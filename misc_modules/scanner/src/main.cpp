@@ -72,8 +72,23 @@ class ScannerModule : public ModuleManager::Instance {
 public:
     ScannerModule(std::string name) {
         this->name = name;
+        
+        // Initialize time points to current time to prevent crashes
+        auto now = std::chrono::high_resolution_clock::now();
+        lastSignalTime = now;
+        lastTuneTime = now;
+        
+        // Ensure scanner starts in a safe state
+        running = false;
+        tuning = false;
+        receiving = false;
+        
+        flog::info("Scanner: Initializing scanner module '{}'", name);
+        
         gui::menu.registerEntry(name, menuHandler, this, NULL);
         loadConfig();
+        
+        flog::info("Scanner: Scanner module '{}' initialized successfully", name);
     }
 
     ~ScannerModule() {
@@ -769,9 +784,11 @@ private:
 
                 // Check if we are waiting for a tune
                 if (tuning) {
-                    flog::warn("Tuning");
-                    if ((std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime)).count() > tuningTime) {
+                    flog::debug("Scanner: Tuning in progress...");
+                    auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
+                    if (timeSinceLastTune.count() > tuningTime) {
                         tuning = false;
+                        flog::debug("Scanner: Tuning completed");
                     }
                     continue;
                 }
@@ -799,14 +816,18 @@ private:
                 double vfoWidth = sigpath::vfoManager.getBandwidth(gui::waterfall.selectedVFO);
 
                 if (receiving) {
-                    flog::warn("Receiving");
+                    flog::debug("Scanner: Receiving signal...");
                 
                     float maxLevel = getMaxLevel(data, current, vfoWidth, dataWidth, wfStart, wfWidth);
                     if (maxLevel >= level) {
                         lastSignalTime = now;
                     }
-                    else if ((std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime)).count() > lingerTime) {
-                        receiving = false;
+                    else {
+                        auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
+                        if (timeSinceLastSignal.count() > lingerTime) {
+                            receiving = false;
+                            flog::debug("Scanner: Signal lost, resuming scanning");
+                        }
                     }
                 }
                 else {
@@ -1006,12 +1027,12 @@ private:
     int tuningTime = 250;
     int lingerTime = 1000.0;
     float level = -50.0;
-    bool receiving = true;
+    bool receiving = false;  // Should start as false, not receiving initially
     bool tuning = false;
     bool scanUp = true;
     bool reverseLock = false;
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastSignalTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastTuneTime;
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastSignalTime = std::chrono::high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastTuneTime = std::chrono::high_resolution_clock::now();
     std::thread workerThread;
     std::mutex scanMtx;
     
