@@ -161,6 +161,9 @@ public:
         }
         
         int rangeIdx = activeRanges[currentRangeIndex];
+        // Critical bounds check to prevent crash
+        if (rangeIdx >= frequencyRanges.size()) return false;
+        
         currentStart = frequencyRanges[rangeIdx].startFreq;
         currentStop = frequencyRanges[rangeIdx].stopFreq;
         return true;
@@ -174,6 +177,9 @@ public:
         if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return 20.0f;
         
         int rangeIdx = activeRanges[currentRangeIndex];
+        // Critical bounds check to prevent crash
+        if (rangeIdx >= frequencyRanges.size()) return 20.0f;
+        
         return frequencyRanges[rangeIdx].gain;
     }
     
@@ -185,6 +191,9 @@ public:
         if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return;
         
         int rangeIdx = activeRanges[currentRangeIndex];
+        // Critical bounds check to prevent crash
+        if (rangeIdx >= frequencyRanges.size()) return;
+        
         float targetGain = frequencyRanges[rangeIdx].gain;
         
         // Get the current source name
@@ -222,13 +231,16 @@ private:
         // Show recommended gain for current scanning range
         if (!activeRanges.empty() && _this->currentRangeIndex < activeRanges.size()) {
             int rangeIdx = activeRanges[_this->currentRangeIndex];
-            ImGui::Text("Current Range Gain: %.1f dB", _this->frequencyRanges[rangeIdx].gain);
-            ImGui::SameLine();
-            if (ImGui::Button("Apply Gain##scanner_apply_current_gain")) {
-                _this->applyCurrentRangeGain();
+            // Critical bounds check to prevent crash
+            if (rangeIdx < _this->frequencyRanges.size()) {
+                ImGui::Text("Current Range Gain: %.1f dB", _this->frequencyRanges[rangeIdx].gain);
+                ImGui::SameLine();
+                if (ImGui::Button("Apply Gain##scanner_apply_current_gain")) {
+                    _this->applyCurrentRangeGain();
+                }
+                ImGui::SameLine();
+                ImGui::TextDisabled("(or set manually in source)");
             }
-            ImGui::SameLine();
-            ImGui::TextDisabled("(or set manually in source)");
         }
         
         // Range management buttons
