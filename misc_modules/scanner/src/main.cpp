@@ -196,20 +196,26 @@ public:
         
         float targetGain = frequencyRanges[rangeIdx].gain;
         
-        // Get the current source name
-        std::string sourceName = sigpath::sourceManager.getSelectedName();
-        if (!sourceName.empty()) {
-            bool gainApplied = UniversalGainControl::applyGain(sourceName, targetGain);
-            if (gainApplied) {
-                flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})", 
-                          targetGain, frequencyRanges[rangeIdx].name, sourceName);
+        // Get the current source name - add try-catch for thread safety
+        try {
+            std::string sourceName = sigpath::sourceManager.getSelectedName();
+            if (!sourceName.empty()) {
+                bool gainApplied = UniversalGainControl::applyGain(sourceName, targetGain);
+                if (gainApplied) {
+                    flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})", 
+                              targetGain, frequencyRanges[rangeIdx].name, sourceName);
+                } else {
+                    flog::info("Scanner: Switched to range '{}' - recommended gain: {:.1f} dB", 
+                              frequencyRanges[rangeIdx].name, targetGain);
+                }
             } else {
-                flog::info("Scanner: Switched to range '{}' - recommended gain: {:.1f} dB", 
-                          frequencyRanges[rangeIdx].name, targetGain);
+                flog::debug("Scanner: No source selected, cannot apply gain for range '{}'", 
+                          frequencyRanges[rangeIdx].name);
             }
-        } else {
-            flog::warn("Scanner: No source selected, cannot apply gain for range '{}'", 
-                      frequencyRanges[rangeIdx].name);
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Exception in applyCurrentRangeGain: {}", e.what());
+        } catch (...) {
+            flog::error("Scanner: Unknown exception in applyCurrentRangeGain");
         }
     }
 
@@ -583,16 +589,45 @@ private:
     }
 
     void start() {
-        if (running) { return; }
+        if (running) { 
+            flog::warn("Scanner: Already running");
+            return; 
+        }
+        
+        // Validate scanner state before starting
+        if (gui::waterfall.selectedVFO.empty()) {
+            flog::error("Scanner: No VFO selected, cannot start scanning");
+            return;
+        }
+        
+        // Initialize scanning parameters
         current = startFreq;
+        tuning = false;
+        receiving = false;
+        
+        flog::info("Scanner: Starting scanner from {:.3f} MHz", current / 1e6);
+        
         running = true;
         
         // Apply gain setting for the initial scanning range
         if (!frequencyRanges.empty()) {
-            applyCurrentRangeGain();
+            try {
+                applyCurrentRangeGain();
+            } catch (const std::exception& e) {
+                flog::error("Scanner: Exception applying initial gain: {}", e.what());
+                // Continue anyway, gain is not critical for basic operation
+            }
         }
         
-        workerThread = std::thread(&ScannerModule::worker, this);
+        // Start worker thread
+        try {
+            workerThread = std::thread(&ScannerModule::worker, this);
+            flog::info("Scanner: Worker thread started successfully");
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Failed to start worker thread: {}", e.what());
+            running = false;
+            throw;
+        }
     }
 
     void stop() {
@@ -700,12 +735,15 @@ private:
     }
 
     void worker() {
-        // 10Hz scan loop
-        while (running) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            {
-                std::lock_guard<std::mutex> lck(scanMtx);
-                auto now = std::chrono::high_resolution_clock::now();
+        flog::info("Scanner: Worker thread started");
+        try {
+            // 10Hz scan loop
+            while (running) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                
+                try {
+                    std::lock_guard<std::mutex> lck(scanMtx);
+                    auto now = std::chrono::high_resolution_clock::now();
 
                 // Enforce tuning
                 if (gui::waterfall.selectedVFO.empty()) {
@@ -741,7 +779,15 @@ private:
                 // Get FFT data
                 int dataWidth = 0;
                 float* data = gui::waterfall.acquireLatestFFT(dataWidth);
-                if (!data) { continue; }
+                if (!data) { 
+                    flog::debug("Scanner: No FFT data available");
+                    continue; 
+                }
+                if (dataWidth <= 0) {
+                    flog::warn("Scanner: Invalid FFT data width: {}", dataWidth);
+                    gui::waterfall.releaseLatestFFT();
+                    continue;
+                }
 
                 // Get gather waterfall data
                 double wfCenter = gui::waterfall.getViewOffset() + gui::waterfall.getCenterFrequency();
@@ -857,8 +903,26 @@ private:
 
                 // Release FFT Data
                 gui::waterfall.releaseLatestFFT();
+                
+                } catch (const std::exception& e) {
+                    flog::error("Scanner: Exception in worker loop: {}", e.what());
+                    running = false;
+                    break;
+                } catch (...) {
+                    flog::error("Scanner: Unknown exception in worker loop");
+                    running = false;
+                    break;
+                }
             }
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Critical exception in worker thread: {}", e.what());
+            running = false;
+        } catch (...) {
+            flog::error("Scanner: Critical unknown exception in worker thread");
+            running = false;
         }
+        
+        flog::info("Scanner: Worker thread ended");
     }
 
     bool findSignal(bool scanDir, double& bottomLimit, double& topLimit, double wfStart, double wfEnd, double wfWidth, double vfoWidth, float* data, int dataWidth) {
