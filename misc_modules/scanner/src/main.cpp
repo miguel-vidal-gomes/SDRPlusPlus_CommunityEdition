@@ -8,6 +8,20 @@
 #include <fstream> // Added for file operations
 #include <core.h>
 
+// Windows MSVC compatibility 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <algorithm>
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#endif
+
 
 
 // Frequency range structure for multiple scanning ranges
@@ -393,13 +407,13 @@ private:
         ImGui::LeftLabel("Tuning Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, 100, 1000)) {
-            _this->tuningTime = std::clamp<int>(_this->tuningTime, 100, 10000.0);
+            _this->tuningTime = std::clamp<int>(_this->tuningTime, 100, 10000);
             _this->saveConfig();
         }
         ImGui::LeftLabel("Linger Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##linger_time_scanner", &_this->lingerTime, 100, 1000)) {
-            _this->lingerTime = std::clamp<int>(_this->lingerTime, 100, 10000.0);
+            _this->lingerTime = std::clamp<int>(_this->lingerTime, 100, 10000);
             _this->saveConfig();
         }
         if (_this->running) { ImGui::EndDisabled(); }
@@ -692,7 +706,8 @@ private:
             }
             if (config.conf.contains("currentRangeIndex")) {
                 currentRangeIndex = config.conf["currentRangeIndex"].get<int>();
-                currentRangeIndex = std::clamp(currentRangeIndex, 0, std::max(0, (int)frequencyRanges.size() - 1));
+                int maxIndex = std::max(0, (int)frequencyRanges.size() - 1);
+                currentRangeIndex = std::clamp<int>(currentRangeIndex, 0, maxIndex);
             }
         }
         
