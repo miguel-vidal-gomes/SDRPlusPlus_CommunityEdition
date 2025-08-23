@@ -42,17 +42,22 @@ mkdir build && cd build
 
 ### Step 2: CMake Configuration
 ```bash
-cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 .. \
+cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Release \
   -DOPT_BUILD_PLUTOSDR_SOURCE=OFF
 ```
 
 **Configuration Options Explained:**
-- `CMAKE_OSX_DEPLOYMENT_TARGET=10.15`: Target macOS 10.15+ for compatibility
+- `CMAKE_OSX_DEPLOYMENT_TARGET=11.0`: Target macOS 11.0+ (**CHANGED FROM 10.15** - see note below)
 - `USE_BUNDLE_DEFAULTS=ON`: **CRITICAL** - Enables proper macOS bundle behavior
 - `CMAKE_BUILD_TYPE=Release`: Optimized release build
 - `OPT_BUILD_PLUTOSDR_SOURCE=OFF`: Disable PlutoSDR (requires libiio)
+
+**⚠️ IMPORTANT: macOS Deployment Target Change**
+- **Previous versions** used `CMAKE_OSX_DEPLOYMENT_TARGET=10.15`
+- **Current version** requires `CMAKE_OSX_DEPLOYMENT_TARGET=11.0` due to `std::filesystem` usage in core files
+- **DO NOT** attempt to manually fix filesystem includes - use macOS 11.0 target instead
 
 ### Step 3: Build
 ```bash
@@ -129,6 +134,16 @@ rm -rf build && mkdir build && cd build
 **Symptom:** `cmake_minimum_required` version errors
 **Solution:** These are warnings in third-party libraries, safe to ignore.
 
+### Issue: std::filesystem Compilation Errors
+**Symptom:** Errors like `'absolute' is unavailable: introduced in macOS 10.15` or `'exists' is unavailable: introduced in macOS 10.15`
+**WRONG Solution:** ❌ Do NOT manually edit core files to change `#include <filesystem>` includes
+**CORRECT Solution:** ✅ Use `CMAKE_OSX_DEPLOYMENT_TARGET=11.0` instead of 10.15
+
+This error occurs because:
+- Core SDR++ files now use `std::filesystem` 
+- macOS 10.15 deployment target has compatibility issues with `std::filesystem`
+- The correct fix is to target macOS 11.0+ which has full `std::filesystem` support
+
 ### Issue: Icon Generation Fails
 **Symptom:** `sips` command errors during bundle creation
 **Solution:** Verify `root/res/icons/sdrpp_ce.macos.png` exists and is valid PNG format.
@@ -156,7 +171,7 @@ Console.app # Look for SDR++ related errors
 ### Debug Build
 For development and debugging:
 ```bash
-cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 .. \
+cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Debug
 ```
@@ -164,7 +179,7 @@ cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 .. \
 ### Custom Module Selection
 Disable specific modules if needed:
 ```bash
-cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 .. \
+cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Release \
   -DOPT_BUILD_DISCORD_INTEGRATION=OFF \

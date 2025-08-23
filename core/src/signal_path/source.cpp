@@ -94,6 +94,13 @@ void SourceManager::tune(double freq) {
     currentFreq = freq;
 }
 
+void SourceManager::setGain(double gain) {
+    if (selectedHandler == NULL || selectedHandler->gainHandler == NULL) {
+        return;
+    }
+    selectedHandler->gainHandler(gain, selectedHandler->ctx);
+}
+
 void SourceManager::setTuningOffset(double offset) {
     tuneOffset = offset;
     tune(currentFreq);

@@ -56,6 +56,7 @@ public:
         handler.startHandler = start;
         handler.stopHandler = stop;
         handler.tuneHandler = tune;
+        handler.gainHandler = NULL;
         handler.stream = &stream;
 
         // Define protocols

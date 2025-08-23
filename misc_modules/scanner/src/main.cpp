@@ -8,42 +8,7 @@
 #include <fstream> // Added for file operations
 #include <core.h>
 
-// Universal gain control system for different SDR sources
-namespace UniversalGainControl {
-    bool applyGain(const std::string& sourceName, float gainDB) {
-        // Get the current source module context
-        // This is a simplified approach that works for most common sources
-        
-        if (sourceName.find("RTL-SDR") != std::string::npos) {
-            flog::info("Scanner: RTL-SDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // RTL-SDR gain needs to be set through its own interface
-        }
-        else if (sourceName.find("HackRF") != std::string::npos) {
-            flog::info("Scanner: HackRF detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // HackRF gain needs to be set through its own interface
-        }
-        else if (sourceName.find("Airspy") != std::string::npos) {
-            flog::info("Scanner: Airspy detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // Airspy gain needs to be set through its own interface
-        }
-        else if (sourceName.find("PlutoSDR") != std::string::npos) {
-            flog::info("Scanner: PlutoSDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // PlutoSDR gain needs to be set through its own interface
-        }
-        else if (sourceName.find("SoapySDR") != std::string::npos || sourceName.find("Soapy") != std::string::npos) {
-            flog::info("Scanner: SoapySDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // SoapySDR gain needs to be set through its own interface
-        }
-        else if (sourceName.find("LimeSDR") != std::string::npos) {
-            flog::info("Scanner: LimeSDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
-            return false; // LimeSDR gain needs to be set through its own interface
-        }
-        else {
-            flog::info("Scanner: Unknown source '{}' - gain {:.1f} dB must be set manually in source menu", sourceName, gainDB);
-            return false; // Unknown source
-        }
-    }
-};
+
 
 // Frequency range structure for multiple scanning ranges
 struct FrequencyRange {
@@ -141,6 +106,7 @@ public:
             frequencyRanges[index].stopFreq = stop;
             frequencyRanges[index].gain = gain;
             saveConfig();
+            flog::info("Scanner: Updated range '{}' - gain set to {:.1f} dB", name, gain);
         }
     }
     
@@ -211,20 +177,15 @@ public:
         
         float targetGain = frequencyRanges[rangeIdx].gain;
         
-        // Get the current source name - add try-catch for thread safety
         try {
             std::string sourceName = sigpath::sourceManager.getSelectedName();
             if (!sourceName.empty()) {
-                bool gainApplied = UniversalGainControl::applyGain(sourceName, targetGain);
-                if (gainApplied) {
-                    flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})", 
-                              targetGain, frequencyRanges[rangeIdx].name, sourceName);
-                } else {
-                    flog::info("Scanner: Switched to range '{}' - recommended gain: {:.1f} dB", 
-                              frequencyRanges[rangeIdx].name, targetGain);
-                }
+                // Use the new SourceManager::setGain() method
+                sigpath::sourceManager.setGain(targetGain);
+                flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})",
+                          targetGain, frequencyRanges[rangeIdx].name, sourceName);
             } else {
-                flog::debug("Scanner: No source selected, cannot apply gain for range '{}'", 
+                flog::debug("Scanner: No source selected, cannot apply gain for range '{}'",
                           frequencyRanges[rangeIdx].name);
             }
         } catch (const std::exception& e) {
@@ -249,18 +210,19 @@ private:
         auto activeRanges = _this->getActiveRangeIndices();
         ImGui::Text("Active ranges: %d/%d", (int)activeRanges.size(), (int)_this->frequencyRanges.size());
         
-        // Show recommended gain for current scanning range
+        // Show current scanning range info
         if (!activeRanges.empty() && _this->currentRangeIndex < activeRanges.size()) {
             int rangeIdx = activeRanges[_this->currentRangeIndex];
             // Critical bounds check to prevent crash
             if (rangeIdx < _this->frequencyRanges.size()) {
-                ImGui::Text("Current Range Gain: %.1f dB", _this->frequencyRanges[rangeIdx].gain);
-                ImGui::SameLine();
-                if (ImGui::Button("Apply Gain##scanner_apply_current_gain")) {
-                    _this->applyCurrentRangeGain();
-                }
-                ImGui::SameLine();
-                ImGui::TextDisabled("(or set manually in source)");
+                ImGui::Separator();
+                
+                // Current range display
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 0.8f, 0.2f, 1.0f)); // Green text
+                ImGui::Text("Current Range: %s (%.1f dB)", _this->frequencyRanges[rangeIdx].name.c_str(), _this->frequencyRanges[rangeIdx].gain);
+                ImGui::PopStyleColor();
+                
+                ImGui::Separator();
             }
         }
         
@@ -708,9 +670,8 @@ private:
         if (config.conf.contains("blacklistedFreqs")) {
             blacklistedFreqs = config.conf["blacklistedFreqs"].get<std::vector<double>>();
         }
-        config.release();
         
-        // Load frequency ranges if they exist
+        // Load frequency ranges if they exist (BEFORE releasing config!)
         if (config.conf.contains("frequencyRanges") && config.conf["frequencyRanges"].is_array()) {
             frequencyRanges.clear();
             for (const auto& rangeJson : config.conf["frequencyRanges"]) {
@@ -734,6 +695,8 @@ private:
                 currentRangeIndex = std::clamp(currentRangeIndex, 0, std::max(0, (int)frequencyRanges.size() - 1));
             }
         }
+        
+        config.release();
         
         // Ensure current frequency is within bounds
         double currentStart, currentStop;

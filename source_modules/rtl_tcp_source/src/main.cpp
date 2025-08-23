@@ -89,6 +89,7 @@ public:
         handler.startHandler = start;
         handler.stopHandler = stop;
         handler.tuneHandler = tune;
+        handler.gainHandler = setGain;
         handler.stream = &stream;
         sigpath::sourceManager.registerSource("RTL-TCP", &handler);
     }
@@ -172,6 +173,18 @@ private:
         }
         _this->freq = freq;
         flog::info("RTLTCPSourceModule '{0}': Tune: {1}!", _this->name, freq);
+    }
+
+    static void setGain(double gain, void* ctx) {
+        RTLTCPSourceModule* _this = (RTLTCPSourceModule*)ctx;
+        // Convert gain to gain index (RTL-TCP uses gain index, not dB)
+        // RTL-SDR gain range is typically 0-28 with steps, so we map gain dB to index
+        int gainIndex = std::max(0, std::min(28, (int)(gain * 28.0 / 50.0))); // Map 0-50dB to 0-28 index
+        _this->gain = gainIndex;
+        if (_this->running && !_this->tunerAGC) {
+            _this->client->setGainIndex(gainIndex);
+        }
+        flog::info("RTLTCPSourceModule '{0}': Set gain to index {1} (from {2:.1f} dB)", _this->name, gainIndex, gain);
     }
 
     static void menuHandler(void* ctx) {

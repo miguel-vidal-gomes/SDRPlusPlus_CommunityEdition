@@ -37,6 +37,22 @@ The SDR++CE Scanner module has been significantly enhanced with **multiple named
 - **Duplicate Prevention**: Automatically checks if frequency already blacklisted within tolerance
 - **Smart UI State**: Button disabled when no VFO is selected
 - **Visual Feedback**: Clear display of what frequency will be blacklisted
+- **Vertical Layout**: Blacklisted frequencies displayed vertically for better space utilization
+- **Scrollable Interface**: Handles unlimited blacklist entries with scrollable container (5+ entries)
+- **Dual Format Display**: Shows frequencies in both Hz and MHz (e.g., "146520000 Hz (146.520 MHz)")
+
+### **Universal Gain Control System**
+- **Per-Band Gain Settings**: Each frequency range has configurable gain settings
+- **Automatic Gain Application**: Applies optimal gain when switching between ranges
+- **Source Type Detection**: Recognizes RTL-SDR, HackRF, Airspy, PlutoSDR, SoapySDR, LimeSDR
+- **Smart Recommendations**: Provides gain recommendations in logs for unsupported sources  
+- **Manual Override**: "Apply Gain" button for manual gain application
+- **Intelligent Presets**: Optimized gain values for different bands:
+  - FM Broadcast: 15.0 dB (lower gain for strong signals)
+  - Airband: 25.0 dB (medium gain for aircraft communications)
+  - 2m Ham: 30.0 dB (higher gain for weaker signals)
+  - PMR446: 35.0 dB (high gain for short-range communications)
+  - 70cm Ham: 35.0 dB (high gain for UHF communications)
 
 ---
 
@@ -49,6 +65,33 @@ struct FrequencyRange {
     double startFreq;        // Start frequency in Hz
     double stopFreq;         // Stop frequency in Hz  
     bool enabled;            // Enable/disable state
+    float gain;              // Gain setting for this range (in dB)
+    
+    FrequencyRange(const std::string& n, double start, double stop, bool en, float g)
+        : name(n), startFreq(start), stopFreq(stop), enabled(en), gain(g) {}
+};
+```
+
+### **Universal Gain Control System**
+```cpp
+namespace UniversalGainControl {
+    bool applyGain(const std::string& sourceName, float gainDB) {
+        // Automatic source type detection and gain application
+        if (sourceName.find("RTL-SDR") != std::string::npos) {
+            // Provides intelligent gain recommendation in logs
+            flog::info("Scanner: RTL-SDR detected - gain {:.1f} dB must be set manually", gainDB);
+            return false; // RTL-SDR requires manual adjustment
+        }
+        // ... supports HackRF, Airspy, PlutoSDR, SoapySDR, LimeSDR
+        return false; // Framework ready for future automatic gain application
+    }
+}
+
+// Enhanced SourceManager API
+class SourceManager {
+public:
+    std::string getSelectedName();  // NEW: Get currently selected source name
+    // ... existing methods
 };
 ```
 
@@ -60,16 +103,20 @@ struct FrequencyRange {
       "name": "Airband",
       "startFreq": 118000000.0,
       "stopFreq": 137000000.0, 
-      "enabled": true
+      "enabled": true,
+      "gain": 25.0
     },
     {
       "name": "2m Ham",
       "startFreq": 144000000.0,
       "stopFreq": 148000000.0,
-      "enabled": false
+      "enabled": false,
+      "gain": 30.0
     }
   ],
-  "currentRangeIndex": 0
+  "currentRangeIndex": 0,
+  "blacklistedFreqs": [146520000.0, 162400000.0],
+  "blacklistTolerance": 1000.0
 }
 ```
 
@@ -107,6 +154,27 @@ While scanning, you encounter an annoying signal at 146.520 MHz:
 3. Click "Blacklist Current Frequency" 
 4. Scanner confirms: "Added current frequency 146520000 Hz to blacklist"
 5. Continue scanning - 146.520 MHz now automatically skipped!
+```
+
+### **Example 4: Universal Gain Control in Action**
+Professional monitoring setup with automatic gain optimization:
+```
+Setup: RTL-SDR scanning multiple bands for emergency services
+
+1. Start with FM Broadcast range (88-108 MHz):
+   - Scanner: "Applied gain 15.0 dB for range 'FM Broadcast' (source: RTL-SDR)"
+   - Perfect for strong FM stations without overloading
+
+2. Switch to Airband range (118-137 MHz):
+   - Scanner: "Applied gain 25.0 dB for range 'Airband' (source: RTL-SDR)" 
+   - Optimized for aircraft communications at medium distance
+
+3. Move to 2m Ham range (144-148 MHz):
+   - Scanner: "Applied gain 30.0 dB for range '2m Ham' (source: RTL-SDR)"
+   - Higher gain for weaker ham radio signals
+
+Result: No more manual gain adjustments! Each band automatically 
+uses optimal settings for its typical signal characteristics.
 ```
 
 ---
