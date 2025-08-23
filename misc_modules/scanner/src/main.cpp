@@ -8,16 +8,54 @@
 #include <fstream> // Added for file operations
 #include <core.h>
 
+// Universal gain control system for different SDR sources
+namespace UniversalGainControl {
+    bool applyGain(const std::string& sourceName, float gainDB) {
+        // Get the current source module context
+        // This is a simplified approach that works for most common sources
+        
+        if (sourceName.find("RTL-SDR") != std::string::npos) {
+            flog::info("Scanner: RTL-SDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // RTL-SDR gain needs to be set through its own interface
+        }
+        else if (sourceName.find("HackRF") != std::string::npos) {
+            flog::info("Scanner: HackRF detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // HackRF gain needs to be set through its own interface
+        }
+        else if (sourceName.find("Airspy") != std::string::npos) {
+            flog::info("Scanner: Airspy detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // Airspy gain needs to be set through its own interface
+        }
+        else if (sourceName.find("PlutoSDR") != std::string::npos) {
+            flog::info("Scanner: PlutoSDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // PlutoSDR gain needs to be set through its own interface
+        }
+        else if (sourceName.find("SoapySDR") != std::string::npos || sourceName.find("Soapy") != std::string::npos) {
+            flog::info("Scanner: SoapySDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // SoapySDR gain needs to be set through its own interface
+        }
+        else if (sourceName.find("LimeSDR") != std::string::npos) {
+            flog::info("Scanner: LimeSDR detected - gain {:.1f} dB must be set manually in source menu", gainDB);
+            return false; // LimeSDR gain needs to be set through its own interface
+        }
+        else {
+            flog::info("Scanner: Unknown source '{}' - gain {:.1f} dB must be set manually in source menu", sourceName, gainDB);
+            return false; // Unknown source
+        }
+    }
+};
+
 // Frequency range structure for multiple scanning ranges
 struct FrequencyRange {
     std::string name;
     double startFreq;
     double stopFreq;
     bool enabled;
+    float gain;  // Gain setting for this frequency range (in dB)
     
-    FrequencyRange() : name("New Range"), startFreq(88000000.0), stopFreq(108000000.0), enabled(true) {}
-    FrequencyRange(const std::string& n, double start, double stop, bool en = true) 
-        : name(n), startFreq(start), stopFreq(stop), enabled(en) {}
+    FrequencyRange() : name("New Range"), startFreq(88000000.0), stopFreq(108000000.0), enabled(true), gain(20.0f) {}
+    FrequencyRange(const std::string& n, double start, double stop, bool en = true, float g = 20.0f) 
+        : name(n), startFreq(start), stopFreq(stop), enabled(en), gain(g) {}
 };
 
 SDRPP_MOD_INFO{
@@ -59,8 +97,8 @@ public:
     }
     
     // Range management methods
-    void addFrequencyRange(const std::string& name, double start, double stop, bool enabled = true) {
-        frequencyRanges.emplace_back(name, start, stop, enabled);
+    void addFrequencyRange(const std::string& name, double start, double stop, bool enabled = true, float gain = 20.0f) {
+        frequencyRanges.emplace_back(name, start, stop, enabled, gain);
         saveConfig();
     }
     
@@ -81,11 +119,12 @@ public:
         }
     }
     
-    void updateFrequencyRange(int index, const std::string& name, double start, double stop) {
+    void updateFrequencyRange(int index, const std::string& name, double start, double stop, float gain) {
         if (index >= 0 && index < frequencyRanges.size()) {
             frequencyRanges[index].name = name;
             frequencyRanges[index].startFreq = start;
             frequencyRanges[index].stopFreq = stop;
+            frequencyRanges[index].gain = gain;
             saveConfig();
         }
     }
@@ -126,6 +165,44 @@ public:
         currentStop = frequencyRanges[rangeIdx].stopFreq;
         return true;
     }
+    
+    // Get recommended gain for current range
+    float getCurrentRangeGain() {
+        if (frequencyRanges.empty()) return 20.0f;
+        
+        auto activeRanges = getActiveRangeIndices();
+        if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return 20.0f;
+        
+        int rangeIdx = activeRanges[currentRangeIndex];
+        return frequencyRanges[rangeIdx].gain;
+    }
+    
+    // Apply or recommend gain setting for current range
+    void applyCurrentRangeGain() {
+        if (frequencyRanges.empty()) return;
+        
+        auto activeRanges = getActiveRangeIndices();
+        if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return;
+        
+        int rangeIdx = activeRanges[currentRangeIndex];
+        float targetGain = frequencyRanges[rangeIdx].gain;
+        
+        // Get the current source name
+        std::string sourceName = sigpath::sourceManager.getSelectedName();
+        if (!sourceName.empty()) {
+            bool gainApplied = UniversalGainControl::applyGain(sourceName, targetGain);
+            if (gainApplied) {
+                flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})", 
+                          targetGain, frequencyRanges[rangeIdx].name, sourceName);
+            } else {
+                flog::info("Scanner: Switched to range '{}' - recommended gain: {:.1f} dB", 
+                          frequencyRanges[rangeIdx].name, targetGain);
+            }
+        } else {
+            flog::warn("Scanner: No source selected, cannot apply gain for range '{}'", 
+                      frequencyRanges[rangeIdx].name);
+        }
+    }
 
 
 
@@ -141,6 +218,18 @@ private:
         // Show current active ranges count
         auto activeRanges = _this->getActiveRangeIndices();
         ImGui::Text("Active ranges: %d/%d", (int)activeRanges.size(), (int)_this->frequencyRanges.size());
+        
+        // Show recommended gain for current scanning range
+        if (!activeRanges.empty() && _this->currentRangeIndex < activeRanges.size()) {
+            int rangeIdx = activeRanges[_this->currentRangeIndex];
+            ImGui::Text("Current Range Gain: %.1f dB", _this->frequencyRanges[rangeIdx].gain);
+            ImGui::SameLine();
+            if (ImGui::Button("Apply Gain##scanner_apply_current_gain")) {
+                _this->applyCurrentRangeGain();
+            }
+            ImGui::SameLine();
+            ImGui::TextDisabled("(or set manually in source)");
+        }
         
         // Range management buttons
         if (ImGui::Button("Manage Ranges", ImVec2(menuWidth * 0.48f, 0))) {
@@ -162,12 +251,14 @@ private:
             ImGui::InputText("Name", _this->newRangeName, sizeof(_this->newRangeName));
             ImGui::InputDouble("Start (Hz)", &_this->newRangeStart, 100000.0, 1000000.0, "%.0f");
             ImGui::InputDouble("Stop (Hz)", &_this->newRangeStop, 100000.0, 1000000.0, "%.0f");
+            ImGui::InputFloat("Gain (dB)", &_this->newRangeGain, 1.0f, 10.0f, "%.1f");
             
             if (ImGui::Button("Add Range")) {
-                _this->addFrequencyRange(std::string(_this->newRangeName), _this->newRangeStart, _this->newRangeStop, true);
+                _this->addFrequencyRange(std::string(_this->newRangeName), _this->newRangeStart, _this->newRangeStop, true, _this->newRangeGain);
                 strcpy(_this->newRangeName, "New Range");
                 _this->newRangeStart = 88000000.0;
                 _this->newRangeStop = 108000000.0;
+                _this->newRangeGain = 20.0f;
             }
             
             ImGui::Spacing();
@@ -190,6 +281,7 @@ private:
                 // Range info with edit capability
                 static char editName[256];
                 static double editStart, editStop;
+                static float editGain;
                 static int editingIndex = -1;
                 
                 if (editingIndex == i) {
@@ -203,9 +295,12 @@ private:
                     ImGui::SetNextItemWidth(80);
                     ImGui::InputDouble("##edit_stop", &editStop, 1000000.0, 10000000.0, "%.0f");
                     ImGui::SameLine();
+                    ImGui::SetNextItemWidth(60);
+                    ImGui::InputFloat("##edit_gain", &editGain, 1.0f, 10.0f, "%.1f");
+                    ImGui::SameLine();
                     
                     if (ImGui::Button("Save")) {
-                        _this->updateFrequencyRange(i, std::string(editName), editStart, editStop);
+                        _this->updateFrequencyRange(i, std::string(editName), editStart, editStop, editGain);
                         editingIndex = -1;
                     }
                     ImGui::SameLine();
@@ -214,10 +309,11 @@ private:
                     }
                 } else {
                     // Display mode
-                    ImGui::Text("%s: %.1f - %.1f MHz", 
+                    ImGui::Text("%s: %.1f - %.1f MHz (%.1f dB)", 
                         range.name.c_str(), 
                         range.startFreq / 1e6, 
-                        range.stopFreq / 1e6);
+                        range.stopFreq / 1e6,
+                        range.gain);
                     ImGui::SameLine();
                     
                     if (ImGui::Button("Edit")) {
@@ -225,6 +321,7 @@ private:
                         strcpy(editName, range.name.c_str());
                         editStart = range.startFreq;
                         editStop = range.stopFreq;
+                        editGain = range.gain;
                     }
                     ImGui::SameLine();
                     if (ImGui::Button("Delete")) {
@@ -239,19 +336,19 @@ private:
             // Quick presets section
             if (ImGui::CollapsingHeader("Quick Presets")) {
                 if (ImGui::Button("FM Broadcast (88-108 MHz)")) {
-                    _this->addFrequencyRange("FM Broadcast", 88000000.0, 108000000.0, true);
+                    _this->addFrequencyRange("FM Broadcast", 88000000.0, 108000000.0, true, 15.0f);
                 }
                 if (ImGui::Button("Airband (118-137 MHz)")) {
-                    _this->addFrequencyRange("Airband", 118000000.0, 137000000.0, true);
+                    _this->addFrequencyRange("Airband", 118000000.0, 137000000.0, true, 25.0f);
                 }
                 if (ImGui::Button("2m Ham (144-148 MHz)")) {
-                    _this->addFrequencyRange("2m Ham", 144000000.0, 148000000.0, true);
+                    _this->addFrequencyRange("2m Ham", 144000000.0, 148000000.0, true, 30.0f);
                 }
                 if (ImGui::Button("PMR446 (446.0-446.2 MHz)")) {
-                    _this->addFrequencyRange("PMR446", 446000000.0, 446200000.0, true);
+                    _this->addFrequencyRange("PMR446", 446000000.0, 446200000.0, true, 35.0f);
                 }
                 if (ImGui::Button("70cm Ham (420-450 MHz)")) {
-                    _this->addFrequencyRange("70cm Ham", 420000000.0, 450000000.0, true);
+                    _this->addFrequencyRange("70cm Ham", 420000000.0, 450000000.0, true, 35.0f);
                 }
             }
             
@@ -392,17 +489,32 @@ private:
         // List of blacklisted frequencies
         if (!_this->blacklistedFreqs.empty()) {
             ImGui::Text("Blacklisted Frequencies:");
+            ImGui::Separator();
+            
+            // Create a scrollable region for the blacklist if there are many entries
+            if (_this->blacklistedFreqs.size() > 5) {
+                ImGui::BeginChild("##blacklist_scroll", ImVec2(0, 150), true);
+            }
+            
             for (size_t i = 0; i < _this->blacklistedFreqs.size(); i++) {
+                // Each frequency on its own line with remove button
+                ImGui::Text("%.0f Hz (%.3f MHz)", _this->blacklistedFreqs[i], _this->blacklistedFreqs[i] / 1e6);
                 ImGui::SameLine();
+                
+                // Right-align the remove button
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 80);
                 if (ImGui::Button(("Remove##scanner_remove_blacklist_" + std::to_string(i)).c_str())) {
                     _this->blacklistedFreqs.erase(_this->blacklistedFreqs.begin() + i);
                     _this->saveConfig();
                     break;
                 }
-                ImGui::SameLine();
-                ImGui::Text("%.0f Hz", _this->blacklistedFreqs[i]);
             }
             
+            if (_this->blacklistedFreqs.size() > 5) {
+                ImGui::EndChild();
+            }
+            
+            ImGui::Spacing();
             if (ImGui::Button("Clear All Blacklisted##scanner_clear_blacklist", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
                 _this->blacklistedFreqs.clear();
                 _this->saveConfig();
@@ -462,6 +574,12 @@ private:
         if (running) { return; }
         current = startFreq;
         running = true;
+        
+        // Apply gain setting for the initial scanning range
+        if (!frequencyRanges.empty()) {
+            applyCurrentRangeGain();
+        }
+        
         workerThread = std::thread(&ScannerModule::worker, this);
     }
 
@@ -506,6 +624,7 @@ private:
             rangeJson["startFreq"] = range.startFreq;
             rangeJson["stopFreq"] = range.stopFreq;
             rangeJson["enabled"] = range.enabled;
+            rangeJson["gain"] = range.gain;
             rangesArray.push_back(rangeJson);
         }
         config.conf["frequencyRanges"] = rangesArray;
@@ -535,11 +654,16 @@ private:
             for (const auto& rangeJson : config.conf["frequencyRanges"]) {
                 if (rangeJson.contains("name") && rangeJson.contains("startFreq") && 
                     rangeJson.contains("stopFreq") && rangeJson.contains("enabled")) {
+                    float gain = 20.0f; // Default gain for backward compatibility
+                    if (rangeJson.contains("gain")) {
+                        gain = rangeJson["gain"].get<float>();
+                    }
                     frequencyRanges.emplace_back(
                         rangeJson["name"].get<std::string>(),
                         rangeJson["startFreq"].get<double>(),
                         rangeJson["stopFreq"].get<double>(),
-                        rangeJson["enabled"].get<bool>()
+                        rangeJson["enabled"].get<bool>(),
+                        gain
                     );
                 }
             }
@@ -662,6 +786,8 @@ private:
                                         current = startFreq; // Fallback
                                     } else {
                                         current = currentStart;
+                                        // Apply gain setting for new range
+                                        applyCurrentRangeGain();
                                     }
                                 } else {
                                     current = currentStart;
@@ -688,6 +814,8 @@ private:
                                         current = stopFreq; // Fallback
                                     } else {
                                         current = currentStop;
+                                        // Apply gain setting for new range
+                                        applyCurrentRangeGain();
                                     }
                                 } else {
                                     current = currentStop;
@@ -820,6 +948,7 @@ private:
     char newRangeName[256] = "New Range";
     double newRangeStart = 88000000.0;
     double newRangeStop = 108000000.0;
+    float newRangeGain = 20.0f;
     
 
 };
