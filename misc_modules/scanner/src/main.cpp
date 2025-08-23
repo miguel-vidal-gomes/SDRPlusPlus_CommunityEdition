@@ -337,6 +337,50 @@ private:
             }
         }
         
+        // Show current frequency for reference
+        if (!gui::waterfall.selectedVFO.empty()) {
+            double currentFreq = gui::waterfall.getCenterFrequency();
+            if (gui::waterfall.vfos.find(gui::waterfall.selectedVFO) != gui::waterfall.vfos.end()) {
+                currentFreq += gui::waterfall.vfos[gui::waterfall.selectedVFO]->centerOffset;
+            }
+            ImGui::Text("Current Frequency: %.0f Hz (%.3f MHz)", currentFreq, currentFreq / 1e6);
+        } else {
+            ImGui::TextDisabled("Current Frequency: No VFO selected");
+        }
+        
+        // Add current tuned frequency to blacklist
+        bool hasValidFreq = !gui::waterfall.selectedVFO.empty();
+        if (!hasValidFreq) { ImGui::BeginDisabled(); }
+        if (ImGui::Button("Blacklist Current Frequency##scanner_blacklist_current", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+            if (!gui::waterfall.selectedVFO.empty()) {
+                // Get current center frequency + VFO offset
+                double currentFreq = gui::waterfall.getCenterFrequency();
+                if (gui::waterfall.vfos.find(gui::waterfall.selectedVFO) != gui::waterfall.vfos.end()) {
+                    currentFreq += gui::waterfall.vfos[gui::waterfall.selectedVFO]->centerOffset;
+                }
+                
+                // Check if frequency is already blacklisted (avoid duplicates)
+                bool alreadyBlacklisted = false;
+                for (const double& blacklisted : _this->blacklistedFreqs) {
+                    if (std::abs(currentFreq - blacklisted) < _this->blacklistTolerance) {
+                        alreadyBlacklisted = true;
+                        break;
+                    }
+                }
+                
+                if (!alreadyBlacklisted) {
+                    _this->blacklistedFreqs.push_back(currentFreq);
+                    _this->saveConfig();
+                    flog::info("Scanner: Added current frequency {:.0f} Hz to blacklist", currentFreq);
+                } else {
+                    flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", currentFreq);
+                }
+            } else {
+                flog::warn("Scanner: No VFO selected, cannot blacklist current frequency");
+            }
+        }
+        if (!hasValidFreq) { ImGui::EndDisabled(); }
+        
         // Blacklist tolerance
         ImGui::LeftLabel("Blacklist Tolerance (Hz)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
