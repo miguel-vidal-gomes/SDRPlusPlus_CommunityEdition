@@ -692,6 +692,34 @@ jobs:
         - name: Download All Builds
           uses: actions/download-artifact@v4
 
+        - name: Create Nightly Release (if needed)
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            # Check if nightly release exists, create if not
+            if ! gh release view nightly -R ${{github.repository}} >/dev/null 2>&1; then
+              echo "Creating nightly release..."
+              gh release create nightly \
+                --title "Nightly Build" \
+                --notes "**Automated nightly builds of SDR++CE Community Edition**
+
+            These builds are automatically updated with the latest changes from the master branch. They include all platforms and are built fresh with each commit.
+
+            **⚠️ Note:** Nightly builds may contain experimental features and should be used for testing purposes.
+
+            **📦 Available Builds:**
+            - Windows x64 package
+            - macOS Intel & ARM app bundles  
+            - Linux packages (Ubuntu, Debian)
+            - Android APK
+
+            **🔄 Last Updated:** This release is automatically updated with each commit to master." \
+                --prerelease \
+                -R ${{github.repository}}
+            else
+              echo "Nightly release already exists"
+            fi
+
         - name: Update Nightly
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
