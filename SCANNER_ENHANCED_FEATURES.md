@@ -31,6 +31,13 @@ The SDR++CE Scanner module has been significantly enhanced with **multiple named
 - **PMR446** (446.0-446.2 MHz)
 - **70cm Ham** (420-450 MHz)
 
+### **Smart Blacklist Management**
+- **Current Frequency Display**: Shows current tuned frequency in Hz and MHz
+- **Blacklist Current Frequency**: One-click button to blacklist the currently tuned frequency
+- **Duplicate Prevention**: Automatically checks if frequency already blacklisted within tolerance
+- **Smart UI State**: Button disabled when no VFO is selected
+- **Visual Feedback**: Clear display of what frequency will be blacklisted
+
 ---
 
 ## 🔧 **Technical Implementation**
@@ -90,6 +97,16 @@ struct FrequencyRange {
 ✅ VHF High (138.0 - 174.0 MHz)       - Emergency services
 ✅ UHF (400.0 - 512.0 MHz)            - Trunked systems
 ❌ 800MHz (806.0 - 824.0 MHz)         - (Disabled for now)
+```
+
+### **Example 3: Smart Blacklist Usage**
+While scanning, you encounter an annoying signal at 146.520 MHz:
+```
+1. Tune to the unwanted frequency (146.520 MHz)
+2. Scanner shows: "Current Frequency: 146520000 Hz (146.520 MHz)"
+3. Click "Blacklist Current Frequency" 
+4. Scanner confirms: "Added current frequency 146520000 Hz to blacklist"
+5. Continue scanning - 146.520 MHz now automatically skipped!
 ```
 
 ---
