@@ -8,6 +8,18 @@
 #include <fstream> // Added for file operations
 #include <core.h>
 
+// Frequency range structure for multiple scanning ranges
+struct FrequencyRange {
+    std::string name;
+    double startFreq;
+    double stopFreq;
+    bool enabled;
+    
+    FrequencyRange() : name("New Range"), startFreq(88000000.0), stopFreq(108000000.0), enabled(true) {}
+    FrequencyRange(const std::string& n, double start, double stop, bool en = true) 
+        : name(n), startFreq(start), stopFreq(stop), enabled(en) {}
+};
+
 SDRPP_MOD_INFO{
     /* Name:            */ "scanner",
     /* Description:     */ "Frequency scanner for SDR++",
@@ -45,6 +57,75 @@ public:
     bool isEnabled() {
         return enabled;
     }
+    
+    // Range management methods
+    void addFrequencyRange(const std::string& name, double start, double stop, bool enabled = true) {
+        frequencyRanges.emplace_back(name, start, stop, enabled);
+        saveConfig();
+    }
+    
+    void removeFrequencyRange(int index) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges.erase(frequencyRanges.begin() + index);
+            if (currentRangeIndex >= frequencyRanges.size() && !frequencyRanges.empty()) {
+                currentRangeIndex = frequencyRanges.size() - 1;
+            }
+            saveConfig();
+        }
+    }
+    
+    void toggleFrequencyRange(int index) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges[index].enabled = !frequencyRanges[index].enabled;
+            saveConfig();
+        }
+    }
+    
+    void updateFrequencyRange(int index, const std::string& name, double start, double stop) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges[index].name = name;
+            frequencyRanges[index].startFreq = start;
+            frequencyRanges[index].stopFreq = stop;
+            saveConfig();
+        }
+    }
+    
+    // Get current active ranges for scanning
+    std::vector<int> getActiveRangeIndices() {
+        std::vector<int> activeRanges;
+        for (int i = 0; i < frequencyRanges.size(); i++) {
+            if (frequencyRanges[i].enabled) {
+                activeRanges.push_back(i);
+            }
+        }
+        return activeRanges;
+    }
+    
+    // Get current scanning bounds (supports both single range and multi-range)
+    bool getCurrentScanBounds(double& currentStart, double& currentStop) {
+        if (frequencyRanges.empty()) {
+            // Fall back to legacy single range
+            currentStart = startFreq;
+            currentStop = stopFreq;
+            return true;
+        }
+        
+        // Multi-range mode: get current active range
+        auto activeRanges = getActiveRangeIndices();
+        if (activeRanges.empty()) {
+            return false; // No active ranges
+        }
+        
+        // Ensure current range index is valid
+        if (currentRangeIndex >= activeRanges.size()) {
+            currentRangeIndex = 0;
+        }
+        
+        int rangeIdx = activeRanges[currentRangeIndex];
+        currentStart = frequencyRanges[rangeIdx].startFreq;
+        currentStop = frequencyRanges[rangeIdx].stopFreq;
+        return true;
+    }
 
 
 
@@ -53,19 +134,158 @@ private:
         ScannerModule* _this = (ScannerModule*)ctx;
         float menuWidth = ImGui::GetContentRegionAvail().x;
         
+        // === FREQUENCY RANGES SECTION ===
+        ImGui::Text("Frequency Ranges");
+        ImGui::Separator();
+        
+        // Show current active ranges count
+        auto activeRanges = _this->getActiveRangeIndices();
+        ImGui::Text("Active ranges: %d/%d", (int)activeRanges.size(), (int)_this->frequencyRanges.size());
+        
+        // Range management buttons
+        if (ImGui::Button("Manage Ranges", ImVec2(menuWidth * 0.48f, 0))) {
+            _this->showRangeManager = !_this->showRangeManager;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Add Quick Range", ImVec2(menuWidth * 0.48f, 0))) {
+            // Add a new range with current single-range values as default
+            _this->addFrequencyRange("New Range", _this->startFreq, _this->stopFreq, true);
+        }
+        
+        // Range Manager Window
+        if (_this->showRangeManager) {
+            ImGui::Begin("Scanner Range Manager", &_this->showRangeManager);
+            
+            // Add new range section
+            ImGui::Text("Add New Range");
+            ImGui::Separator();
+            ImGui::InputText("Name", _this->newRangeName, sizeof(_this->newRangeName));
+            ImGui::InputDouble("Start (Hz)", &_this->newRangeStart, 100000.0, 1000000.0, "%.0f");
+            ImGui::InputDouble("Stop (Hz)", &_this->newRangeStop, 100000.0, 1000000.0, "%.0f");
+            
+            if (ImGui::Button("Add Range")) {
+                _this->addFrequencyRange(std::string(_this->newRangeName), _this->newRangeStart, _this->newRangeStop, true);
+                strcpy(_this->newRangeName, "New Range");
+                _this->newRangeStart = 88000000.0;
+                _this->newRangeStop = 108000000.0;
+            }
+            
+            ImGui::Spacing();
+            ImGui::Text("Existing Ranges");
+            ImGui::Separator();
+            
+            // List existing ranges
+            for (int i = 0; i < _this->frequencyRanges.size(); i++) {
+                auto& range = _this->frequencyRanges[i];
+                
+                ImGui::PushID(i);
+                
+                // Enabled checkbox
+                bool enabled = range.enabled;
+                if (ImGui::Checkbox("##enabled", &enabled)) {
+                    _this->toggleFrequencyRange(i);
+                }
+                ImGui::SameLine();
+                
+                // Range info with edit capability
+                static char editName[256];
+                static double editStart, editStop;
+                static int editingIndex = -1;
+                
+                if (editingIndex == i) {
+                    // Editing mode
+                    ImGui::SetNextItemWidth(80);
+                    ImGui::InputText("##edit_name", editName, sizeof(editName));
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(80);
+                    ImGui::InputDouble("##edit_start", &editStart, 1000000.0, 10000000.0, "%.0f");
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(80);
+                    ImGui::InputDouble("##edit_stop", &editStop, 1000000.0, 10000000.0, "%.0f");
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Save")) {
+                        _this->updateFrequencyRange(i, std::string(editName), editStart, editStop);
+                        editingIndex = -1;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Cancel")) {
+                        editingIndex = -1;
+                    }
+                } else {
+                    // Display mode
+                    ImGui::Text("%s: %.1f - %.1f MHz", 
+                        range.name.c_str(), 
+                        range.startFreq / 1e6, 
+                        range.stopFreq / 1e6);
+                    ImGui::SameLine();
+                    
+                    if (ImGui::Button("Edit")) {
+                        editingIndex = i;
+                        strcpy(editName, range.name.c_str());
+                        editStart = range.startFreq;
+                        editStop = range.stopFreq;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Delete")) {
+                        _this->removeFrequencyRange(i);
+                        break; // Break to avoid iterator invalidation
+                    }
+                }
+                
+                ImGui::PopID();
+            }
+            
+            // Quick presets section
+            if (ImGui::CollapsingHeader("Quick Presets")) {
+                if (ImGui::Button("FM Broadcast (88-108 MHz)")) {
+                    _this->addFrequencyRange("FM Broadcast", 88000000.0, 108000000.0, true);
+                }
+                if (ImGui::Button("Airband (118-137 MHz)")) {
+                    _this->addFrequencyRange("Airband", 118000000.0, 137000000.0, true);
+                }
+                if (ImGui::Button("2m Ham (144-148 MHz)")) {
+                    _this->addFrequencyRange("2m Ham", 144000000.0, 148000000.0, true);
+                }
+                if (ImGui::Button("PMR446 (446.0-446.2 MHz)")) {
+                    _this->addFrequencyRange("PMR446", 446000000.0, 446200000.0, true);
+                }
+                if (ImGui::Button("70cm Ham (420-450 MHz)")) {
+                    _this->addFrequencyRange("70cm Ham", 420000000.0, 450000000.0, true);
+                }
+            }
+            
+            ImGui::End();
+        }
+        
+        // Legacy single range controls (for backward compatibility or when no ranges exist)
+        if (_this->frequencyRanges.empty()) {
+            ImGui::Spacing();
+            ImGui::Text("Legacy Single Range Mode");
+            ImGui::Separator();
+            
+            if (_this->running) { ImGui::BeginDisabled(); }
+            ImGui::LeftLabel("Start");
+            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+            if (ImGui::InputDouble("##start_freq_scanner", &_this->startFreq, 100.0, 100000.0, "%0.0f")) {
+                _this->startFreq = round(_this->startFreq);
+                _this->saveConfig();
+            }
+            ImGui::LeftLabel("Stop");
+            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+            if (ImGui::InputDouble("##stop_freq_scanner", &_this->stopFreq, 100.0, 100000.0, "%0.0f")) {
+                _this->stopFreq = round(_this->stopFreq);
+                _this->saveConfig();
+            }
+            if (_this->running) { ImGui::EndDisabled(); }
+        }
+        
+        // === COMMON SCANNER PARAMETERS ===
+        ImGui::Spacing();
+        ImGui::Text("Scanner Parameters");
+        ImGui::Separator();
+        
         if (_this->running) { ImGui::BeginDisabled(); }
-        ImGui::LeftLabel("Start");
-        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::InputDouble("##start_freq_scanner", &_this->startFreq, 100.0, 100000.0, "%0.0f")) {
-            _this->startFreq = round(_this->startFreq);
-            _this->saveConfig();
-        }
-        ImGui::LeftLabel("Stop");
-        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::InputDouble("##stop_freq_scanner", &_this->stopFreq, 100.0, 100000.0, "%0.0f")) {
-            _this->stopFreq = round(_this->stopFreq);
-            _this->saveConfig();
-        }
         ImGui::LeftLabel("Interval");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputDouble("##interval_scanner", &_this->interval, 100.0, 100000.0, "%0.0f")) {
@@ -220,8 +440,12 @@ private:
 
     void saveConfig() {
         config.acquire();
+        
+        // Save legacy single range (for backward compatibility)
         config.conf["startFreq"] = startFreq;
         config.conf["stopFreq"] = stopFreq;
+        
+        // Save common scanner parameters
         config.conf["interval"] = interval;
         config.conf["passbandRatio"] = passbandRatio;
         config.conf["tuningTime"] = tuningTime;
@@ -229,6 +453,20 @@ private:
         config.conf["level"] = level;
         config.conf["blacklistTolerance"] = blacklistTolerance;
         config.conf["blacklistedFreqs"] = blacklistedFreqs;
+        
+        // Save frequency ranges
+        json rangesArray = json::array();
+        for (const auto& range : frequencyRanges) {
+            json rangeJson;
+            rangeJson["name"] = range.name;
+            rangeJson["startFreq"] = range.startFreq;
+            rangeJson["stopFreq"] = range.stopFreq;
+            rangeJson["enabled"] = range.enabled;
+            rangesArray.push_back(rangeJson);
+        }
+        config.conf["frequencyRanges"] = rangesArray;
+        config.conf["currentRangeIndex"] = currentRangeIndex;
+        
         config.release(true);
     }
 
@@ -247,9 +485,37 @@ private:
         }
         config.release();
         
+        // Load frequency ranges if they exist
+        if (config.conf.contains("frequencyRanges") && config.conf["frequencyRanges"].is_array()) {
+            frequencyRanges.clear();
+            for (const auto& rangeJson : config.conf["frequencyRanges"]) {
+                if (rangeJson.contains("name") && rangeJson.contains("startFreq") && 
+                    rangeJson.contains("stopFreq") && rangeJson.contains("enabled")) {
+                    frequencyRanges.emplace_back(
+                        rangeJson["name"].get<std::string>(),
+                        rangeJson["startFreq"].get<double>(),
+                        rangeJson["stopFreq"].get<double>(),
+                        rangeJson["enabled"].get<bool>()
+                    );
+                }
+            }
+            if (config.conf.contains("currentRangeIndex")) {
+                currentRangeIndex = config.conf["currentRangeIndex"].get<int>();
+                currentRangeIndex = std::clamp(currentRangeIndex, 0, std::max(0, (int)frequencyRanges.size() - 1));
+            }
+        }
+        
         // Ensure current frequency is within bounds
-        if (current < startFreq || current > stopFreq) {
-            current = startFreq;
+        double currentStart, currentStop;
+        if (getCurrentScanBounds(currentStart, currentStop)) {
+            if (current < currentStart || current > currentStop) {
+                current = currentStart;
+            }
+        } else {
+            // Fall back to legacy range
+            if (current < startFreq || current > stopFreq) {
+                current = startFreq;
+            }
         }
     }
 
@@ -267,10 +533,18 @@ private:
                     return;
                 }
                 
+                // Get current range bounds (supports multi-range and legacy single range)
+                double currentStart, currentStop;
+                if (!getCurrentScanBounds(currentStart, currentStop)) {
+                    flog::warn("Scanner: No active frequency ranges, stopping");
+                    running = false;
+                    return;
+                }
+                
                 // Ensure current frequency is within bounds
-                if (current < startFreq || current > stopFreq) {
+                if (current < currentStart || current > currentStop) {
                     flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
-                    current = startFreq;
+                    current = currentStart;
                 }
                 
                 tuner::normalTuning(gui::waterfall.selectedVFO, current);
@@ -333,23 +607,62 @@ private:
                     // There is no signal on the visible spectrum, tune in scan direction and retry
                     if (scanUp) {
                         current = topLimit + interval;
-                        // Ensure proper wrapping with bounds checking
-                        while (current > stopFreq) {
-                            current = startFreq + (current - stopFreq - interval);
+                        // Handle range wrapping for multi-range scanning
+                        if (current > currentStop) {
+                            // Move to next range or wrap to beginning of current range
+                            if (!frequencyRanges.empty()) {
+                                auto activeRanges = getActiveRangeIndices();
+                                if (!activeRanges.empty()) {
+                                    currentRangeIndex = (currentRangeIndex + 1) % activeRanges.size();
+                                    if (!getCurrentScanBounds(currentStart, currentStop)) {
+                                        current = startFreq; // Fallback
+                                    } else {
+                                        current = currentStart;
+                                    }
+                                } else {
+                                    current = currentStart;
+                                }
+                            } else {
+                                // Legacy single range wrapping
+                                while (current > stopFreq) {
+                                    current = startFreq + (current - stopFreq - interval);
+                                }
+                                if (current < startFreq) { current = startFreq; }
+                            }
                         }
-                        if (current < startFreq) { current = startFreq; }
                     }
                     else {
                         current = bottomLimit - interval;
-                        // Ensure proper wrapping with bounds checking
-                        while (current < startFreq) {
-                            current = stopFreq - (startFreq - current - interval);
+                        // Handle range wrapping for multi-range scanning
+                        if (current < currentStart) {
+                            // Move to previous range or wrap to end of current range
+                            if (!frequencyRanges.empty()) {
+                                auto activeRanges = getActiveRangeIndices();
+                                if (!activeRanges.empty()) {
+                                    currentRangeIndex = (currentRangeIndex - 1 + activeRanges.size()) % activeRanges.size();
+                                    if (!getCurrentScanBounds(currentStart, currentStop)) {
+                                        current = stopFreq; // Fallback
+                                    } else {
+                                        current = currentStop;
+                                    }
+                                } else {
+                                    current = currentStop;
+                                }
+                            } else {
+                                // Legacy single range wrapping
+                                while (current < startFreq) {
+                                    current = stopFreq - (startFreq - current - interval);
+                                }
+                                if (current > stopFreq) { current = stopFreq; }
+                            }
                         }
-                        if (current > stopFreq) { current = stopFreq; }
                     }
                     
+                    // Update current range bounds after potential range change
+                    getCurrentScanBounds(currentStart, currentStop);
+                    
                     // Add debug logging
-                    flog::warn("Scanner: Tuned to {:.0f} Hz (range: {:.0f} - {:.0f})", current, startFreq, stopFreq);
+                    flog::warn("Scanner: Tuned to {:.0f} Hz (range: {:.0f} - {:.0f})", current, currentStart, currentStop);
 
                     // If the new current frequency is outside the visible bandwidth, wait for retune
                     if (current - (vfoWidth/2.0) < wfStart || current + (vfoWidth/2.0) > wfEnd) {
@@ -370,8 +683,14 @@ private:
         int maxIterations = 1000; // Prevent infinite loops
         int iterations = 0;
         
+        // Get current range bounds
+        double currentStart, currentStop;
+        if (!getCurrentScanBounds(currentStart, currentStop)) {
+            return false; // No valid range
+        }
+        
         for (freq += scanDir ? interval : -interval;
-            scanDir ? (freq <= stopFreq) : (freq >= startFreq);
+            scanDir ? (freq <= currentStop) : (freq >= currentStart);
             freq += scanDir ? interval : -interval) {
             
             iterations++;
@@ -424,8 +743,15 @@ private:
     
     bool running = false;
     //std::string selectedVFO = "Radio";
+    
+    // Multiple frequency ranges support
+    std::vector<FrequencyRange> frequencyRanges;
+    int currentRangeIndex = 0;
+    
+    // Legacy single-range support (for backward compatibility)
     double startFreq = 88000000.0;
     double stopFreq = 108000000.0;
+    
     double interval = 100000.0;
     double current = 88000000.0;
     double passbandRatio = 10.0;
@@ -445,13 +771,23 @@ private:
     std::vector<double> blacklistedFreqs;
     double blacklistTolerance = 1000.0; // Tolerance in Hz for blacklisted frequencies
     
+    // UI state for range management
+    bool showRangeManager = false;
+    char newRangeName[256] = "New Range";
+    double newRangeStart = 88000000.0;
+    double newRangeStop = 108000000.0;
+    
 
 };
 
 MOD_EXPORT void _INIT_() {
     json def = json({});
+    
+    // Legacy single range (for backward compatibility)
     def["startFreq"] = 88000000.0;
     def["stopFreq"] = 108000000.0;
+    
+    // Common scanner parameters
     def["interval"] = 100000.0;
     def["passbandRatio"] = 10.0;
     def["tuningTime"] = 250;
@@ -459,6 +795,10 @@ MOD_EXPORT void _INIT_() {
     def["level"] = -50.0;
     def["blacklistTolerance"] = 1000.0;
     def["blacklistedFreqs"] = json::array();
+    
+    // Multiple frequency ranges support
+    def["frequencyRanges"] = json::array();
+    def["currentRangeIndex"] = 0;
 
     config.setPath(core::args["root"].s() + "/scanner_config.json");
     config.load(def);
