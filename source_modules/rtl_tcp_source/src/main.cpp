@@ -9,6 +9,19 @@
 #include <gui/style.h>
 #include <utils/optionlist.h>
 
+// Windows MSVC compatibility 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#endif
+
 #define CONCAT(a, b) ((std::string(a) + b).c_str())
 
 SDRPP_MOD_INFO{
@@ -177,9 +190,10 @@ private:
 
     static void setGain(double gain, void* ctx) {
         RTLTCPSourceModule* _this = (RTLTCPSourceModule*)ctx;
-        // Convert gain to gain index (RTL-TCP uses gain index, not dB)
-        // RTL-SDR gain range is typically 0-28 with steps, so we map gain dB to index
-        int gainIndex = std::max(0, std::min(28, (int)(gain * 28.0 / 50.0))); // Map 0-50dB to 0-28 index
+        // Convert gain dB to RTL-TCP gain index (0-28 range)
+        // Map 0-50dB to 0-28 index range, avoiding Windows min/max macro conflicts
+        int rawGainIndex = (int)(gain * 28.0 / 50.0);
+        int gainIndex = (rawGainIndex < 0) ? 0 : ((rawGainIndex > 28) ? 28 : rawGainIndex);
         _this->gain = gainIndex;
         if (_this->running && !_this->tunerAGC) {
             _this->client->setGainIndex(gainIndex);
