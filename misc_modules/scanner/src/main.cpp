@@ -228,7 +228,7 @@ public:
                 flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})",
                           targetGain, frequencyRanges[rangeIdx].name, sourceName);
             } else {
-                flog::debug("Scanner: No source selected, cannot apply gain for range '{}'",
+                SCAN_DEBUG("Scanner: No source selected, cannot apply gain for range '{}'",
                           frequencyRanges[rangeIdx].name);
             }
         } catch (const std::exception& e) {
@@ -659,7 +659,7 @@ private:
                         std::lock_guard<std::mutex> lck(_this->scanMtx);
                         _this->receiving = false;
                     }
-                    flog::debug("Scanner: Auto-resuming scanning after blacklisting frequency");
+                    SCAN_DEBUG("Scanner: Auto-resuming scanning after blacklisting frequency");
                     
                 } else {
                     flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", currentFreq);
@@ -1223,7 +1223,7 @@ private:
                                 }
                             } else {
                                 if (applyProfiles && !currentTuningProfile) {
-                                    flog::debug("Scanner: No profile available for {:.6f} MHz (Index:{})", current / 1e6, (int)currentScanIndex);
+                                    SCAN_DEBUG("Scanner: No profile available for {:.6f} MHz (Index:{})", current / 1e6, (int)currentScanIndex);
                                 }
                             }
                             
@@ -1406,7 +1406,7 @@ private:
                     }
                 } else {
                     if (useFrequencyManager && applyProfiles && !currentTuningProfile) {
-                        flog::debug("Scanner: No profile available for {:.6f} MHz BAND (Index:{})", freq / 1e6, (int)currentScanIndex);
+                        SCAN_DEBUG("Scanner: No profile available for {:.6f} MHz BAND (Index:{})", freq / 1e6, (int)currentScanIndex);
                     }
                 }
                 
@@ -1418,7 +1418,7 @@ private:
 
     // DISCRETE PARAMETER HELPERS: Sync indices with actual values
     void initializeDiscreteIndices() {
-        flog::debug("Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
+        SCAN_DEBUG("Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
         // Find closest interval index
         intervalIndex = 4; // Default to 100 kHz
         double minDiff = std::abs(interval - INTERVAL_VALUES_HZ[intervalIndex]);
@@ -1451,14 +1451,14 @@ private:
                 minPassbandDiff = diff;
             }
         }
-        flog::debug("Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
+        SCAN_DEBUG("Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
     }
     
     void syncDiscreteValues() {
         interval = INTERVAL_VALUES_HZ[intervalIndex];
         scanRateHz = SCAN_RATE_VALUES[scanRateIndex];
         passbandRatio = PASSBAND_VALUES[passbandIndex];
-        flog::debug("Scanner: syncDiscreteValues - passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
+        SCAN_DEBUG("Scanner: syncDiscreteValues - passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
     }
     
     // BLACKLIST: Helper function for consistent blacklist checking
@@ -1491,7 +1491,7 @@ private:
             
             if (!core::modComManager.callInterface("frequency_manager", CMD_GET_BOOKMARK_NAME, 
                                                  const_cast<double*>(&frequency), &bookmarkName)) {
-                flog::debug("Scanner: Failed to call frequency manager getBookmarkName interface");
+                SCAN_DEBUG("Scanner: Failed to call frequency manager getBookmarkName interface");
                 frequencyNameCache[frequency] = ""; // Cache the empty result
                 return "";
             }
@@ -1501,7 +1501,7 @@ private:
             return bookmarkName;
             
         } catch (const std::exception& e) {
-            flog::debug("Scanner: Error looking up frequency manager name: {}", e.what());
+            SCAN_DEBUG("Scanner: Error looking up frequency manager name: {}", e.what());
             frequencyNameCache[frequency] = ""; // Cache the empty result
             return "";
         }
@@ -1514,7 +1514,7 @@ private:
             lastAppliedVFO == vfoName && 
             std::abs(lastProfileFrequency - frequency) < 1000.0) { // Within 1 kHz
             
-            flog::debug("{}: SKIPPED redundant profile '{}' for {:.6f} MHz (already applied)", 
+            SCAN_DEBUG("{}: SKIPPED redundant profile '{}' for {:.6f} MHz (already applied)", 
                        context, profile.name.empty() ? "Auto" : profile.name, frequency / 1e6);
             return false; // Skipped - no change needed
         }
@@ -1752,7 +1752,7 @@ private:
                                     applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, testScanList[i], "STARTUP");
                                 }
                             } else {
-                                flog::debug("Scanner: INIT NULL PROFILE for start freq {:.6f} MHz (Index:{})", 
+                                SCAN_DEBUG("Scanner: INIT NULL PROFILE for start freq {:.6f} MHz (Index:{})", 
                                            testScanList[i] / 1e6, (int)i);
                             }
                         } else {
@@ -1794,7 +1794,7 @@ private:
                                 applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "INITIAL");
                             }
                         } else {
-                            flog::debug("Scanner: LOOKUP NULL PROFILE for current freq {:.6f} MHz (Index:{})", 
+                            SCAN_DEBUG("Scanner: LOOKUP NULL PROFILE for current freq {:.6f} MHz (Index:{})", 
                                        current / 1e6, (int)i);
                         }
                     } else {
@@ -1841,7 +1841,7 @@ private:
                             applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "PREEMPTIVE");
                         }
                     } else {
-                        flog::debug("Scanner: TRACKING NULL PROFILE for {:.6f} MHz (Index:{})", 
+                        SCAN_DEBUG("Scanner: TRACKING NULL PROFILE for {:.6f} MHz (Index:{})", 
                                    current / 1e6, (int)currentScanIndex);
                     }
                 } else {
@@ -1889,7 +1889,7 @@ private:
             tuning = true;
             lastTuneTime = std::chrono::high_resolution_clock::now();
             
-            flog::debug("Scanner: Stepped to non-blacklisted frequency {:.6f} MHz ({})", 
+            SCAN_DEBUG("Scanner: Stepped to non-blacklisted frequency {:.6f} MHz ({})", 
                        current / 1e6, currentEntryIsSingleFreq ? "single freq" : "band");
             
             return true; // Successfully performed FM frequency stepping
@@ -1960,7 +1960,7 @@ private:
         if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, 
                                            RADIO_IFACE_CMD_GET_SQUELCH_LEVEL, 
                                            NULL, &squelchLevel)) {
-            flog::debug("Scanner: Failed to get squelch level");
+            SCAN_DEBUG("Scanner: Failed to get squelch level");
         }
         
         return squelchLevel;
@@ -1980,7 +1980,7 @@ private:
         if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, 
                                            RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, 
                                            &newLevel, NULL)) {
-            flog::debug("Scanner: Failed to set squelch level");
+            SCAN_DEBUG("Scanner: Failed to set squelch level");
         }
     }
     
