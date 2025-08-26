@@ -167,8 +167,15 @@ public:
 private:
     static void menuHandler(void* ctx) {
         RadioModule* _this = (RadioModule*)ctx;
-
-        if (!_this->enabled) { style::beginDisabled(); }
+        
+        // Snapshot state at the beginning to avoid thread safety issues
+        const bool module_enabled = _this->enabled;
+        const bool squelch_enabled = _this->squelchEnabled;
+        const bool nb_enabled = _this->nbEnabled;
+        const bool fmifnr_enabled = _this->FMIFNREnabled;
+        
+        // Begin disabled state if module is not enabled
+        if (!module_enabled) { style::beginDisabled(); }
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
         ImGui::BeginGroup();
@@ -239,13 +246,15 @@ private:
             if (ImGui::Checkbox(("Noise blanker (W.I.P.)##_radio_nb_ena_" + _this->name).c_str(), &_this->nbEnabled)) {
                 _this->setNBEnabled(_this->nbEnabled);
             }
-            if (!_this->nbEnabled && _this->enabled) { style::beginDisabled(); }
+            
+            // Use consistent condition for NB controls
+            if (!nb_enabled && module_enabled) { style::beginDisabled(); }
             ImGui::SameLine();
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
             if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
                 _this->setNBLevel(_this->nbLevel);
             }
-            if (!_this->nbEnabled && _this->enabled) { style::endDisabled(); }
+            if (!nb_enabled && module_enabled) { style::endDisabled(); }
         }
         
 
@@ -253,38 +262,47 @@ private:
         if (ImGui::Checkbox(("Squelch##_radio_sqelch_ena_" + _this->name).c_str(), &_this->squelchEnabled)) {
             _this->setSquelchEnabled(_this->squelchEnabled);
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::beginDisabled(); }
+        
+        // Use consistent condition for squelch controls
+        if (!squelch_enabled && module_enabled) { style::beginDisabled(); }
         ImGui::SameLine();
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
             _this->setUserSquelchLevel(_this->userSquelchLevel);
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::endDisabled(); }
+        if (!squelch_enabled && module_enabled) { style::endDisabled(); }
 
         // FM IF Noise Reduction
         if (_this->FMIFNRAllowed) {
             if (ImGui::Checkbox(("IF Noise Reduction##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->FMIFNREnabled)) {
                 _this->setFMIFNREnabled(_this->FMIFNREnabled);
             }
+            
             if (_this->selectedDemodID == RADIO_DEMOD_NFM) {
-                if (!_this->FMIFNREnabled && _this->enabled) { style::beginDisabled(); }
+                // Use consistent condition for FMIFNR controls
+                if (!fmifnr_enabled && module_enabled) { style::beginDisabled(); }
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
                 if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
                     _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
                 }
-                if (!_this->FMIFNREnabled && _this->enabled) { style::endDisabled(); }
+                if (!fmifnr_enabled && module_enabled) { style::endDisabled(); }
             }
         }
 
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
 
-        // Make sure all disabled styles are properly ended
-        if (!_this->enabled) { style::endDisabled(); }
-        
-        // Safety check to ensure all style colors are properly popped
+        // Debug assertion and safety check for style stack
         ImGuiContext& g = *GImGui;
+        
+#ifndef NDEBUG
+        // In debug builds, assert if there's a color stack leak
+        IM_ASSERT(g.ColorStack.Size == 0 && "Color stack leak in RadioModule::menuHandler");
+#endif
+
+        // Safety check to ensure all style colors are properly popped
+        // This is a temporary measure until we're confident all push/pop pairs are properly matched
         if (g.ColorStack.Size > 0) {
             // Reset the color stack to avoid crashes
             while (g.ColorStack.Size > 0) {
