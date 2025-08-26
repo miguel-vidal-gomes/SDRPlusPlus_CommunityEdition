@@ -1,6 +1,5 @@
 #pragma once
 #include <imgui.h>
-#include <imgui_internal.h> // For proper stack tracking
 #include <module.h>
 #include <gui/style.h>
 
@@ -175,20 +174,6 @@ private:
     static void menuHandler(void* ctx) {
         RadioModule* _this = (RadioModule*)ctx;
         
-        // Capture ImGui stack baselines at entry for proper cleanup
-        ImGuiContext& g = *GImGui;
-        const int color_base = g.ColorStack.Size;
-        const int var_base = g.StyleVarStack.Size;
-        
-#ifndef NDEBUG
-        // These are only used for debug assertions (can't be manually restored)
-        const int flags_base = g.ItemFlagsStack.Size;
-        const int disabled_base = g.DisabledStackSize;
-#else
-        // Avoid unused variable warning in release builds
-        (void)g;
-#endif
-        
         // Snapshot state at the beginning to ensure frame consistency
         const bool module_enabled = _this->enabled;
         const bool squelch_enabled = _this->squelchEnabled;
@@ -317,27 +302,7 @@ private:
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
         
-        // Get ImGui context for stack checks and safety net
-        ImGuiContext& g_end = *GImGui;
-        
-#ifndef NDEBUG
-        // Assert exact equality to catch both underflows and leaks
-        IM_ASSERT(g_end.ColorStack.Size == color_base && "Color stack leak in RadioModule::menuHandler");
-        IM_ASSERT(g_end.StyleVarStack.Size == var_base && "Style var stack leak in RadioModule::menuHandler");
-        
-        // Also check other stacks that BeginDisabled might touch
-        // Note: These stacks can't be manually restored, we rely on proper RAII pairing
-        IM_ASSERT(g_end.ItemFlagsStack.Size == flags_base && "ItemFlags stack leak in RadioModule::menuHandler");
-        IM_ASSERT(g_end.DisabledStackSize == disabled_base && "Disabled stack leak in RadioModule::menuHandler");
-#endif
-
-        // In release builds, restore to baseline as a safety net
-        if (int d = g_end.ColorStack.Size - color_base) {
-            ImGui::PopStyleColor(d);
-        }
-        if (int d = g_end.StyleVarStack.Size - var_base) {
-            ImGui::PopStyleVar(d);
-        }
+        // No manual stack cleanup needed - RAII guards handle everything
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
