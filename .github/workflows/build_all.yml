@@ -720,10 +720,20 @@ jobs:
               echo "Nightly release already exists"
             fi
 
-        - name: Update Nightly
+        - name: Update Nightly Tag and Assets
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
+          run: |
+            # Configure git
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            
+            # Force-update the tag to point to the current commit
+            git tag -f nightly
+            git push -f origin nightly
+            
+            # Update release assets
+            gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
 
     check_spelling:
         runs-on: ubuntu-latest
