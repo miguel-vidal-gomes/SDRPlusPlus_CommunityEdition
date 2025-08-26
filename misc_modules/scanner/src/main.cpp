@@ -457,22 +457,26 @@ private:
                              "Lower values = more sensitive, higher values = less sensitive");
         }
         
-        // Squelch Delta Control
-        ImGui::LeftLabel("Squelch Delta");
+        // Squelch Delta Control with improved labeling
+        ImGui::LeftLabel("Delta (dB)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::SliderFloat("##scanner_squelch_delta", &_this->squelchDelta, 0.0f, 10.0f, "%.1f dB")) {
             _this->saveConfig();
         }
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Difference between trigger and closing squelch levels\n"
+            ImGui::SetTooltip("Close threshold = Squelch − Delta\n"
                              "Higher values reduce unnecessary squelch closures\n"
                              "Creates hysteresis effect to maintain reception");
         }
         
-        ImGui::Checkbox("Auto Delta##scanner_auto_delta", &_this->squelchDeltaAuto);
+        ImGui::LeftLabel("Auto Delta");
+        if (ImGui::Checkbox(("##scanner_squelch_delta_auto_" + _this->name).c_str(), &_this->squelchDeltaAuto)) {
+            _this->saveConfig();
+        }
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Automatically calculate squelch delta based on noise floor\n"
-                             "Places squelch closing level closer to noise floor");
+                             "Places squelch closing level closer to noise floor\n"
+                             "Updates every 250ms when not receiving");
         }
 
         // Blacklist controls
@@ -835,8 +839,12 @@ private:
         }
         
         // Load squelch delta settings
-        squelchDelta = config.conf.value("squelchDelta", 3.0f);
+        squelchDelta = config.conf.value("squelchDelta", 2.5f);
         squelchDeltaAuto = config.conf.value("squelchDeltaAuto", false);
+        
+        // Initialize time points
+        lastNoiseUpdate = std::chrono::high_resolution_clock::now();
+        tuneTime = std::chrono::high_resolution_clock::now();
         
         // Load frequency ranges if they exist (BEFORE releasing config!)
         if (config.conf.contains("frequencyRanges") && config.conf["frequencyRanges"].is_array()) {
@@ -928,9 +936,12 @@ private:
                     flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
                     current = currentStart;
                 }
+                // Record tuning time for debounce
+                tuneTime = std::chrono::high_resolution_clock::now();
+                
                 // Apply squelch delta preemptively when tuning to new frequency
                 // This prevents the initial noise burst when jumping between bands
-                // Apply only when not in UI interaction and not during startup
+                // Apply only when not during startup
                 if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
                     applySquelchDelta();
                 }
@@ -1704,9 +1715,12 @@ private:
             
             // CRITICAL: Immediate VFO tuning (same as performLegacyScanning) 
             // This frequency is guaranteed to NOT be blacklisted
+            // Record tuning time for debounce
+            tuneTime = std::chrono::high_resolution_clock::now();
+            
             // Apply squelch delta preemptively when tuning to new frequency
             // This prevents the initial noise burst when jumping between bands
-            // Apply only when not in UI interaction and not during startup
+            // Apply only when not during startup
             if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
                 applySquelchDelta();
             }
@@ -1822,18 +1836,20 @@ private:
             // Calculate new squelch level with delta
             float deltaLevel;
             if (squelchDeltaAuto) {
-                // Auto mode: use noise floor plus delta value
-                deltaLevel = noiseFloor + squelchDelta;
+                // Auto mode: use noise floor plus delta value (with bounds)
+                float boundedDelta = std::clamp(squelchDelta, 0.0f, 20.0f);
+                deltaLevel = std::max(noiseFloor + boundedDelta, MIN_SQUELCH);
             } else {
-                // Manual mode: subtract delta from original level
-                deltaLevel = originalSquelchLevel - squelchDelta;
+                // Manual mode: subtract delta from original level (with bounds)
+                deltaLevel = std::max(originalSquelchLevel - squelchDelta, MIN_SQUELCH);
             }
             
             // Apply the new squelch level
             setRadioSquelchLevel(deltaLevel);
             squelchDeltaActive = true;
             
-            // Debug logging removed for production
+            // Initialize last noise update time
+            lastNoiseUpdate = std::chrono::high_resolution_clock::now();
         }
     }
     
@@ -1845,16 +1861,36 @@ private:
         if (squelchDeltaActive) {
             setRadioSquelchLevel(originalSquelchLevel);
             squelchDeltaActive = false;
-            
-            // Debug logging removed for production
         }
     }
     
     // Update noise floor estimate (for auto squelch delta mode)
-    void updateNoiseFloor(float level) {
-        // Smooth noise floor estimate using exponential moving average
-        const float alpha = 0.1f; // Smoothing factor
-        noiseFloor = (alpha * level) + ((1.0f - alpha) * noiseFloor);
+    void updateNoiseFloor(float instantNoise) {
+        // Stronger smoothing factor for more stable noise floor
+        const float alpha = 0.95f; // Smoothing factor (0.95 = 95% old value, 5% new value)
+        
+        // Skip updates during active reception to avoid fighting the signal
+        if (receiving) return;
+        
+        // Apply exponential moving average
+        noiseFloor = alpha * noiseFloor + (1.0f - alpha) * instantNoise;
+        
+        // If in auto mode and enough time has passed since last adjustment
+        auto now = std::chrono::high_resolution_clock::now();
+        if (squelchDeltaAuto && 
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - lastNoiseUpdate).count() >= 250) {
+            
+            // Calculate and apply closing threshold with bounds
+            float deltaValue = std::clamp(squelchDelta, 0.0f, 20.0f);
+            float closingThreshold = std::max(noiseFloor + deltaValue, MIN_SQUELCH);
+            
+            // Only apply if we're actively scanning and delta is enabled
+            if (squelchDeltaActive && !receiving) {
+                setRadioSquelchLevel(closingThreshold);
+            }
+            
+            lastNoiseUpdate = now;
+        }
     }
 
     std::string name;
@@ -1896,11 +1932,17 @@ private:
     bool frequencyNameCacheDirty = true; // Set to true when blacklist changes
     
     // Squelch delta functionality
-    float squelchDelta = 3.0f; // Default delta of 3 dB between detection and closing levels
+    float squelchDelta = 2.5f; // Default delta of 2.5 dB between detection and closing levels
     bool squelchDeltaAuto = false; // Whether to calculate delta automatically based on noise floor
     float noiseFloor = -100.0f; // Estimated noise floor for auto delta calculation
     float originalSquelchLevel = -50.0f; // Original squelch level before applying delta
     bool squelchDeltaActive = false; // Whether squelch delta is currently active
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastNoiseUpdate; // Time of last noise floor update
+    std::chrono::time_point<std::chrono::high_resolution_clock> tuneTime; // Time of last frequency tuning
+    
+    // Constants for squelch limits
+    const float MIN_SQUELCH = -100.0f;
+    const float MAX_SQUELCH = 0.0f;
     
     // UI state for range management
     bool showRangeManager = false;
@@ -1961,7 +2003,7 @@ MOD_EXPORT void _INIT_() {
     def["blacklistedFreqs"] = json::array();
     
     // Squelch delta settings
-    def["squelchDelta"] = 3.0f;
+    def["squelchDelta"] = 2.5f;
     def["squelchDeltaAuto"] = false;
     
     // Scanning direction preference 
