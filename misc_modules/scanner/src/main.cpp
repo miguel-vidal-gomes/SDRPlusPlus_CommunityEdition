@@ -402,9 +402,10 @@ private:
             }
         }
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Enable scan rates up to 200 Hz\n"
+            ImGui::SetTooltip("Enable scan rates up to %d Hz\n"
                              "WARNING: High scan rates may overload your CPU\n"
-                             "and could cause missed signals or unstable operation");
+                             "and could cause missed signals or unstable operation",
+                             MAX_SCAN_RATE);
         }
         
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
@@ -440,18 +441,24 @@ private:
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, 100, 1000)) {
             // Allow shorter tuning times for high-speed scanning
-            const int minTime = _this->unlockHighSpeed ? 25 : 100;
+            const int minTime = _this->unlockHighSpeed ? MIN_TUNING_TIME : 100;
             _this->tuningTime = std::clamp<int>(_this->tuningTime, minTime, 10000);
+            // If user manually adjusts tuning time, turn off auto mode
+            if (_this->tuningTimeAuto) {
+                _this->tuningTimeAuto = false;
+                flog::info("Scanner: Auto tuning time adjustment disabled due to manual edit");
+            }
             _this->saveConfig();
         }
-        if (ImGui::IsItemHovered()) {
+                if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Time to wait after tuning before checking for signals (ms)\n"
                              "Allows hardware and DSP to settle after frequency change\n"
                              "TIP: Increase if missing signals (slow hardware)\n"
                              "Decrease for faster scanning (stable hardware)\n"
                              "Range: %dms - 10000ms, default: 250ms\n"
-                             "For high-speed scanning (>50Hz), use 25-50ms", 
-                             _this->unlockHighSpeed ? 25 : 100);
+                             "For high-speed scanning (>50Hz), use %d-50ms",
+                             _this->unlockHighSpeed ? MIN_TUNING_TIME : 100,
+                             MIN_TUNING_TIME);
         }
         
         // Auto-adjust tuning time based on scan rate (available at all scan rates)
@@ -465,13 +472,14 @@ private:
                 // Use the same scaling formula as in the worker thread
                 
                 // Calculate optimal tuning time that scales with scan rate
-                float scaleFactor = static_cast<float>(BASE_SCAN_RATE) / _this->scanRateHz;
-                int optimalTime = static_cast<int>(BASE_TUNING_TIME * scaleFactor);
-                optimalTime = std::max(MIN_TUNING_TIME, optimalTime); // Enforce minimum
+                const int optimalTime = std::max(
+                    MIN_TUNING_TIME, 
+                    static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / _this->scanRateHz)
+                );
                 
                 _this->tuningTime = optimalTime;
-                flog::info("Scanner: Auto-adjusted tuning time to {}ms for {}Hz scan rate (scale factor: {:.2f})", 
-                          _this->tuningTime, _this->scanRateHz, scaleFactor);
+                flog::info("Scanner: Auto-adjusted tuning time to {}ms for {}Hz scan rate", 
+                          _this->tuningTime, _this->scanRateHz);
             }
             
             _this->saveConfig();
@@ -479,17 +487,22 @@ private:
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Toggle automatic tuning time adjustment based on scan rate\n"
                              "When ON: Tuning time will automatically scale with scan rate\n"
-                             "Formula: tuningTime = 250ms * (50Hz / currentRate)\n"
+                             "Formula: tuningTime = %dms * (%dHz / currentRate)\n"
                              "Examples:\n"
-                             "- 200Hz scan rate: ~62ms tuning time\n"
-                             "- 100Hz scan rate: ~125ms tuning time\n"
-                             "- 50Hz scan rate: 250ms tuning time\n"
-                             "- 25Hz scan rate: 500ms tuning time");
+                             "- %dHz scan rate: ~%dms tuning time\n"
+                             "- %dHz scan rate: ~%dms tuning time\n"
+                             "- %dHz scan rate: %dms tuning time\n"
+                             "- %dHz scan rate: %dms tuning time",
+                             BASE_TUNING_TIME, BASE_SCAN_RATE,
+                             MAX_SCAN_RATE, BASE_TUNING_TIME * BASE_SCAN_RATE / MAX_SCAN_RATE,
+                             100, BASE_TUNING_TIME * BASE_SCAN_RATE / 100,
+                             BASE_SCAN_RATE, BASE_TUNING_TIME,
+                             25, BASE_TUNING_TIME * BASE_SCAN_RATE / 25);
         }
         ImGui::LeftLabel("Linger Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##linger_time_scanner", &_this->lingerTime, 100, 1000)) {
-            const int minLinger = _this->unlockHighSpeed ? 50 : 100;
+            const int minLinger = _this->unlockHighSpeed ? MIN_LINGER_TIME : 100;
             _this->lingerTime = std::clamp<int>(_this->lingerTime, minLinger, 10000);
             _this->saveConfig();
         }
@@ -498,9 +511,13 @@ private:
                              "Scanner pauses to let you listen to the signal\n"
                              "TIP: Longer times for voice communications (2000+ ms)\n"
                              "Shorter times for quick signal identification (500-1000 ms)\n"
-                             "Range: %dms - 10000ms, default: 1000ms\n"
-                             "For high scan rates (>50Hz), consider using 50-500ms",
-                             _this->unlockHighSpeed ? 50 : 100);
+                             "Range: %dms - 10000ms, default: %dms\n"
+                             "For high scan rates (>%dHz), consider using %d-%dms",
+                             _this->unlockHighSpeed ? MIN_LINGER_TIME : 100,
+                             BASE_LINGER_TIME,
+                             NORMAL_MAX_SCAN_RATE,
+                             MIN_LINGER_TIME,
+                             BASE_LINGER_TIME / 2);
         }
         
         // Add linger time auto-adjust button when auto-adjust is enabled for tuning time
@@ -511,23 +528,29 @@ private:
                 // Linger time should be longer than tuning time
                 
                 // Calculate optimal linger time that scales with scan rate
-                float scaleFactor = static_cast<float>(BASE_SCAN_RATE) / _this->scanRateHz;
-                int optimalTime = static_cast<int>(BASE_LINGER_TIME * scaleFactor);
-                optimalTime = std::max(MIN_LINGER_TIME, optimalTime); // Enforce minimum
+                const int optimalTime = std::max(
+                    MIN_LINGER_TIME, 
+                    static_cast<int>((BASE_LINGER_TIME * BASE_SCAN_RATE) / _this->scanRateHz)
+                );
                 
                 _this->lingerTime = optimalTime;
                 _this->saveConfig();
-                flog::info("Scanner: Scaled linger time to {}ms for {}Hz scan rate (scale factor: {:.2f})", 
-                          _this->lingerTime, _this->scanRateHz, scaleFactor);
+                flog::info("Scanner: Scaled linger time to {}ms for {}Hz scan rate", 
+                          _this->lingerTime, _this->scanRateHz);
             }
             if (ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("Scale linger time based on scan rate (one-time adjustment)\n"
-                                 "Formula: lingerTime = 1000ms * (50Hz / currentRate)\n"
+                                 "Formula: lingerTime = %dms * (%dHz / currentRate)\n"
                                  "Examples:\n"
-                                 "- 200Hz scan rate: ~250ms linger time\n"
-                                 "- 100Hz scan rate: ~500ms linger time\n"
-                                 "- 50Hz scan rate: 1000ms linger time\n"
-                                 "- 25Hz scan rate: 2000ms linger time");
+                                 "- %dHz scan rate: ~%dms linger time\n"
+                                 "- %dHz scan rate: ~%dms linger time\n"
+                                 "- %dHz scan rate: %dms linger time\n"
+                                 "- %dHz scan rate: %dms linger time",
+                                 BASE_LINGER_TIME, BASE_SCAN_RATE,
+                                 MAX_SCAN_RATE, BASE_LINGER_TIME * BASE_SCAN_RATE / MAX_SCAN_RATE,
+                                 100, BASE_LINGER_TIME * BASE_SCAN_RATE / 100,
+                                 BASE_SCAN_RATE, BASE_LINGER_TIME,
+                                 25, BASE_LINGER_TIME * BASE_SCAN_RATE / 25);
             }
         }
         // LIVE PARAMETERS: No more disabling - all can be changed during scanning!
@@ -992,9 +1015,12 @@ private:
                 while (running) {
                     // Implement actual scan rate control with different max based on unlock status
                     // Safety guard against division by zero and enforce limits
-                    const int maxHz = unlockHighSpeed ? 200 : 50;
-                    const int safeRate = std::clamp(scanRateHz, 5, maxHz);
+                    const int maxHz = unlockHighSpeed ? MAX_SCAN_RATE : NORMAL_MAX_SCAN_RATE;
+                    const int safeRate = std::clamp(scanRateHz, MIN_SCAN_RATE, maxHz);
                     const int intervalMs = std::max(1, 1000 / safeRate);
+                    
+                    // Use sleep_until with steady_clock to reduce drift and jitter
+                    static auto nextWakeTime = std::chrono::steady_clock::now();
                     
                     // Dynamically scale tuning time based on scan rate when auto mode is enabled
                     // This ensures we don't wait too long between frequencies
@@ -1005,15 +1031,16 @@ private:
                     static int lastAdjustedRate = 0;
                     if (tuningTimeAuto && safeRate != lastAdjustedRate) {
                         // Calculate optimal tuning time that scales with scan rate
-                        float scaleFactor = static_cast<float>(BASE_SCAN_RATE) / safeRate;
-                        int optimalTime = static_cast<int>(BASE_TUNING_TIME * scaleFactor);
-                        optimalTime = std::max(MIN_TUNING_TIME, optimalTime); // Enforce minimum
+                        const int optimalTime = std::max(
+                            MIN_TUNING_TIME, 
+                            static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / safeRate)
+                        );
                         
                         // Only adjust if current tuning time is significantly different
                         if (std::abs(tuningTime - optimalTime) > 10) {
                             tuningTime = optimalTime;
-                            flog::info("Scanner: Auto-scaled tuning time to {}ms for {}Hz scan rate (scale factor: {:.2f})", 
-                                      tuningTime, safeRate, scaleFactor);
+                            flog::info("Scanner: Auto-scaled tuning time to {}ms for {}Hz scan rate", 
+                                      tuningTime, safeRate);
                         }
                         lastAdjustedRate = safeRate;
                     }
@@ -1022,11 +1049,13 @@ private:
                     static int logCounter = 0;
                     if (++logCounter >= 100) { // Log every 100 iterations to avoid spam
                         flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms, tuning time: {} ms)", 
-                                   scanRateHz, intervalMs, tuningTime);
+                                   safeRate, intervalMs, tuningTime);
                         logCounter = 0;
                     }
                     
-                    std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
+                    // Sleep until next scheduled time to reduce drift
+                    nextWakeTime += std::chrono::milliseconds(intervalMs);
+                    std::this_thread::sleep_until(nextWakeTime);
                 
                 try {
                     std::lock_guard<std::mutex> lck(scanMtx);
@@ -2121,6 +2150,9 @@ private:
     static constexpr int BASE_LINGER_TIME = 1000;    // Reference linger time (ms) at 50Hz
     static constexpr int MIN_TUNING_TIME = 10;       // Absolute minimum tuning time (ms)
     static constexpr int MIN_LINGER_TIME = 50;       // Absolute minimum linger time (ms)
+    static constexpr int MAX_SCAN_RATE = 200;        // Maximum scan rate (Hz) when unlocked
+    static constexpr int MIN_SCAN_RATE = 5;          // Minimum scan rate (Hz)
+    static constexpr int NORMAL_MAX_SCAN_RATE = 50;  // Maximum scan rate (Hz) in normal mode
     
     // UI state for range management
     bool showRangeManager = false;
