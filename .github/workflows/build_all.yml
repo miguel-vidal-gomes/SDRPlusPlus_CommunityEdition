@@ -32,27 +32,36 @@ jobs:
           shell: bash
           run: |
             # Determine version string based on branch/tag and build number
+            DATE_UTC=$(date -u +%Y-%m-%d)
+            SHORT_SHA=${GITHUB_SHA::7}
+            
             if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
-              # Master branch builds get -nightly suffix
-              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+              # Master branch builds get nightly+date+sha suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
             elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
               # Tag builds get the tag name
               VERSION_STR="${GITHUB_REF#refs/tags/}"
+              BUILD_VERSION="${VERSION_STR}"
             elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
-              # PR builds get -pr.NUMBER suffix
+              # PR builds get -pr.NUMBER suffix with date and SHA
               PR_NUM=${GITHUB_REF#refs/pull/}
               PR_NUM=${PR_NUM%/merge}
-              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
             else
-              # Other branches get -branch.BRANCHNAME suffix
+              # Other branches get -branch.BRANCHNAME suffix with date and SHA
               BRANCH=${GITHUB_REF#refs/heads/}
-              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
             fi
             
             echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
             echo "Setting version to: $VERSION_STR"
+            echo "Setting build version to: $BUILD_VERSION"
             
-            # Update version.h
+            # Update version.h (still needed for compatibility)
             sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
             
             # Update make_macos_bundle.sh
@@ -120,6 +129,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCOPY_MSVC_REDISTRIBUTABLES=ON "$Env:GITHUB_WORKSPACE" "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
@@ -217,6 +228,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 $GITHUB_WORKSPACE -DOPT_BUILD_PLUTOSDR_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_AUDIO_SINK=ON -DOPT_BUILD_PORTAUDIO_SINK=OFF -DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_AUDIO_SOURCE=OFF -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
@@ -314,6 +327,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 $GITHUB_WORKSPACE -DOPT_BUILD_PLUTOSDR_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_AUDIO_SINK=ON -DOPT_BUILD_PORTAUDIO_SINK=OFF -DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=OFF -DOPT_BUILD_PERSEUS_SOURCE=OFF -DOPT_BUILD_AUDIO_SOURCE=OFF -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
