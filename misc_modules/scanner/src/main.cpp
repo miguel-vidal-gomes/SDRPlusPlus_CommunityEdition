@@ -393,8 +393,10 @@ private:
         // PERFORMANCE: Configurable scan rate (consistent across all modes)
         ImGui::LeftLabel("Scan Rate");
         
-        // Add unlock higher speed toggle
-        if (ImGui::Checkbox("Unlock high-speed scanning (up to 200 Hz)", &_this->unlockHighSpeed)) {
+        // Add unlock higher speed toggle with parameterized max rate
+        char unlockLabel[64];
+        snprintf(unlockLabel, sizeof(unlockLabel), "Unlock high-speed scanning (up to %d Hz)", MAX_SCAN_RATE);
+        if (ImGui::Checkbox(unlockLabel, &_this->unlockHighSpeed)) {
             _this->saveConfig();
             // Adjust scan rate index if needed when toggling
             if (!_this->unlockHighSpeed && _this->scanRateIndex >= _this->SCAN_RATE_NORMAL_COUNT) {
@@ -1062,6 +1064,11 @@ private:
                     }
                     
                     // Sleep until next scheduled time to reduce drift
+                    // Reset nextWakeTime if we've fallen too far behind to prevent catch-up bursts
+                    auto now = std::chrono::steady_clock::now();
+                    if (nextWakeTime + std::chrono::milliseconds(2*intervalMs) < now) {
+                        nextWakeTime = now;
+                    }
                     nextWakeTime += std::chrono::milliseconds(intervalMs);
                     std::this_thread::sleep_until(nextWakeTime);
                 
