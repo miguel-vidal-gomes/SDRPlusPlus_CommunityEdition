@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(scanner)
 
-# Option to enable verbose scanner debug logging
+# Option to enable verbose scanner debug logging (OFF by default)
+# Set to ON only for development/debugging
 option(SCANNER_DEBUG_LOGS "Enable verbose scanner debug logging" OFF)
 
 file(GLOB SRC "src/*.cpp")
