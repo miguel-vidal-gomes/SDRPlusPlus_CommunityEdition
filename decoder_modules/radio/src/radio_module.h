@@ -310,7 +310,7 @@ private:
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
         
-        // Safety check to restore stack baselines (not drain to zero)
+        // Get ImGui context for stack checks and safety net
         ImGuiContext& g_end = *GImGui;
         
 #ifndef NDEBUG
