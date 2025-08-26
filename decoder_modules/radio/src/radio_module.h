@@ -1,8 +1,15 @@
 #pragma once
 #include <imgui.h>
 #include <module.h>
-#include <gui/gui.h>
 #include <gui/style.h>
+
+// RAII guard for style disabling to ensure proper pairing of begin/end calls
+struct DisabledScope {
+    bool active;
+    DisabledScope(bool on) : active(on) { if (active) style::beginDisabled(); }
+    ~DisabledScope() { if (active) style::endDisabled(); }
+};
+#include <gui/gui.h>
 #include <signal_path/signal_path.h>
 #include <config.h>
 #include <dsp/chain.h>
@@ -166,8 +173,15 @@ public:
 private:
     static void menuHandler(void* ctx) {
         RadioModule* _this = (RadioModule*)ctx;
-
-        if (!_this->enabled) { style::beginDisabled(); }
+        
+        // Snapshot state at the beginning to ensure frame consistency
+        const bool module_enabled = _this->enabled;
+        const bool squelch_enabled = _this->squelchEnabled;
+        const bool nb_enabled = _this->nbEnabled;
+        const bool fmifnr_enabled = _this->FMIFNREnabled;
+        
+        // Use RAII guard for the module's enabled state
+        DisabledScope moduleGuard(!module_enabled);
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
         ImGui::BeginGroup();
@@ -238,13 +252,16 @@ private:
             if (ImGui::Checkbox(("Noise blanker (W.I.P.)##_radio_nb_ena_" + _this->name).c_str(), &_this->nbEnabled)) {
                 _this->setNBEnabled(_this->nbEnabled);
             }
-            if (!_this->nbEnabled && _this->enabled) { style::beginDisabled(); }
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
-                _this->setNBLevel(_this->nbLevel);
+            
+            // Use RAII guard for NB controls
+            {
+                DisabledScope nbGuard(!nb_enabled && module_enabled);
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
+                    _this->setNBLevel(_this->nbLevel);
+                }
             }
-            if (!_this->nbEnabled && _this->enabled) { style::endDisabled(); }
         }
         
 
@@ -252,34 +269,40 @@ private:
         if (ImGui::Checkbox(("Squelch##_radio_sqelch_ena_" + _this->name).c_str(), &_this->squelchEnabled)) {
             _this->setSquelchEnabled(_this->squelchEnabled);
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::beginDisabled(); }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
-            _this->setUserSquelchLevel(_this->userSquelchLevel);
+        
+        // Use RAII guard for squelch controls
+        {
+            DisabledScope squelchGuard(!squelch_enabled && module_enabled);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+            if (ImGui::SliderFloat(("##_radio_squelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
+                _this->setUserSquelchLevel(_this->userSquelchLevel);
+            }
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::endDisabled(); }
 
         // FM IF Noise Reduction
         if (_this->FMIFNRAllowed) {
             if (ImGui::Checkbox(("IF Noise Reduction##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->FMIFNREnabled)) {
                 _this->setFMIFNREnabled(_this->FMIFNREnabled);
             }
+            
             if (_this->selectedDemodID == RADIO_DEMOD_NFM) {
-                if (!_this->FMIFNREnabled && _this->enabled) { style::beginDisabled(); }
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-                if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
-                    _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                // Use RAII guard for FMIFNR controls
+                {
+                    DisabledScope fmifnrGuard(!fmifnr_enabled && module_enabled);
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                    if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
+                        _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                    }
                 }
-                if (!_this->FMIFNREnabled && _this->enabled) { style::endDisabled(); }
             }
         }
 
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
-
-        if (!_this->enabled) { style::endDisabled(); }
+        
+        // No manual stack cleanup needed - RAII guards handle everything
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
