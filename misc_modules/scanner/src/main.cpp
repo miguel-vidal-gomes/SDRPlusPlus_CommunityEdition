@@ -439,7 +439,9 @@ private:
         ImGui::LeftLabel("Tuning Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, 100, 1000)) {
-            _this->tuningTime = std::clamp<int>(_this->tuningTime, 100, 10000);
+            // Allow shorter tuning times for high-speed scanning
+            int minTime = _this->unlockHighSpeed ? 25 : 100;
+            _this->tuningTime = std::clamp<int>(_this->tuningTime, minTime, 10000);
             _this->saveConfig();
         }
         if (ImGui::IsItemHovered()) {
@@ -447,7 +449,37 @@ private:
                              "Allows hardware and DSP to settle after frequency change\n"
                              "TIP: Increase if missing signals (slow hardware)\n"
                              "Decrease for faster scanning (stable hardware)\n"
-                             "Range: 100ms - 10000ms, default: 250ms");
+                             "Range: %dms - 10000ms, default: 250ms\n"
+                             "For high-speed scanning (>50Hz), use 25-50ms", 
+                             _this->unlockHighSpeed ? 25 : 100);
+        }
+        
+        // Auto-adjust tuning time based on scan rate (available at all scan rates)
+        ImGui::SameLine();
+        if (ImGui::Button("Auto-Adjust")) {
+            // Use the same scaling formula as in the worker thread
+            const int BASE_SCAN_RATE = 50;   // Reference scan rate (Hz)
+            const int BASE_TUNING_TIME = 250; // Reference tuning time (ms) at 50Hz
+            const int MIN_TUNING_TIME = 10;   // Absolute minimum tuning time (ms)
+            
+            // Calculate optimal tuning time that scales with scan rate
+            float scaleFactor = static_cast<float>(BASE_SCAN_RATE) / _this->scanRateHz;
+            int optimalTime = static_cast<int>(BASE_TUNING_TIME * scaleFactor);
+            optimalTime = std::max(MIN_TUNING_TIME, optimalTime); // Enforce minimum
+            
+            _this->tuningTime = optimalTime;
+            _this->saveConfig();
+            flog::info("Scanner: Auto-adjusted tuning time to {}ms for {}Hz scan rate (scale factor: {:.2f})", 
+                      _this->tuningTime, _this->scanRateHz, scaleFactor);
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically set optimal tuning time based on scan rate\n"
+                             "Formula: tuningTime = 250ms * (50Hz / currentRate)\n"
+                             "Examples:\n"
+                             "- 200Hz scan rate: ~62ms tuning time\n"
+                             "- 100Hz scan rate: ~125ms tuning time\n"
+                             "- 50Hz scan rate: 250ms tuning time\n"
+                             "- 25Hz scan rate: 500ms tuning time");
         }
         ImGui::LeftLabel("Linger Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
@@ -925,10 +957,36 @@ private:
                     // The UI already enforces the appropriate limits based on unlockHighSpeed
                     int intervalMs = 1000 / scanRateHz;
                     
+                    // Dynamically scale tuning time based on scan rate
+                    // This ensures we don't wait too long between frequencies
+                    // Formula: tuningTime = BASE_TUNING_TIME * (BASE_SCAN_RATE / currentScanRate)
+                    // This creates an inverse relationship - faster scanning = shorter tuning time
+                    const int BASE_SCAN_RATE = 50;   // Reference scan rate (Hz)
+                    const int BASE_TUNING_TIME = 250; // Reference tuning time (ms) at 50Hz
+                    const int MIN_TUNING_TIME = 10;   // Absolute minimum tuning time (ms)
+                    
+                    // Only recalculate when scan rate changes
+                    static int lastAdjustedRate = 0;
+                    if (scanRateHz != lastAdjustedRate) {
+                        // Calculate optimal tuning time that scales with scan rate
+                        float scaleFactor = static_cast<float>(BASE_SCAN_RATE) / scanRateHz;
+                        int optimalTime = static_cast<int>(BASE_TUNING_TIME * scaleFactor);
+                        optimalTime = std::max(MIN_TUNING_TIME, optimalTime); // Enforce minimum
+                        
+                        // Only adjust if current tuning time is significantly different
+                        if (std::abs(tuningTime - optimalTime) > 10) {
+                            tuningTime = optimalTime;
+                            flog::info("Scanner: Scaled tuning time to {}ms for {}Hz scan rate (scale factor: {:.2f})", 
+                                      tuningTime, scanRateHz, scaleFactor);
+                        }
+                        lastAdjustedRate = scanRateHz;
+                    }
+                    
                     // Add debug logging to verify the actual scan rate being used
                     static int logCounter = 0;
                     if (++logCounter >= 100) { // Log every 100 iterations to avoid spam
-                        flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms)", scanRateHz, intervalMs);
+                        flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms, tuning time: {} ms)", 
+                                   scanRateHz, intervalMs, tuningTime);
                         logCounter = 0;
                     }
                     
