@@ -851,6 +851,7 @@ jobs:
             fi
 
         - name: Update Nightly Tag and Assets
+          # No need to set GH_TOKEN again as it's defined at the workflow level
           run: |
             # Configure git with canonical bot identity
             git config --global user.name "github-actions[bot]"
@@ -860,8 +861,14 @@ jobs:
             git tag -fa nightly "$GITHUB_SHA" -m "nightly $(date -u +%FT%TZ)"
             git push -f origin refs/tags/nightly
             
-            # Update release assets (release existence already checked in previous step)
-            gh release upload nightly sdrpp_all/* -R "$GITHUB_REPOSITORY" --clobber
+            # Update release assets (release is created earlier in the workflow)
+            set -euo pipefail
+            shopt -s nullglob
+            files=(sdrpp_all/*)
+            if (( ${#files[@]} == 0 )); then
+              echo "No artifacts in sdrpp_all/"; exit 1
+            fi
+            gh release upload nightly "${files[@]}" -R "$GITHUB_REPOSITORY" --clobber
 
     check_spelling:
         runs-on: ubuntu-latest
