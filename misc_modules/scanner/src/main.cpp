@@ -456,6 +456,24 @@ private:
                              "Scanner stops when signal exceeds this level\n"
                              "Lower values = more sensitive, higher values = less sensitive");
         }
+        
+        // Squelch Delta Control
+        ImGui::LeftLabel("Squelch Delta");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderFloat("##scanner_squelch_delta", &_this->squelchDelta, 0.0f, 10.0f, "%.1f dB")) {
+            _this->saveConfig();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Difference between trigger and closing squelch levels\n"
+                             "Higher values reduce unnecessary squelch closures\n"
+                             "Creates hysteresis effect to maintain reception");
+        }
+        
+        ImGui::Checkbox("Auto Delta##scanner_auto_delta", &_this->squelchDeltaAuto);
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically calculate squelch delta based on noise floor\n"
+                             "Places squelch closing level closer to noise floor");
+        }
 
         // Blacklist controls
         ImGui::Separator();
@@ -471,6 +489,8 @@ private:
         if (ImGui::Button("Add to Blacklist##scanner_add_blacklist", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
             if (newBlacklistFreq > 0) {
                 _this->blacklistedFreqs.push_back(newBlacklistFreq);
+                _this->frequencyNameCache.clear(); // Clear cache when blacklist changes
+                _this->frequencyNameCacheDirty = true;
                 newBlacklistFreq = 0.0;
                 _this->saveConfig();
             }
@@ -509,6 +529,8 @@ private:
                 
                 if (!alreadyBlacklisted) {
                     _this->blacklistedFreqs.push_back(currentFreq);
+                    _this->frequencyNameCache.clear(); // Clear cache when blacklist changes
+                    _this->frequencyNameCacheDirty = true;
                     _this->saveConfig();
                     flog::info("Scanner: Added current frequency {:.0f} Hz to blacklist", currentFreq);
                     
@@ -564,6 +586,8 @@ private:
                 ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 80);
                 if (ImGui::Button(("Remove##scanner_remove_blacklist_" + std::to_string(i)).c_str())) {
                     _this->blacklistedFreqs.erase(_this->blacklistedFreqs.begin() + i);
+                    _this->frequencyNameCache.clear(); // Clear cache when blacklist changes
+                    _this->frequencyNameCacheDirty = true;
                     _this->saveConfig();
                     break;
                 }
@@ -576,6 +600,8 @@ private:
             ImGui::Spacing();
             if (ImGui::Button("Clear All Blacklisted##scanner_clear_blacklist", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
                 _this->blacklistedFreqs.clear();
+                _this->frequencyNameCache.clear(); // Clear cache when blacklist changes
+                _this->frequencyNameCacheDirty = true;
                 _this->saveConfig();
             }
         }
@@ -725,6 +751,12 @@ private:
     void stop() {
         if (!running) { return; }
         running = false;
+        
+        // Restore squelch level if modified
+        if (squelchDeltaActive) {
+            restoreSquelchLevel();
+        }
+        
         if (workerThread.joinable()) {
             workerThread.join();
         }
@@ -736,6 +768,12 @@ private:
         receiving = false;
         tuning = false;
         reverseLock = false;
+        
+        // Reset squelch delta state
+        if (squelchDeltaActive) {
+            restoreSquelchLevel();
+        }
+        
         flog::warn("Scanner: Reset to start frequency {:.0f} Hz", startFreq);
     }
 
@@ -755,6 +793,10 @@ private:
         config.conf["blacklistTolerance"] = blacklistTolerance;
         config.conf["scanUp"] = scanUp; // Save scanning direction preference
         config.conf["blacklistedFreqs"] = blacklistedFreqs;
+        
+        // Save squelch delta settings
+        config.conf["squelchDelta"] = squelchDelta;
+        config.conf["squelchDeltaAuto"] = squelchDeltaAuto;
         
         // Save frequency ranges
         json rangesArray = json::array();
@@ -791,6 +833,10 @@ private:
         if (config.conf.contains("blacklistedFreqs")) {
             blacklistedFreqs = config.conf["blacklistedFreqs"].get<std::vector<double>>();
         }
+        
+        // Load squelch delta settings
+        squelchDelta = config.conf.value("squelchDelta", 3.0f);
+        squelchDeltaAuto = config.conf.value("squelchDeltaAuto", false);
         
         // Load frequency ranges if they exist (BEFORE releasing config!)
         if (config.conf.contains("frequencyRanges") && config.conf["frequencyRanges"].is_array()) {
@@ -882,6 +928,13 @@ private:
                     flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
                     current = currentStart;
                 }
+                // Apply squelch delta preemptively when tuning to new frequency
+                // This prevents the initial noise burst when jumping between bands
+                // Apply only when not in UI interaction and not during startup
+                if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
+                    applySquelchDelta();
+                }
+                
                 tuner::normalTuning(gui::waterfall.selectedVFO, current);
 
                 // Check if we are waiting for a tune
@@ -952,11 +1005,26 @@ private:
                 
                     float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
                     if (maxLevel >= level) {
+                        // Update noise floor when signal is present
+                        if (squelchDeltaAuto) {
+                            updateNoiseFloor(maxLevel - 15.0f); // Estimate noise floor as 15dB below signal
+                        }
+                        
+                        // Apply squelch delta when receiving strong signal
+                        if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
+                            applySquelchDelta();
+                        }
+                        
                         lastSignalTime = now;
                     }
                     else {
                         auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
                         if (timeSinceLastSignal.count() > lingerTime) {
+                            // Restore original squelch level when we leave receiving state
+                            if (squelchDeltaActive) {
+                                restoreSquelchLevel();
+                            }
+                            
                             receiving = false;
                             flog::debug("Scanner: Signal lost, resuming scanning");
                         }
@@ -1150,6 +1218,11 @@ private:
             // Check signal level
             float maxLevel = getMaxLevel(data, freq, vfoWidth * (passbandRatio * 0.01f), dataWidth, wfStart, wfWidth);
             if (maxLevel >= level) {
+                // Update noise floor estimate with weak signal values when scanning
+                if (!squelchDeltaAuto && maxLevel < level - 15.0f) {
+                    updateNoiseFloor(maxLevel);
+                }
+                
                 found = true;
                 receiving = true;
                 current = freq;
@@ -1226,10 +1299,18 @@ private:
     }
     
     // ENHANCED UX: Look up frequency manager entry name for a given frequency
-    std::string lookupFrequencyManagerName(double frequency) const {
+    std::string lookupFrequencyManagerName(double frequency) {
+        // Check cache first to avoid excessive interface calls
+        auto it = frequencyNameCache.find(frequency);
+        if (it != frequencyNameCache.end()) {
+            return it->second;
+        }
+        
+        // Cache miss - need to look up the name
         try {
             // Check if frequency manager interface is available
             if (!core::modComManager.interfaceExists("frequency_manager")) {
+                frequencyNameCache[frequency] = ""; // Cache the empty result
                 return "";
             }
             
@@ -1240,13 +1321,17 @@ private:
             if (!core::modComManager.callInterface("frequency_manager", CMD_GET_BOOKMARK_NAME, 
                                                  const_cast<double*>(&frequency), &bookmarkName)) {
                 flog::debug("Scanner: Failed to call frequency manager getBookmarkName interface");
+                frequencyNameCache[frequency] = ""; // Cache the empty result
                 return "";
             }
             
+            // Cache the result for future lookups
+            frequencyNameCache[frequency] = bookmarkName;
             return bookmarkName;
             
         } catch (const std::exception& e) {
             flog::debug("Scanner: Error looking up frequency manager name: {}", e.what());
+            frequencyNameCache[frequency] = ""; // Cache the empty result
             return "";
         }
     }
@@ -1619,6 +1704,13 @@ private:
             
             // CRITICAL: Immediate VFO tuning (same as performLegacyScanning) 
             // This frequency is guaranteed to NOT be blacklisted
+            // Apply squelch delta preemptively when tuning to new frequency
+            // This prevents the initial noise burst when jumping between bands
+            // Apply only when not in UI interaction and not during startup
+            if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
+                applySquelchDelta();
+            }
+            
             tuner::normalTuning(gui::waterfall.selectedVFO, current);
             tuning = true;
             lastTuneTime = std::chrono::high_resolution_clock::now();
@@ -1657,6 +1749,13 @@ private:
         if (current < currentStart) current = currentStop;
         
         // Standard tuning
+        // Apply squelch delta preemptively when tuning to new frequency
+        // This prevents the initial noise burst when jumping between bands
+        // Apply only when not in UI interaction and not during startup
+        if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
+            applySquelchDelta();
+        }
+        
         tuner::normalTuning(gui::waterfall.selectedVFO, current);
         tuning = true;
         lastTuneTime = std::chrono::high_resolution_clock::now();
@@ -1672,6 +1771,90 @@ private:
             if (data[i] > max) { max = data[i]; }
         }
         return max;
+    }
+    
+    // Get current squelch level from radio module
+    float getRadioSquelchLevel() {
+        if (gui::waterfall.selectedVFO.empty() || 
+            !core::modComManager.interfaceExists(gui::waterfall.selectedVFO) ||
+            core::modComManager.getModuleName(gui::waterfall.selectedVFO) != "radio") {
+            // Debug logging removed for production
+            return -50.0f; // Default squelch level if no radio available
+        }
+        
+        float squelchLevel = -50.0f;
+        if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, 
+                                           RADIO_IFACE_CMD_GET_SQUELCH_LEVEL, 
+                                           NULL, &squelchLevel)) {
+            flog::debug("Scanner: Failed to get squelch level");
+        }
+        
+        return squelchLevel;
+    }
+    
+    // Set squelch level on radio module
+    void setRadioSquelchLevel(float level) {
+        if (gui::waterfall.selectedVFO.empty() || 
+            !core::modComManager.interfaceExists(gui::waterfall.selectedVFO) ||
+            core::modComManager.getModuleName(gui::waterfall.selectedVFO) != "radio") {
+            // Debug logging removed for production
+            return;
+        }
+        
+        float newLevel = level;
+        
+        if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, 
+                                           RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, 
+                                           &newLevel, NULL)) {
+            flog::debug("Scanner: Failed to set squelch level");
+        }
+    }
+    
+    // Apply squelch delta when signal detected
+    void applySquelchDelta() {
+        // CRITICAL FIX: Don't use scanMtx here - it's causing a deadlock
+        // The worker thread already holds scanMtx when this is called
+        
+        if (!squelchDeltaActive) {
+            // Store original squelch level
+            originalSquelchLevel = getRadioSquelchLevel();
+            
+            // Calculate new squelch level with delta
+            float deltaLevel;
+            if (squelchDeltaAuto) {
+                // Auto mode: use noise floor plus delta value
+                deltaLevel = noiseFloor + squelchDelta;
+            } else {
+                // Manual mode: subtract delta from original level
+                deltaLevel = originalSquelchLevel - squelchDelta;
+            }
+            
+            // Apply the new squelch level
+            setRadioSquelchLevel(deltaLevel);
+            squelchDeltaActive = true;
+            
+            // Debug logging removed for production
+        }
+    }
+    
+    // Restore original squelch level
+    void restoreSquelchLevel() {
+        // CRITICAL FIX: Don't use scanMtx here - it's causing a deadlock
+        // The worker thread already holds scanMtx when this is called
+        
+        if (squelchDeltaActive) {
+            setRadioSquelchLevel(originalSquelchLevel);
+            squelchDeltaActive = false;
+            
+            // Debug logging removed for production
+        }
+    }
+    
+    // Update noise floor estimate (for auto squelch delta mode)
+    void updateNoiseFloor(float level) {
+        // Smooth noise floor estimate using exponential moving average
+        const float alpha = 0.1f; // Smoothing factor
+        noiseFloor = (alpha * level) + ((1.0f - alpha) * noiseFloor);
     }
 
     std::string name;
@@ -1707,6 +1890,17 @@ private:
     // Blacklist functionality
     std::vector<double> blacklistedFreqs;
     double blacklistTolerance = 1000.0; // Tolerance in Hz for blacklisted frequencies
+    
+    // Cache for frequency manager names to avoid excessive lookups
+    std::map<double, std::string> frequencyNameCache;
+    bool frequencyNameCacheDirty = true; // Set to true when blacklist changes
+    
+    // Squelch delta functionality
+    float squelchDelta = 3.0f; // Default delta of 3 dB between detection and closing levels
+    bool squelchDeltaAuto = false; // Whether to calculate delta automatically based on noise floor
+    float noiseFloor = -100.0f; // Estimated noise floor for auto delta calculation
+    float originalSquelchLevel = -50.0f; // Original squelch level before applying delta
+    bool squelchDeltaActive = false; // Whether squelch delta is currently active
     
     // UI state for range management
     bool showRangeManager = false;
@@ -1765,6 +1959,10 @@ MOD_EXPORT void _INIT_() {
     def["level"] = -50.0;
     def["blacklistTolerance"] = 1000.0;
     def["blacklistedFreqs"] = json::array();
+    
+    // Squelch delta settings
+    def["squelchDelta"] = 3.0f;
+    def["squelchDeltaAuto"] = false;
     
     // Scanning direction preference 
     def["scanUp"] = true; // Default to increasing frequency

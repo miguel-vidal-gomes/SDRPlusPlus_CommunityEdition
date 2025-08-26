@@ -541,8 +541,11 @@ private:
     }
 
     void setSquelchLevel(float level) {
+        float oldLevel = squelchLevel;
         squelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
         squelch.setLevel(squelchLevel);
+        
+        // Debug logging removed for production
 
         // Save config
         config.acquire();
@@ -633,6 +636,7 @@ private:
         }
         else if (code == RADIO_IFACE_CMD_SET_SQUELCH_LEVEL && in && _this->enabled) {
             float* _in = (float*)in;
+            // Debug logging removed for production
             _this->setSquelchLevel(*_in);
         }
         else {
