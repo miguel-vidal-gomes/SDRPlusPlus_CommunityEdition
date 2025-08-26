@@ -179,6 +179,8 @@ private:
         ImGuiContext& g = *GImGui;
         const int color_base = g.ColorStack.Size;
         const int var_base = g.StyleVarStack.Size;
+        const int flags_base = g.ItemFlagsStack.Size;
+        const int disabled_base = g.DisabledStackSize;
         
         // Snapshot state at the beginning to ensure frame consistency
         const bool module_enabled = _this->enabled;
@@ -281,7 +283,7 @@ private:
             DisabledScope squelchGuard(!squelch_enabled && module_enabled);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
+            if (ImGui::SliderFloat(("##_radio_squelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
                 _this->setUserSquelchLevel(_this->userSquelchLevel);
             }
         }
@@ -308,15 +310,20 @@ private:
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
         
-        // Debug assertions to check for stack leaks (baseline mismatch)
-#ifndef NDEBUG
-        ImGuiContext& g_end = *GImGui;
-        IM_ASSERT(g_end.ColorStack.Size >= color_base && "Color stack underflow in RadioModule::menuHandler");
-        IM_ASSERT(g_end.StyleVarStack.Size >= var_base && "Style var stack underflow in RadioModule::menuHandler");
-#endif
-
         // Safety check to restore stack baselines (not drain to zero)
         ImGuiContext& g_end = *GImGui;
+        
+#ifndef NDEBUG
+        // Assert exact equality to catch both underflows and leaks
+        IM_ASSERT(g_end.ColorStack.Size == color_base && "Color stack leak in RadioModule::menuHandler");
+        IM_ASSERT(g_end.StyleVarStack.Size == var_base && "Style var stack leak in RadioModule::menuHandler");
+        
+        // Also check other stacks that BeginDisabled might touch
+        IM_ASSERT(g_end.ItemFlagsStack.Size == flags_base && "ItemFlags stack leak in RadioModule::menuHandler");
+        IM_ASSERT(g_end.DisabledStackSize == disabled_base && "Disabled stack leak in RadioModule::menuHandler");
+#endif
+
+        // In release builds, restore to baseline as a safety net
         if (int d = g_end.ColorStack.Size - color_base) {
             ImGui::PopStyleColor(d);
         }
