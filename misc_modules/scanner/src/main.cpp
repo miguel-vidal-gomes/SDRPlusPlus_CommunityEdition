@@ -443,7 +443,10 @@ private:
         }
         ImGui::LeftLabel("Tuning Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, 100, 1000)) {
+        // Use smaller step sizes when in high-speed mode
+        int step = _this->unlockHighSpeed ? 5 : 100;
+        int step_fast = _this->unlockHighSpeed ? 50 : 1000;
+        if (ImGui::InputInt("##tuning_time_scanner", &_this->tuningTime, step, step_fast)) {
             // Allow shorter tuning times for high-speed scanning
             const int minTime = _this->unlockHighSpeed ? MIN_TUNING_TIME : 100;
             _this->tuningTime = std::clamp<int>(_this->tuningTime, minTime, 10000);
@@ -459,10 +462,9 @@ private:
                              "Allows hardware and DSP to settle after frequency change\n"
                              "TIP: Increase if missing signals (slow hardware)\n"
                              "Decrease for faster scanning (stable hardware)\n"
-                             "Range: %dms - 10000ms, default: 250ms\n"
-                             "For high-speed scanning (>50Hz), use %d-50ms",
+                             "Range: %dms - 10000ms, default: 250ms%s",
                              _this->unlockHighSpeed ? MIN_TUNING_TIME : 100,
-                             MIN_TUNING_TIME);
+                             _this->unlockHighSpeed ? "\nFor high-speed scanning (>50Hz), use 10-50ms" : "");
         }
         
         // Auto-adjust tuning time based on scan rate (available at all scan rates)
@@ -478,7 +480,7 @@ private:
                 // Calculate optimal tuning time that scales with scan rate
                 const int optimalTime = std::max(
                     MIN_TUNING_TIME, 
-                    static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / _this->scanRateHz)
+                    static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / static_cast<int>(_this->scanRateHz))
                 );
                 
                 _this->tuningTime = optimalTime;
@@ -505,7 +507,10 @@ private:
         }
         ImGui::LeftLabel("Linger Time (ms)");
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::InputInt("##linger_time_scanner", &_this->lingerTime, 100, 1000)) {
+        // Use smaller step sizes when in high-speed mode
+        int lingerStep = _this->unlockHighSpeed ? 10 : 100;
+        int lingerStepFast = _this->unlockHighSpeed ? 100 : 1000;
+        if (ImGui::InputInt("##linger_time_scanner", &_this->lingerTime, lingerStep, lingerStepFast)) {
             const int minLinger = _this->unlockHighSpeed ? MIN_LINGER_TIME : 100;
             _this->lingerTime = std::clamp<int>(_this->lingerTime, minLinger, 10000);
             _this->saveConfig();
@@ -534,7 +539,7 @@ private:
                 // Calculate optimal linger time that scales with scan rate
                 const int optimalTime = std::max(
                     MIN_LINGER_TIME, 
-                    static_cast<int>((BASE_LINGER_TIME * BASE_SCAN_RATE) / _this->scanRateHz)
+                    static_cast<int>((BASE_LINGER_TIME * BASE_SCAN_RATE) / static_cast<int>(_this->scanRateHz))
                 );
                 
                 _this->lingerTime = optimalTime;
@@ -1015,8 +1020,11 @@ private:
     void worker() {
         flog::info("Scanner: Worker thread started");
         try {
-                            // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
-                while (running) {
+            // Initialize timer for sleep_until to reduce drift
+            auto nextWakeTime = std::chrono::steady_clock::now();
+            
+            // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
+            while (running) {
                     // Implement actual scan rate control with different max based on unlock status
                     // Safety guard against division by zero and enforce limits
                     const int maxHz = unlockHighSpeed ? MAX_SCAN_RATE : NORMAL_MAX_SCAN_RATE;
@@ -1024,7 +1032,6 @@ private:
                     const int intervalMs = std::max(1, 1000 / safeRate);
                     
                     // Use sleep_until with steady_clock to reduce drift and jitter
-                    static auto nextWakeTime = std::chrono::steady_clock::now();
                     
                     // Dynamically scale tuning time based on scan rate when auto mode is enabled
                     // This ensures we don't wait too long between frequencies
@@ -1037,7 +1044,7 @@ private:
                         // Calculate optimal tuning time that scales with scan rate
                         const int optimalTime = std::max(
                             MIN_TUNING_TIME, 
-                            static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / safeRate)
+                            static_cast<int>((BASE_TUNING_TIME * BASE_SCAN_RATE) / static_cast<int>(safeRate))
                         );
                         
                         // Only adjust if current tuning time is significantly different
