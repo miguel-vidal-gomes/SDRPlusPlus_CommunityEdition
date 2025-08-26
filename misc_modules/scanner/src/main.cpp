@@ -12,6 +12,10 @@
 #include <cstring>  // For memcpy
 #include <set>      // For std::set in profile diagnostics
 
+// Define SCANNER_DISABLE_DEBUG_LOGS to disable verbose debug logging
+// Comment this line to enable debug logs for development:
+#define SCANNER_DISABLE_DEBUG_LOGS
+
 // Windows MSVC compatibility 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -1046,12 +1050,14 @@ private:
                     }
                     
                     // Add debug logging to verify the actual scan rate being used
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                     static int logCounter = 0;
                     if (++logCounter >= 100) { // Log every 100 iterations to avoid spam
                         flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms, tuning time: {} ms)", 
                                    safeRate, intervalMs, tuningTime);
                         logCounter = 0;
                     }
+#endif
                     
                     // Sleep until next scheduled time to reduce drift
                     nextWakeTime += std::chrono::milliseconds(intervalMs);
@@ -1102,11 +1108,15 @@ private:
 
                 // Check if we are waiting for a tune
                 if (tuning) {
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                     flog::debug("Scanner: Tuning in progress...");
+#endif
                     auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
                     if (timeSinceLastTune.count() > tuningTime) {
                         tuning = false;
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                         flog::debug("Scanner: Tuning completed");
+#endif
                     }
                     continue;
                 }
@@ -1164,7 +1174,9 @@ private:
                 }
 
                 if (receiving) {
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                     flog::debug("Scanner: Receiving signal...");
+#endif
                 
                     float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
                     if (maxLevel >= level) {
@@ -1189,7 +1201,9 @@ private:
                             }
                             
                             receiving = false;
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                             flog::debug("Scanner: Signal lost, resuming scanning");
+#endif
                         }
                     }
                 }
@@ -1222,7 +1236,9 @@ private:
                             continue; // Signal found, stay on this frequency
                         }
                         // No signal at exact frequency - continue to frequency stepping
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                         flog::debug("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", current / 1e6, maxLevel, level);
+#endif
                     } else {
                         // BAND SCANNING: Search for signals across range using interval stepping
                         if (findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
@@ -1849,7 +1865,9 @@ private:
                     // Found a non-blacklisted frequency
                     break;
                 } else {
+#ifndef SCANNER_DISABLE_DEBUG_LOGS
                     flog::debug("Scanner: Skipping blacklisted frequency {:.3f} MHz", current / 1e6);
+#endif
                     // Continue to next frequency
                 }
                 
