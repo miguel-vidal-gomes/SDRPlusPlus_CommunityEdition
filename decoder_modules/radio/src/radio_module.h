@@ -1,6 +1,5 @@
 #pragma once
 #include <imgui.h>
-#include <imgui_internal.h> // For GImGui access
 #include <module.h>
 #include <gui/gui.h>
 #include <gui/style.h>
@@ -293,22 +292,8 @@ private:
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
 
-        // Debug assertion and safety check for style stack
-        ImGuiContext& g = *GImGui;
-        
-#ifndef NDEBUG
-        // In debug builds, assert if there's a color stack leak
-        IM_ASSERT(g.ColorStack.Size == 0 && "Color stack leak in RadioModule::menuHandler");
-#endif
-
-        // Safety check to ensure all style colors are properly popped
-        // This is a temporary measure until we're confident all push/pop pairs are properly matched
-        if (g.ColorStack.Size > 0) {
-            // Reset the color stack to avoid crashes
-            while (g.ColorStack.Size > 0) {
-                ImGui::PopStyleColor();
-            }
-        }
+        // Make sure module disabled style is properly ended
+        if (!module_enabled) { style::endDisabled(); }
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
