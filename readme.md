@@ -28,11 +28,42 @@
 
 **🔧 Advanced Features:**
 - **Spectrum analyzer** with waterfall display
-- **Frequency scanner** with blacklist management
+- **Professional frequency scanner** with frequency manager integration, band support, and automatic tuning profiles
+- **Frequency manager** with per-entry tuning profiles and band definitions
 - **Digital mode decoding** (ADS-B, AIS, APRS, M17, POCSAG)
 - **Amateur radio** and **ham radio** applications
 - **Satellite tracking** and **radio astronomy** support
 
+## 🎉 **Latest Release: v1.2.3-CE**
+
+**Major Scanner Enhancement Release** - Complete implementation of community-requested features:
+
+**🔥 Scanner-Frequency Manager Integration**
+- Complete frequency manager integration with automatic scan list generation
+- Enhanced blacklist management with frequency name display
+- Source safety checks prevent scanning when radio is stopped
+
+**⚙️ Per-Entry Tuning Profiles**
+- Automated radio configuration for each frequency entry
+- Profile parameters: demodulation mode, bandwidth, squelch, RF gain
+- Smart caching prevents redundant radio configuration changes
+
+**📡 Frequency Band Support**
+- Configurable frequency bands with custom step intervals
+- Discovery scanning across defined ranges (e.g., 118-137 MHz airband)
+- Adaptive signal detection: narrow window for single frequencies, full bandwidth for bands
+
+**🎛️ Professional Interface**
+- Discrete parameter controls with optimized defaults
+- Comprehensive tooltips with technical guidance
+- Double-click editing for frequency manager bookmarks
+
+**🔧 Cross-Platform Compatibility**
+- Windows MSVC compilation fixes
+- Linux GCC and Debian compatibility improvements
+- Enhanced macOS support with proper app bundle creation
+
+**📦 Download**: [Release v1.2.3-CE](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases/tag/v1.2.3-CE)
 ### 🎯 **Mission: Community-First Development**
 
 This Community Edition exists to address the gap in community contributions and feature development. While the original SDR++ project has established a solid foundation, many valuable user-requested features and improvements have remained unaddressed due to restrictive contribution policies.
