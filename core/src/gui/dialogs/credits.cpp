@@ -43,6 +43,10 @@ namespace credits {
         ImGui::BulletText("Community Contributors");
         ImGui::Spacing();
         
+        ImGui::TextUnformatted("Special Contributors");
+        ImGui::BulletText("PeiusMars (Parks-McClellan DSP)");
+        ImGui::Spacing();
+        
         ImGui::TextUnformatted("Key Features");
         ImGui::BulletText("MPX Analysis for FM Broadcasting");
         ImGui::BulletText("Enhanced Configuration Management");
