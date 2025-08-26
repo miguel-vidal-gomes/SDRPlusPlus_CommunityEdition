@@ -1,5 +1,6 @@
 #pragma once
 #include <imgui.h>
+#include <imgui_internal.h> // For GImGui access
 #include <module.h>
 #include <gui/gui.h>
 #include <gui/style.h>
@@ -279,7 +280,17 @@ private:
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
 
+        // Make sure all disabled styles are properly ended
         if (!_this->enabled) { style::endDisabled(); }
+        
+        // Safety check to ensure all style colors are properly popped
+        ImGuiContext& g = *GImGui;
+        if (g.ColorStack.Size > 0) {
+            // Reset the color stack to avoid crashes
+            while (g.ColorStack.Size > 0) {
+                ImGui::PopStyleColor();
+            }
+        }
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
