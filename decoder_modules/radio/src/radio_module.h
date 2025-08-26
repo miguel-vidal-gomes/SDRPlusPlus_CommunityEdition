@@ -179,8 +179,15 @@ private:
         ImGuiContext& g = *GImGui;
         const int color_base = g.ColorStack.Size;
         const int var_base = g.StyleVarStack.Size;
+        
+#ifndef NDEBUG
+        // These are only used for debug assertions (can't be manually restored)
         const int flags_base = g.ItemFlagsStack.Size;
         const int disabled_base = g.DisabledStackSize;
+#else
+        // Avoid unused variable warning in release builds
+        (void)g;
+#endif
         
         // Snapshot state at the beginning to ensure frame consistency
         const bool module_enabled = _this->enabled;
@@ -319,6 +326,7 @@ private:
         IM_ASSERT(g_end.StyleVarStack.Size == var_base && "Style var stack leak in RadioModule::menuHandler");
         
         // Also check other stacks that BeginDisabled might touch
+        // Note: These stacks can't be manually restored, we rely on proper RAII pairing
         IM_ASSERT(g_end.ItemFlagsStack.Size == flags_base && "ItemFlags stack leak in RadioModule::menuHandler");
         IM_ASSERT(g_end.DisabledStackSize == disabled_base && "Disabled stack leak in RadioModule::menuHandler");
 #endif
