@@ -72,7 +72,7 @@ public:
 
         nb.init(NULL, 500.0 / 24000.0, 10.0);
         fmnr.init(NULL, 32);
-        squelch.init(NULL, MIN_SQUELCH);
+        squelch.init(NULL, effectiveSquelchLevel);
 
         ifChain.addBlock(&nb, false);
         ifChain.addBlock(&squelch, false);
@@ -255,8 +255,8 @@ private:
         if (!_this->squelchEnabled && _this->enabled) { style::beginDisabled(); }
         ImGui::SameLine();
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->squelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
-            _this->setSquelchLevel(_this->squelchLevel);
+        if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
+            _this->setUserSquelchLevel(_this->userSquelchLevel);
         }
         if (!_this->squelchEnabled && _this->enabled) { style::endDisabled(); }
 
@@ -360,7 +360,8 @@ private:
         maxBandwidth = selectedDemod->getMaxBandwidth();
         bandwidthLocked = selectedDemod->getBandwidthLocked();
         snapInterval = selectedDemod->getDefaultSnapInterval();
-        squelchLevel = MIN_SQUELCH;
+        userSquelchLevel = MIN_SQUELCH;
+        effectiveSquelchLevel = userSquelchLevel;
         deempAllowed = selectedDemod->getDeempAllowed();
         deempId = deempModes.valueId((DeemphasisMode)selectedDemod->getDefaultDeemphasisMode());
         squelchEnabled = false;
@@ -381,7 +382,8 @@ private:
             snapInterval = config.conf[name][selectedDemod->getName()]["snapInterval"];
         }
         if (config.conf[name][selectedDemod->getName()].contains("squelchLevel")) {
-            squelchLevel = config.conf[name][selectedDemod->getName()]["squelchLevel"];
+            userSquelchLevel = config.conf[name][selectedDemod->getName()]["squelchLevel"];
+            effectiveSquelchLevel = userSquelchLevel;
         }
         if (config.conf[name][selectedDemod->getName()].contains("squelchEnabled")) {
             squelchEnabled = config.conf[name][selectedDemod->getName()]["squelchEnabled"];
@@ -434,7 +436,7 @@ private:
         setFMIFNREnabled(FMIFNRAllowed ? FMIFNREnabled : false);
 
         // Configure squelch
-        setSquelchLevel(squelchLevel);
+        setUserSquelchLevel(userSquelchLevel, false);
         setSquelchEnabled(squelchEnabled);
 
         // Configure AF chain
@@ -540,13 +542,44 @@ private:
         config.release(true);
     }
 
+    // Set user squelch level - persisted value from UI
+    void setUserSquelchLevel(float level, bool persist = true) {
+        float oldLevel = userSquelchLevel;
+        userSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
+        
+        // Update effective level and apply to DSP
+        updateEffectiveSquelch();
+        
+        // Only persist user-initiated changes if requested
+        if (persist) {
+            config.acquire();
+            config.conf[name][selectedDemod->getName()]["squelchLevel"] = userSquelchLevel;
+            config.release(true);
+        }
+    }
+    
+    // Set effective squelch level - runtime value with delta applied
+    void setEffectiveSquelchLevel(float level) {
+        // Remove mutex lock for now to prevent potential deadlock
+        effectiveSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
+        squelch.setLevel(effectiveSquelchLevel);
+    }
+    
+    // Update effective squelch based on current settings
+    void updateEffectiveSquelch() {
+        // Remove mutex lock for now to prevent potential deadlock
+        // Apply effective level to DSP path without persisting
+        setEffectiveSquelchLevel(userSquelchLevel);
+    }
+    
+    // Legacy method for backward compatibility
     void setSquelchLevel(float level) {
-        squelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
-        squelch.setLevel(squelchLevel);
-
-        // Save config
+        // Keep user & effective in sync without re-persisting
+        setUserSquelchLevel(level, /*persist=*/false);
+        
+        // Persist directly here instead of in setUserSquelchLevel
         config.acquire();
-        config.conf[name][selectedDemod->getName()]["squelchLevel"] = squelchLevel;
+        config.conf[name][selectedDemod->getName()]["squelchLevel"] = userSquelchLevel;
         config.release(true);
     }
 
@@ -629,11 +662,16 @@ private:
         }
         else if (code == RADIO_IFACE_CMD_GET_SQUELCH_LEVEL && out) {
             float* _out = (float*)out;
-            *_out = _this->squelchLevel;
+            *_out = _this->userSquelchLevel;
+        }
+        else if (code == RADIO_IFACE_CMD_GET_EFFECTIVE_SQUELCH_LEVEL && out) {
+            float* _out = (float*)out;
+            *_out = _this->effectiveSquelchLevel;
         }
         else if (code == RADIO_IFACE_CMD_SET_SQUELCH_LEVEL && in && _this->enabled) {
             float* _in = (float*)in;
-            _this->setSquelchLevel(*_in);
+            // Debug logging removed for production
+            _this->setUserSquelchLevel(*_in);
         }
         else {
             return;
@@ -680,7 +718,8 @@ private:
     bool postProcEnabled;
 
     bool squelchEnabled = false;
-    float squelchLevel;
+    float userSquelchLevel = -50.0f;   // User-set squelch level (persisted)
+    float effectiveSquelchLevel = -50.0f; // Runtime squelch level with delta applied
 
     int deempId = 0;
     bool deempAllowed;
