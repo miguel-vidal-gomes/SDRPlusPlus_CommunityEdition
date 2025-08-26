@@ -394,7 +394,7 @@ private:
         ImGui::LeftLabel("Scan Rate");
         
         // Add unlock higher speed toggle
-        if (ImGui::Checkbox("Unlock Higher Speed", &_this->unlockHighSpeed)) {
+        if (ImGui::Checkbox("Unlock high-speed scanning (up to 200 Hz)", &_this->unlockHighSpeed)) {
             _this->saveConfig();
             // Adjust scan rate index if needed when toggling
             if (!_this->unlockHighSpeed && _this->scanRateIndex >= _this->SCAN_RATE_NORMAL_COUNT) {
@@ -403,10 +403,10 @@ private:
             }
         }
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("Enable scan rates up to %d Hz\n"
+            ImGui::SetTooltip("Enable scan rates up to %d Hz (default max is %d Hz)\n"
                              "WARNING: High scan rates may overload your CPU\n"
                              "and could cause missed signals or unstable operation",
-                             MAX_SCAN_RATE);
+                             MAX_SCAN_RATE, NORMAL_MAX_SCAN_RATE);
         }
         
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
