@@ -391,10 +391,28 @@ private:
         
         // PERFORMANCE: Configurable scan rate (consistent across all modes)
         ImGui::LeftLabel("Scan Rate");
+        
+        // Add unlock higher speed toggle
+        if (ImGui::Checkbox("Unlock Higher Speed", &_this->unlockHighSpeed)) {
+            _this->saveConfig();
+            // Adjust scan rate index if needed when toggling
+            if (!_this->unlockHighSpeed && _this->scanRateIndex >= _this->SCAN_RATE_NORMAL_COUNT) {
+                _this->scanRateIndex = _this->SCAN_RATE_NORMAL_COUNT - 1;
+                _this->syncDiscreteValues();
+            }
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Enable scan rates up to 200 Hz\n"
+                             "WARNING: High scan rates may overload your CPU\n"
+                             "and could cause missed signals or unstable operation");
+        }
+        
         ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
         
         // DISCRETE SLIDER: Show actual values with units instead of indices
-        if (ImGui::SliderInt("##scan_rate_discrete", &_this->scanRateIndex, 0, _this->SCAN_RATE_VALUES_COUNT - 1, _this->SCAN_RATE_LABELS[_this->scanRateIndex])) {
+        // Use different max index based on unlock status
+        int maxIndex = _this->unlockHighSpeed ? _this->SCAN_RATE_VALUES_COUNT - 1 : _this->SCAN_RATE_NORMAL_COUNT - 1;
+        if (ImGui::SliderInt("##scan_rate_discrete", &_this->scanRateIndex, 0, maxIndex, _this->SCAN_RATE_LABELS[_this->scanRateIndex])) {
             flog::debug("Scanner: Scan rate slider changed to index {} ({})", _this->scanRateIndex, _this->SCAN_RATE_LABELS[_this->scanRateIndex]);
             _this->syncDiscreteValues(); // Update actual scan rate value
             _this->saveConfig();
@@ -801,6 +819,7 @@ private:
         // Save squelch delta settings
         config.conf["squelchDelta"] = squelchDelta;
         config.conf["squelchDeltaAuto"] = squelchDeltaAuto;
+        config.conf["unlockHighSpeed"] = unlockHighSpeed;
         
         // Save frequency ranges
         json rangesArray = json::array();
@@ -841,6 +860,7 @@ private:
         // Load squelch delta settings
         squelchDelta = config.conf.value("squelchDelta", 2.5f);
         squelchDeltaAuto = config.conf.value("squelchDeltaAuto", false);
+        unlockHighSpeed = config.conf.value("unlockHighSpeed", false);
         
         // Initialize time points
         lastNoiseUpdate = std::chrono::high_resolution_clock::now();
@@ -898,12 +918,13 @@ private:
     void worker() {
         flog::info("Scanner: Worker thread started");
         try {
-            // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
-            while (running) {
-                // Implement actual scan rate control (was hardcoded at 100ms)
-                int clampedRate = std::clamp(scanRateHz, 5, 50);  // Safety bounds
-                int intervalMs = 1000 / clampedRate;
-                std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
+                            // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
+                while (running) {
+                    // Implement actual scan rate control with different max based on unlock status
+                    int maxRate = unlockHighSpeed ? 200 : 50;  // 50Hz normal, 200Hz unlocked
+                    int clampedRate = std::clamp(scanRateHz, 5, maxRate);
+                    int intervalMs = 1000 / clampedRate;
+                    std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
                 
                 try {
                     std::lock_guard<std::mutex> lck(scanMtx);
@@ -1984,6 +2005,9 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> lastNoiseUpdate; // Time of last noise floor update
     std::chrono::time_point<std::chrono::high_resolution_clock> tuneTime; // Time of last frequency tuning
     
+    // High speed scanning option
+    bool unlockHighSpeed = false; // Whether to allow scan rates above 50Hz (up to 200Hz)
+    
     // Constants for squelch limits
     const float MIN_SQUELCH = -100.0f;
     const float MAX_SQUELCH = 0.0f;
@@ -2016,9 +2040,11 @@ private:
     static constexpr int INTERVAL_VALUES_COUNT = 6;
     int intervalIndex = 4; // Default to 100 kHz (index 4)
     
-    static constexpr int SCAN_RATE_VALUES[] = {1, 2, 5, 10, 15, 20, 25, 30, 40, 50};
-    static constexpr const char* SCAN_RATE_LABELS[] = {"1/sec", "2/sec", "5/sec", "10/sec", "15/sec", "20/sec", "25/sec", "30/sec", "40/sec", "50/sec"};
-    static constexpr int SCAN_RATE_VALUES_COUNT = 10;
+    static constexpr int SCAN_RATE_VALUES[] = {1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150, 175, 200};
+    static constexpr const char* SCAN_RATE_LABELS[] = {"1/sec", "2/sec", "5/sec", "10/sec", "15/sec", "20/sec", "25/sec", "30/sec", "40/sec", "50/sec", 
+                                                      "75/sec", "100/sec", "125/sec", "150/sec", "175/sec", "200/sec"};
+    static constexpr int SCAN_RATE_VALUES_COUNT = 16;
+    static constexpr int SCAN_RATE_NORMAL_COUNT = 10;  // First 10 values (up to 50/sec) are normal speed
     int scanRateIndex = 6; // Default to 25/sec (index 6, recommended starting point)
     
     static constexpr int PASSBAND_VALUES[] = {5, 10, 20, 30, 50, 75, 100};
@@ -2047,8 +2073,9 @@ MOD_EXPORT void _INIT_() {
     def["blacklistedFreqs"] = json::array();
     
     // Squelch delta settings
-    def["squelchDelta"] = 2.5f;
-    def["squelchDeltaAuto"] = false;
+            def["squelchDelta"] = 2.5f;
+        def["squelchDeltaAuto"] = false;
+        def["unlockHighSpeed"] = false;
     
     // Scanning direction preference 
     def["scanUp"] = true; // Default to increasing frequency
