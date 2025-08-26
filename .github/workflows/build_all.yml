@@ -12,6 +12,9 @@ env:
     # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
     BUILD_TYPE: Release
     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Version information
+    VERSION_BASE: "1.2.3"
+    VERSION_SUFFIX: "CE"
 
 permissions:
     contents: write
@@ -24,6 +27,36 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+        
+        - name: Update Version Information
+          shell: bash
+          run: |
+            # Determine version string based on branch/tag and build number
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get -nightly suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            
+            # Update version.h
+            sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            
+            # Update make_macos_bundle.sh
+            sed -i "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
         
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
@@ -116,6 +149,35 @@ jobs:
         steps:
         - uses: actions/checkout@v4
         
+        - name: Update Version Information
+          run: |
+            # Determine version string based on branch/tag and build number
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get -nightly suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            
+            # Update version.h
+            sed -i '' "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            
+            # Update make_macos_bundle.sh
+            sed -i '' "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
+        
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
 
@@ -183,6 +245,35 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+        
+        - name: Update Version Information
+          run: |
+            # Determine version string based on branch/tag and build number
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get -nightly suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            
+            # Update version.h
+            sed -i '' "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            
+            # Update make_macos_bundle.sh
+            sed -i '' "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
         
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
@@ -603,6 +694,38 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+        
+        - name: Update Version Information
+          run: |
+            # Determine version string based on branch/tag and build number
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get -nightly suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            
+            # Update version.h
+            sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            
+            # Update make_macos_bundle.sh
+            sed -i "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
+            
+            # Update Android version
+            sed -i "s/versionName \".*\"/versionName \"$VERSION_STR\"/" android/app/build.gradle
 
         - name: Fetch container
           working-directory: ${{runner.workspace}}
