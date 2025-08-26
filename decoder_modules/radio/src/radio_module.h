@@ -560,19 +560,29 @@ private:
     
     // Set effective squelch level - runtime value with delta applied
     void setEffectiveSquelchLevel(float level) {
+        // Remove mutex lock for now to prevent potential deadlock
         effectiveSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
         squelch.setLevel(effectiveSquelchLevel);
+        flog::info("Radio: Set effective squelch level to {:.1f} dB", effectiveSquelchLevel);
     }
     
     // Update effective squelch based on current settings
     void updateEffectiveSquelch() {
+        // Remove mutex lock for now to prevent potential deadlock
         // Apply effective level to DSP path without persisting
+        flog::info("Radio: Updating effective squelch from user level {:.1f} dB", userSquelchLevel);
         setEffectiveSquelchLevel(userSquelchLevel);
     }
     
     // Legacy method for backward compatibility
     void setSquelchLevel(float level) {
-        setUserSquelchLevel(level);
+        // Keep user & effective in sync without re-persisting
+        setUserSquelchLevel(level, /*persist=*/false);
+        
+        // Persist directly here instead of in setUserSquelchLevel
+        config.acquire();
+        config.conf[name][selectedDemod->getName()]["squelchLevel"] = userSquelchLevel;
+        config.release(true);
     }
 
     void setFMIFNREnabled(bool enabled) {
@@ -655,6 +665,10 @@ private:
         else if (code == RADIO_IFACE_CMD_GET_SQUELCH_LEVEL && out) {
             float* _out = (float*)out;
             *_out = _this->userSquelchLevel;
+        }
+        else if (code == RADIO_IFACE_CMD_GET_EFFECTIVE_SQUELCH_LEVEL && out) {
+            float* _out = (float*)out;
+            *_out = _this->effectiveSquelchLevel;
         }
         else if (code == RADIO_IFACE_CMD_SET_SQUELCH_LEVEL && in && _this->enabled) {
             float* _in = (float*)in;

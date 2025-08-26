@@ -1830,26 +1830,53 @@ private:
         // The worker thread already holds scanMtx when this is called
         
         if (!squelchDeltaActive) {
-            // Store original squelch level
-            originalSquelchLevel = getRadioSquelchLevel();
-            
-            // Calculate new squelch level with delta
-            float deltaLevel;
-            if (squelchDeltaAuto) {
-                // Auto mode: use noise floor plus delta value (with bounds)
-                float boundedDelta = std::clamp(squelchDelta, 0.0f, 20.0f);
-                deltaLevel = std::max(noiseFloor + boundedDelta, MIN_SQUELCH);
-            } else {
-                // Manual mode: subtract delta from original level (with bounds)
-                deltaLevel = std::max(originalSquelchLevel - squelchDelta, MIN_SQUELCH);
+            try {
+                // Check if squelch is enabled in radio module
+                bool squelchEnabled = false;
+                if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_GET_SQUELCH_ENABLED, NULL, &squelchEnabled)) {
+                    // Failed to get squelch state, assume disabled
+                    flog::warn("Scanner: Failed to get squelch state, skipping delta application");
+                    return;
+                }
+                
+                // Don't apply delta if squelch is disabled
+                if (!squelchEnabled) {
+                    flog::info("Scanner: Squelch is disabled, skipping delta application");
+                    return;
+                }
+                
+                // Store original squelch level
+                originalSquelchLevel = getRadioSquelchLevel();
+                flog::info("Scanner: Original squelch level: {:.1f} dB", originalSquelchLevel);
+                
+                // Calculate new squelch level with delta
+                float deltaLevel;
+                if (squelchDeltaAuto) {
+                    // Auto mode: use noise floor plus delta value (with bounds)
+                    float boundedDelta = std::clamp(squelchDelta, 0.0f, 20.0f);
+                    deltaLevel = std::max(noiseFloor + boundedDelta, MIN_SQUELCH);
+                    flog::info("Scanner: Auto delta mode - noise floor: {:.1f} dB, delta: {:.1f} dB, new level: {:.1f} dB", 
+                              noiseFloor, boundedDelta, deltaLevel);
+                } else {
+                    // Manual mode: subtract delta from original level (with bounds)
+                    deltaLevel = std::max(originalSquelchLevel - squelchDelta, MIN_SQUELCH);
+                    flog::info("Scanner: Manual delta mode - original: {:.1f} dB, delta: {:.1f} dB, new level: {:.1f} dB", 
+                              originalSquelchLevel, squelchDelta, deltaLevel);
+                }
+                
+                // Apply the new squelch level
+                setRadioSquelchLevel(deltaLevel);
+                squelchDeltaActive = true;
+                
+                // Initialize last noise update time
+                lastNoiseUpdate = std::chrono::high_resolution_clock::now();
             }
-            
-            // Apply the new squelch level
-            setRadioSquelchLevel(deltaLevel);
-            squelchDeltaActive = true;
-            
-            // Initialize last noise update time
-            lastNoiseUpdate = std::chrono::high_resolution_clock::now();
+            catch (const std::exception& e) {
+                flog::error("Scanner: Exception in applySquelchDelta: {}", e.what());
+            }
+            catch (...) {
+                flog::error("Scanner: Unknown exception in applySquelchDelta");
+            }
         }
     }
     
@@ -1859,8 +1886,35 @@ private:
         // The worker thread already holds scanMtx when this is called
         
         if (squelchDeltaActive) {
-            setRadioSquelchLevel(originalSquelchLevel);
-            squelchDeltaActive = false;
+            try {
+                // Check if squelch is enabled in radio module
+                bool squelchEnabled = false;
+                if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_GET_SQUELCH_ENABLED, NULL, &squelchEnabled)) {
+                    // Failed to get squelch state, assume disabled
+                    flog::warn("Scanner: Failed to get squelch state during restore, clearing delta state");
+                    squelchDeltaActive = false;
+                    return;
+                }
+                
+                // Only restore level if squelch is enabled
+                if (squelchEnabled) {
+                    flog::info("Scanner: Restoring squelch level from {:.1f} dB to original {:.1f} dB", 
+                              getRadioSquelchLevel(), originalSquelchLevel);
+                    setRadioSquelchLevel(originalSquelchLevel);
+                } else {
+                    flog::info("Scanner: Squelch is disabled, not restoring level");
+                }
+                
+                squelchDeltaActive = false;
+            }
+            catch (const std::exception& e) {
+                flog::error("Scanner: Exception in restoreSquelchLevel: {}", e.what());
+                squelchDeltaActive = false;
+            }
+            catch (...) {
+                flog::error("Scanner: Unknown exception in restoreSquelchLevel");
+                squelchDeltaActive = false;
+            }
         }
     }
     
