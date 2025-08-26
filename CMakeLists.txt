@@ -94,6 +94,10 @@ if(DEFINED ENV{BUILD_VERSION})
   set(GIT_DESC "$ENV{BUILD_VERSION}")
 endif()
 
+# Set the version string as a CMake variable that can be passed to subdirectories
+set(APP_VERSION_STR "${GIT_DESC}" CACHE STRING "Application version string")
+
+# Add it as a compile definition for the main executable
 add_compile_definitions(APP_VERSION_STR="${GIT_DESC}")
 
 # Compiler flags
