@@ -921,9 +921,17 @@ private:
                             // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
                 while (running) {
                     // Implement actual scan rate control with different max based on unlock status
-                    int maxRate = unlockHighSpeed ? 200 : 50;  // 50Hz normal, 200Hz unlocked
-                    int clampedRate = std::clamp(scanRateHz, 5, maxRate);
-                    int intervalMs = 1000 / clampedRate;
+                    // CRITICAL: Use the actual scanRateHz value directly without re-clamping it
+                    // The UI already enforces the appropriate limits based on unlockHighSpeed
+                    int intervalMs = 1000 / scanRateHz;
+                    
+                    // Add debug logging to verify the actual scan rate being used
+                    static int logCounter = 0;
+                    if (++logCounter >= 100) { // Log every 100 iterations to avoid spam
+                        flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms)", scanRateHz, intervalMs);
+                        logCounter = 0;
+                    }
+                    
                     std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
                 
                 try {
