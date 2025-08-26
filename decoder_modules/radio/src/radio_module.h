@@ -1,8 +1,16 @@
 #pragma once
 #include <imgui.h>
+#include <imgui_internal.h> // For proper stack tracking
 #include <module.h>
-#include <gui/gui.h>
 #include <gui/style.h>
+
+// RAII guard for style disabling to ensure proper pairing of begin/end calls
+struct DisabledScope {
+    bool active;
+    DisabledScope(bool on) : active(on) { if (active) style::beginDisabled(); }
+    ~DisabledScope() { if (active) style::endDisabled(); }
+};
+#include <gui/gui.h>
 #include <signal_path/signal_path.h>
 #include <config.h>
 #include <dsp/chain.h>
@@ -167,14 +175,19 @@ private:
     static void menuHandler(void* ctx) {
         RadioModule* _this = (RadioModule*)ctx;
         
-        // Snapshot state at the beginning to avoid thread safety issues
+        // Capture ImGui stack baselines at entry for proper cleanup
+        ImGuiContext& g = *GImGui;
+        const int color_base = g.ColorStack.Size;
+        const int var_base = g.StyleVarStack.Size;
+        
+        // Snapshot state at the beginning to ensure frame consistency
         const bool module_enabled = _this->enabled;
         const bool squelch_enabled = _this->squelchEnabled;
         const bool nb_enabled = _this->nbEnabled;
         const bool fmifnr_enabled = _this->FMIFNREnabled;
         
-        // Begin disabled state if module is not enabled
-        if (!module_enabled) { style::beginDisabled(); }
+        // Use RAII guard for the module's enabled state
+        DisabledScope moduleGuard(!module_enabled);
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
         ImGui::BeginGroup();
@@ -246,14 +259,15 @@ private:
                 _this->setNBEnabled(_this->nbEnabled);
             }
             
-            // Use consistent condition for NB controls
-            if (!nb_enabled && module_enabled) { style::beginDisabled(); }
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
-                _this->setNBLevel(_this->nbLevel);
+            // Use RAII guard for NB controls
+            {
+                DisabledScope nbGuard(!nb_enabled && module_enabled);
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
+                    _this->setNBLevel(_this->nbLevel);
+                }
             }
-            if (!nb_enabled && module_enabled) { style::endDisabled(); }
         }
         
 
@@ -262,14 +276,15 @@ private:
             _this->setSquelchEnabled(_this->squelchEnabled);
         }
         
-        // Use consistent condition for squelch controls
-        if (!squelch_enabled && module_enabled) { style::beginDisabled(); }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
-            _this->setUserSquelchLevel(_this->userSquelchLevel);
+        // Use RAII guard for squelch controls
+        {
+            DisabledScope squelchGuard(!squelch_enabled && module_enabled);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+            if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
+                _this->setUserSquelchLevel(_this->userSquelchLevel);
+            }
         }
-        if (!squelch_enabled && module_enabled) { style::endDisabled(); }
 
         // FM IF Noise Reduction
         if (_this->FMIFNRAllowed) {
@@ -278,22 +293,36 @@ private:
             }
             
             if (_this->selectedDemodID == RADIO_DEMOD_NFM) {
-                // Use consistent condition for FMIFNR controls
-                if (!fmifnr_enabled && module_enabled) { style::beginDisabled(); }
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-                if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
-                    _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                // Use RAII guard for FMIFNR controls
+                {
+                    DisabledScope fmifnrGuard(!fmifnr_enabled && module_enabled);
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                    if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
+                        _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                    }
                 }
-                if (!fmifnr_enabled && module_enabled) { style::endDisabled(); }
             }
         }
 
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
+        
+        // Debug assertions to check for stack leaks (baseline mismatch)
+#ifndef NDEBUG
+        ImGuiContext& g_end = *GImGui;
+        IM_ASSERT(g_end.ColorStack.Size >= color_base && "Color stack underflow in RadioModule::menuHandler");
+        IM_ASSERT(g_end.StyleVarStack.Size >= var_base && "Style var stack underflow in RadioModule::menuHandler");
+#endif
 
-        // Make sure module disabled style is properly ended
-        if (!module_enabled) { style::endDisabled(); }
+        // Safety check to restore stack baselines (not drain to zero)
+        ImGuiContext& g_end = *GImGui;
+        if (int d = g_end.ColorStack.Size - color_base) {
+            ImGui::PopStyleColor(d);
+        }
+        if (int d = g_end.StyleVarStack.Size - var_base) {
+            ImGui::PopStyleVar(d);
+        }
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
