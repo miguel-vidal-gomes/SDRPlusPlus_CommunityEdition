@@ -62,7 +62,12 @@ jobs:
             echo "Setting build version to: $BUILD_VERSION"
             
             # Update version.h (still needed for compatibility)
-            sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            # Make sure the version is never empty
+            if [ -n "$VERSION_STR" ]; then
+              sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            else
+              sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"1.2.3-CE-nightly\"/" core/src/version.h
+            fi
             
             # Update make_macos_bundle.sh
             sed -i "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh

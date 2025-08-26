@@ -98,7 +98,12 @@ endif()
 set(APP_VERSION_STR "${GIT_DESC}" CACHE STRING "Application version string")
 
 # Add it as a compile definition for the main executable
-add_compile_definitions(APP_VERSION_STR="${GIT_DESC}")
+if(GIT_DESC STREQUAL "")
+  # If GIT_DESC is empty, define a flag to handle it in code
+  add_compile_definitions(APP_VERSION_STR_EMPTY)
+else()
+  add_compile_definitions(APP_VERSION_STR="${GIT_DESC}")
+endif()
 
 # Compiler flags
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")

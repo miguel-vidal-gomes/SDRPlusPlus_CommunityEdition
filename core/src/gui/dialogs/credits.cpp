@@ -71,11 +71,13 @@ namespace credits {
         ImGui::Spacing();
         ImGui::Spacing();
         
-        // Use APP_VERSION_STR if defined (from git/CI), otherwise fall back to VERSION_STR
-#ifdef APP_VERSION_STR
+        // Always show version string, with fallbacks to ensure something is always displayed
+#if defined(APP_VERSION_STR) && !defined(APP_VERSION_STR_EMPTY)
         ImGui::TextUnformatted("SDR++ CE " APP_VERSION_STR " (Built at " __TIME__ ", " __DATE__ ")");
-#else
+#elif defined(VERSION_STR)
         ImGui::TextUnformatted("SDR++ CE v" VERSION_STR " (Built at " __TIME__ ", " __DATE__ ")");
+#else
+        ImGui::TextUnformatted("SDR++ CE (Built at " __TIME__ ", " __DATE__ ")");
 #endif
 
         ImGui::EndPopup();
