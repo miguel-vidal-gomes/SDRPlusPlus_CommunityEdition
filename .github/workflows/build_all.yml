@@ -11,7 +11,7 @@ on:
 env:
     # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
     BUILD_TYPE: Release
-    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GH_TOKEN: ${{ github.token }}
     # Version information
     VERSION_BASE: "1.2.3"
     VERSION_SUFFIX: "CE"
@@ -825,12 +825,9 @@ jobs:
             fetch-depth: 0
 
         - name: Create Nightly Release (if needed)
-          env:
-            GH_TOKEN: ${{ github.token }}
-            GITHUB_TOKEN: ${{ github.token }}
           run: |
             # Check if nightly release exists, create if not
-            if ! gh release view nightly -R ${{github.repository}} >/dev/null 2>&1; then
+            if ! gh release view nightly -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
               echo "Creating nightly release..."
               gh release create nightly \
                 --title "Nightly Build" \
@@ -848,30 +845,22 @@ jobs:
 
             **🔄 Last Updated:** This release is automatically updated with each commit to master." \
                 --prerelease \
-                -R ${{github.repository}}
+                -R "$GITHUB_REPOSITORY"
             else
               echo "Nightly release already exists"
             fi
 
         - name: Update Nightly Tag and Assets
-          env:
-            GH_TOKEN: ${{ github.token }}
-            GITHUB_TOKEN: ${{ github.token }}
           run: |
-            # Configure git
-            git config --global user.name "GitHub Actions"
-            git config --global user.email "actions@github.com"
+            # Configure git with canonical bot identity
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
             
-            # Force-update the tag to point to the exact commit with timestamp annotation
+            # Create annotated tag with timestamp and push only the tag reference
             git tag -fa nightly "$GITHUB_SHA" -m "nightly $(date -u +%FT%TZ)"
             git push -f origin refs/tags/nightly
             
-            # Ensure release exists before uploading assets
-            if ! gh release view nightly -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-              gh release create nightly -t "Nightly Build" -n "Automated nightly build" -R "$GITHUB_REPOSITORY"
-            fi
-            
-            # Update release assets
+            # Update release assets (release existence already checked in previous step)
             gh release upload nightly sdrpp_all/* -R "$GITHUB_REPOSITORY" --clobber
 
     check_spelling:
