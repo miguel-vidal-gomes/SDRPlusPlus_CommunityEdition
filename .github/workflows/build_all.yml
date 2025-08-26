@@ -687,14 +687,24 @@ jobs:
         needs: [create_full_archive]
         runs-on: ubuntu-latest
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        permissions:
+          contents: write
+        concurrency:
+          group: nightly-publish
+          cancel-in-progress: true
 
         steps:
         - name: Download All Builds
           uses: actions/download-artifact@v4
+          
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
         - name: Create Nightly Release (if needed)
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ github.token }}
+            GITHUB_TOKEN: ${{ github.token }}
           run: |
             # Check if nightly release exists, create if not
             if ! gh release view nightly -R ${{github.repository}} >/dev/null 2>&1; then
@@ -722,18 +732,24 @@ jobs:
 
         - name: Update Nightly Tag and Assets
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ github.token }}
+            GITHUB_TOKEN: ${{ github.token }}
           run: |
             # Configure git
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
             
-            # Force-update the tag to point to the current commit
-            git tag -f nightly
-            git push -f origin nightly
+            # Force-update the tag to point to the exact commit with timestamp annotation
+            git tag -fa nightly "$GITHUB_SHA" -m "nightly $(date -u +%FT%TZ)"
+            git push -f origin refs/tags/nightly
+            
+            # Ensure release exists before uploading assets
+            if ! gh release view nightly -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              gh release create nightly -t "Nightly Build" -n "Automated nightly build" -R "$GITHUB_REPOSITORY"
+            fi
             
             # Update release assets
-            gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
+            gh release upload nightly sdrpp_all/* -R "$GITHUB_REPOSITORY" --clobber
 
     check_spelling:
         runs-on: ubuntu-latest
