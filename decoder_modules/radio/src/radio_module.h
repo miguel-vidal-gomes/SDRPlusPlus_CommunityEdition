@@ -72,7 +72,7 @@ public:
 
         nb.init(NULL, 500.0 / 24000.0, 10.0);
         fmnr.init(NULL, 32);
-        squelch.init(NULL, MIN_SQUELCH);
+        squelch.init(NULL, effectiveSquelchLevel);
 
         ifChain.addBlock(&nb, false);
         ifChain.addBlock(&squelch, false);
@@ -563,14 +563,12 @@ private:
         // Remove mutex lock for now to prevent potential deadlock
         effectiveSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
         squelch.setLevel(effectiveSquelchLevel);
-        flog::info("Radio: Set effective squelch level to {:.1f} dB", effectiveSquelchLevel);
     }
     
     // Update effective squelch based on current settings
     void updateEffectiveSquelch() {
         // Remove mutex lock for now to prevent potential deadlock
         // Apply effective level to DSP path without persisting
-        flog::info("Radio: Updating effective squelch from user level {:.1f} dB", userSquelchLevel);
         setEffectiveSquelchLevel(userSquelchLevel);
     }
     
@@ -720,8 +718,8 @@ private:
     bool postProcEnabled;
 
     bool squelchEnabled = false;
-    float userSquelchLevel;   // User-set squelch level (persisted)
-    float effectiveSquelchLevel; // Runtime squelch level with delta applied
+    float userSquelchLevel = -50.0f;   // User-set squelch level (persisted)
+    float effectiveSquelchLevel = -50.0f; // Runtime squelch level with delta applied
 
     int deempId = 0;
     bool deempAllowed;

@@ -1841,13 +1841,11 @@ private:
                 
                 // Don't apply delta if squelch is disabled
                 if (!squelchEnabled) {
-                    flog::info("Scanner: Squelch is disabled, skipping delta application");
                     return;
                 }
                 
                 // Store original squelch level
                 originalSquelchLevel = getRadioSquelchLevel();
-                flog::info("Scanner: Original squelch level: {:.1f} dB", originalSquelchLevel);
                 
                 // Calculate new squelch level with delta
                 float deltaLevel;
@@ -1855,13 +1853,9 @@ private:
                     // Auto mode: use noise floor plus delta value (with bounds)
                     float boundedDelta = std::clamp(squelchDelta, 0.0f, 20.0f);
                     deltaLevel = std::max(noiseFloor + boundedDelta, MIN_SQUELCH);
-                    flog::info("Scanner: Auto delta mode - noise floor: {:.1f} dB, delta: {:.1f} dB, new level: {:.1f} dB", 
-                              noiseFloor, boundedDelta, deltaLevel);
                 } else {
                     // Manual mode: subtract delta from original level (with bounds)
                     deltaLevel = std::max(originalSquelchLevel - squelchDelta, MIN_SQUELCH);
-                    flog::info("Scanner: Manual delta mode - original: {:.1f} dB, delta: {:.1f} dB, new level: {:.1f} dB", 
-                              originalSquelchLevel, squelchDelta, deltaLevel);
                 }
                 
                 // Apply the new squelch level
@@ -1898,11 +1892,7 @@ private:
                 
                 // Only restore level if squelch is enabled
                 if (squelchEnabled) {
-                    flog::info("Scanner: Restoring squelch level from {:.1f} dB to original {:.1f} dB", 
-                              getRadioSquelchLevel(), originalSquelchLevel);
                     setRadioSquelchLevel(originalSquelchLevel);
-                } else {
-                    flog::info("Scanner: Squelch is disabled, not restoring level");
                 }
                 
                 squelchDeltaActive = false;
