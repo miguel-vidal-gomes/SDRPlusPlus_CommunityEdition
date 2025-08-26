@@ -11,10 +11,7 @@
 #include <sstream>
 #include <cstring>  // For memcpy
 #include <set>      // For std::set in profile diagnostics
-
-// Define SCANNER_DISABLE_DEBUG_LOGS to disable verbose debug logging
-// Comment this line to enable debug logs for development:
-#define SCANNER_DISABLE_DEBUG_LOGS
+#include "scanner_log.h" // Custom logging macros
 
 // Windows MSVC compatibility 
 #ifdef _WIN32
@@ -381,7 +378,7 @@ private:
         
         // DISCRETE SLIDER: Show actual values with units instead of indices
         if (ImGui::SliderInt("##interval_scanner_discrete", &_this->intervalIndex, 0, _this->INTERVAL_VALUES_COUNT - 1, _this->INTERVAL_LABELS[_this->intervalIndex])) {
-            flog::debug("Scanner: Interval slider changed to index {} ({})", _this->intervalIndex, _this->INTERVAL_LABELS[_this->intervalIndex]);
+            SCAN_DEBUG("Scanner: Interval slider changed to index {} ({})", _this->intervalIndex, _this->INTERVAL_LABELS[_this->intervalIndex]);
             _this->syncDiscreteValues(); // Update actual interval value
             _this->saveConfig();
         }
@@ -418,7 +415,7 @@ private:
         // Use different max index based on unlock status
         int maxIndex = _this->unlockHighSpeed ? _this->SCAN_RATE_VALUES_COUNT - 1 : _this->SCAN_RATE_NORMAL_COUNT - 1;
         if (ImGui::SliderInt("##scan_rate_discrete", &_this->scanRateIndex, 0, maxIndex, _this->SCAN_RATE_LABELS[_this->scanRateIndex])) {
-            flog::debug("Scanner: Scan rate slider changed to index {} ({})", _this->scanRateIndex, _this->SCAN_RATE_LABELS[_this->scanRateIndex]);
+            SCAN_DEBUG("Scanner: Scan rate slider changed to index {} ({})", _this->scanRateIndex, _this->SCAN_RATE_LABELS[_this->scanRateIndex]);
             _this->syncDiscreteValues(); // Update actual scan rate value
             _this->saveConfig();
         }
@@ -434,7 +431,7 @@ private:
         if (ImGui::SliderInt("##passband_ratio_discrete", &_this->passbandIndex, 0, _this->PASSBAND_VALUES_COUNT - 1, _this->PASSBAND_FORMATS[_this->passbandIndex])) {
             _this->syncDiscreteValues(); // Update actual passband ratio value
             _this->saveConfig();
-            flog::debug("Scanner: Passband slider changed to index {} ({})", _this->passbandIndex, _this->PASSBAND_LABELS[_this->passbandIndex]);
+            SCAN_DEBUG("Scanner: Passband slider changed to index {} ({})", _this->passbandIndex, _this->PASSBAND_LABELS[_this->passbandIndex]);
         }
         if (ImGui::IsItemHovered()) {
             ImGui::SetTooltip("Signal detection bandwidth as percentage of VFO width\n"
@@ -1057,14 +1054,12 @@ private:
                     }
                     
                     // Add debug logging to verify the actual scan rate being used
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                    static int logCounter = 0;
-                    if (++logCounter >= 100) { // Log every 100 iterations to avoid spam
-                        flog::debug("Scanner: Current scan rate: {} Hz (interval: {} ms, tuning time: {} ms)", 
-                                   safeRate, intervalMs, tuningTime);
-                        logCounter = 0;
+                    // Log status every 500ms instead of counting iterations
+                    static Throttle statusLogThrottle{std::chrono::milliseconds(500)};
+                    if (statusLogThrottle.ready()) {
+                        SCAN_DEBUG("Scanner: Current scan rate: {} Hz (interval: {} ms, tuning time: {} ms)", 
+                                 safeRate, intervalMs, tuningTime);
                     }
-#endif
                     
                     // Sleep until next scheduled time to reduce drift
                     nextWakeTime += std::chrono::milliseconds(intervalMs);
@@ -1115,15 +1110,11 @@ private:
 
                 // Check if we are waiting for a tune
                 if (tuning) {
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                    flog::debug("Scanner: Tuning in progress...");
-#endif
+                    SCAN_DEBUG("Scanner: Tuning in progress...");
                     auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
                     if (timeSinceLastTune.count() > tuningTime) {
                         tuning = false;
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                        flog::debug("Scanner: Tuning completed");
-#endif
+                        SCAN_DEBUG("Scanner: Tuning completed");
                     }
                     continue;
                 }
@@ -1181,9 +1172,7 @@ private:
                 }
 
                 if (receiving) {
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                    flog::debug("Scanner: Receiving signal...");
-#endif
+                    SCAN_DEBUG("Scanner: Receiving signal...");
                 
                     float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
                     if (maxLevel >= level) {
@@ -1208,9 +1197,7 @@ private:
                             }
                             
                             receiving = false;
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                            flog::debug("Scanner: Signal lost, resuming scanning");
-#endif
+                            SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
                         }
                     }
                 }
@@ -1243,9 +1230,7 @@ private:
                             continue; // Signal found, stay on this frequency
                         }
                         // No signal at exact frequency - continue to frequency stepping
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                        flog::debug("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", current / 1e6, maxLevel, level);
-#endif
+                        SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", current / 1e6, maxLevel, level);
                     } else {
                         // BAND SCANNING: Search for signals across range using interval stepping
                         if (findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
@@ -1872,9 +1857,7 @@ private:
                     // Found a non-blacklisted frequency
                     break;
                 } else {
-#ifndef SCANNER_DISABLE_DEBUG_LOGS
-                    flog::debug("Scanner: Skipping blacklisted frequency {:.3f} MHz", current / 1e6);
-#endif
+                    SCAN_DEBUG("Scanner: Skipping blacklisted frequency {:.3f} MHz", current / 1e6);
                     // Continue to next frequency
                 }
                 
