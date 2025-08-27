@@ -838,12 +838,7 @@ jobs:
             mv sdrpp_ubuntu_oracular_aarch64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_oracular_aarch64.deb &&
             mv sdrpp_android/sdrpp.apk sdrpp_all/sdrpp.apk
 
-        # download the artifact into a predictable folder
-        - uses: actions/download-artifact@v4
-          with:
-            name: sdrpp_all
-            path: sdrpp_all
-        
+      
         # quick visibility into what we actually have
         - name: Debug tree
           run: |
