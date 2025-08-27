@@ -1031,10 +1031,27 @@ private:
                     handler->init(iqStream, 
                         [](dsp::complex_t* data, int count, void* ctx) {
                             ScannerModule* _this = (ScannerModule*)ctx;
-                            if (!_this || !_this->scannerPSD || !_this->running || !_this->useDedicatedFFT) return;
+                            if (!_this || !_this->scannerPSD || !_this->running || !_this->useDedicatedFFT) {
+                                // Log when samples are skipped and why
+                                static int skipLogCounter = 0;
+                                if (++skipLogCounter % 100 == 0) {
+                                    flog::debug("Scanner: Skipping samples - module:{}, scannerPSD:{}, running:{}, useDedicatedFFT:{}",
+                                             _this ? "valid" : "null",
+                                             _this && _this->scannerPSD ? "valid" : "null",
+                                             _this && _this->running ? "true" : "false",
+                                             _this && _this->useDedicatedFFT ? "true" : "false");
+                                }
+                                return;
+                            }
                             
                             // Feed samples to the scanner PSD
-                            _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
+                            bool success = _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
+                            if (!success) {
+                                static int errorLogCounter = 0;
+                                if (++errorLogCounter % 10 == 0) {
+                                    flog::warn("Scanner: Failed to feed samples to ScannerPSD");
+                                }
+                            }
                         }, 
                         this
                     );
@@ -1737,8 +1754,11 @@ private:
             // Pass the noise floor back to the caller if requested
             if (noiseFloorDb) *noiseFloorDb = localNoiseFloor;
             
-            // Signal detected if level exceeds threshold above noise floor
-            if (signalLevel >= localNoiseFloor + scannerThresholdDb) {
+            // Signal detected if level exceeds threshold above noise floor and is above minimum level
+            float thresholdDb = localNoiseFloor + scannerThresholdDb;
+            bool detected = (signalLevel >= thresholdDb && signalLevel > -90.0f);
+            
+            if (detected) {
                 // Found a signal - tune to it and switch to receiving state
                 current = freq;
                 receiving = true;
@@ -1749,8 +1769,8 @@ private:
                 // CRITICAL: Tune VFO immediately to detected frequency
                 tuner::normalTuning(gui::waterfall.selectedVFO, current);
                 
-                flog::info("Scanner: CFAR found signal at {:.6f} MHz, level: {:.1f} dB, noise floor: {:.1f} dB",
-                          freq / 1e6, signalLevel, localNoiseFloor);
+                flog::info("Scanner: CFAR found signal at {:.6f} MHz, level: {:.1f} dB, noise floor: {:.1f} dB, threshold: {:.1f} dB",
+                          freq / 1e6, signalLevel, localNoiseFloor, thresholdDb);
                 
                 // Apply tuning profile if available
                 if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
@@ -2365,18 +2385,43 @@ private:
     
     // CFAR-style peak detection with dedicated scanner FFT
     float getMaxLevelCFAR(double freq, double width, float& noiseFloorDb) {
-        if (!scannerPSD) return -INFINITY;
+        if (!scannerPSD) {
+            flog::error("Scanner: scannerPSD is null in getMaxLevelCFAR");
+            return -INFINITY;
+        }
         
         // Get the scanner PSD data
         int dataWidth = 0;
         const float* data = scannerPSD->acquireLatestPSD(dataWidth);
         if (!data || dataWidth <= 0) {
+            flog::error("Scanner: Failed to acquire PSD data (data={}, width={})", data ? "non-null" : "null", dataWidth);
             if (data) scannerPSD->releaseLatestPSD();
             return -INFINITY;
         }
         
+        flog::info("Scanner: Acquired PSD data with width {}", dataWidth);
+        
         // Calculate bin width and center bin
         double binHz = scannerPSD->getBinWidthHz();
+        int sampleRate = scannerPSD->getSampleRate();
+        int fftSize = scannerPSD->getFftSize();
+        
+        // Recalculate bin width if the scanner's value is incorrect
+        if (binHz <= 0.0 || binHz > 10000.0) {  // Sanity check - bin width should be small
+            if (fftSize > 0 && sampleRate > 0) {
+                binHz = static_cast<double>(sampleRate) / static_cast<double>(fftSize);
+                flog::warn("Scanner: Corrected invalid bin width to {:.2f} Hz", binHz);
+            } else {
+                flog::error("Scanner: Cannot calculate bin width: sample rate={}, FFT size={}", sampleRate, fftSize);
+                scannerPSD->releaseLatestPSD();
+                return -INFINITY;
+            }
+        }
+        
+        flog::info("Scanner: Bin width: {:.2f} Hz (sample rate: {} Hz, FFT size: {})", 
+                  binHz, sampleRate, fftSize);
+        
+        // Calculate the bin index for the center frequency
         double centerBin = freq / binHz;
         int centerBinInt = (int)round(centerBin);
         
@@ -2409,6 +2454,9 @@ private:
             }
         }
         
+        // Debug the maxSignal value
+        flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", maxSignal, maxBin);
+        
         // Calculate noise floor using reference regions
         // Use a robust method (median or trimmed mean)
         std::vector<float> refValues;
@@ -2433,6 +2481,14 @@ private:
             } else {
                 noiseFloor = refValues[refValues.size()/2];
             }
+            
+            // Debug the noise floor values
+            float minNoise = refValues.front();
+            float maxNoise = refValues.back();
+            flog::info("Scanner: Noise floor calculation: median {:.1f} dB, min {:.1f} dB, max {:.1f} dB, from {} samples",
+                      noiseFloor, minNoise, maxNoise, static_cast<int>(refValues.size()));
+        } else {
+            flog::warn("Scanner: No reference values for noise floor calculation, using default {:.1f} dB", noiseFloor);
         }
         
         // Store noise floor for caller
@@ -2454,7 +2510,31 @@ private:
         
         scannerPSD->releaseLatestPSD();
         
-        return maxSignal;
+        // Always log CFAR detection details for debugging
+        float thresholdDb = noiseFloor + scannerThresholdDb;
+        bool detected = (maxSignal >= thresholdDb && maxSignal > -90.0f); // Ensure signal is above noise floor and reasonable
+        
+        // Check for invalid signal and noise values
+        if (std::abs(maxSignal) > 200.0f || std::isnan(maxSignal) || std::isinf(maxSignal)) {
+            flog::error("Scanner: Invalid signal value: {:.1f} dB! Using default.", maxSignal);
+            maxSignal = -100.0f;  // Set to a reasonable default
+        }
+        
+        if (std::abs(noiseFloor) > 200.0f || std::isnan(noiseFloor) || std::isinf(noiseFloor)) {
+            flog::error("Scanner: Invalid noise floor value: {:.1f} dB! Using default.", noiseFloor);
+            noiseFloor = -120.0f;  // Set to a reasonable default
+        }
+        
+        flog::info("Scanner: CFAR detection at {:.6f} MHz - signal: {:.1f} dB, noise: {:.1f} dB, threshold: {:.1f} dB, result: {}",
+                  freq / 1e6, maxSignal, noiseFloor, thresholdDb, 
+                  detected ? "DETECTED" : "REJECTED");
+                  
+        // Add more detailed debug info
+        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.2f} Hz, ROI bins: [{}, {}], ref bins: [{}, {}] + [{}, {}]",
+                  scannerFFTSize, binHz, lowSignalBin, highSignalBin, lowRefStart, lowRefEnd, highRefStart, highRefEnd);
+        
+        // Return -INFINITY if signal is not valid (below reasonable threshold)
+        return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
     }
     
     // Get current squelch level from radio module
