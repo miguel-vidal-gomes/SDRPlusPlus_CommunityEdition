@@ -2452,10 +2452,16 @@ private:
         }
         
         flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
-                  binWidthHz(sampleRate, fftSize), sampleRate, fftSize);
+                  (double)sampleRate / (double)fftSize, sampleRate, fftSize);
         
         // Calculate the bin index for the center frequency using DC-centered mapping
         int centerBinInt = absHzToDcBin(freq);
+        
+        // Sanity check for center bin
+        if (centerBinInt < 0 || centerBinInt >= fftSize) {
+            flog::error("Scanner: Invalid center bin: {}, FFT size: {}", centerBinInt, fftSize);
+            return -INFINITY;
+        }
         
         // Calculate width in bins
         int widthBins = (int)round(width / binHz);
@@ -2465,11 +2471,22 @@ private:
         int lowSignalBin = std::max(0, centerBinInt - halfWidth);
         int highSignalBin = std::min(dataWidth - 1, centerBinInt + halfWidth);
         
+        // Ensure ROI is valid
+        if (lowSignalBin > highSignalBin) {
+            flog::error("Scanner: Invalid ROI order: [{}, {}]", lowSignalBin, highSignalBin);
+            std::swap(lowSignalBin, highSignalBin);
+        }
+        
         // Sanity check for bin indices
         if (lowSignalBin < 0 || lowSignalBin >= fftSize || highSignalBin < 0 || highSignalBin >= fftSize) {
             flog::error("Scanner: Invalid ROI bins: [{}, {}], FFT size: {}", lowSignalBin, highSignalBin, fftSize);
             return -INFINITY;
         }
+        
+        // Runtime assertions (debug-only)
+        assert(lowSignalBin >= 0 && lowSignalBin < fftSize);
+        assert(highSignalBin >= 0 && highSignalBin < fftSize);
+        assert(lowSignalBin <= highSignalBin);
         
         // Define reference regions (on both sides, outside guard band)
         const int N = fftSize;
@@ -2478,8 +2495,9 @@ private:
         assert(lowSignalBin >= 0 && lowSignalBin < N);
         assert(highSignalBin >= 0 && highSignalBin < N);
 
-        const int guardBins    = hzToBins(scannerGuardHz, sampleRate, fftSize);
-        const int refWidthBins = std::max(1, hzToBins(scannerRefHz, sampleRate, fftSize));
+        // Use wider guard and reference bands for better CFAR performance
+        const int guardBins    = std::max(5, hzToBins(scannerGuardHz, sampleRate, fftSize));
+        const int refWidthBins = std::max(20, hzToBins(scannerRefHz, sampleRate, fftSize));
 
         // Left band just before ROI (with guard)
         const int leftEnd   = clamp(lowSignalBin - guardBins - 1);
@@ -2510,7 +2528,7 @@ private:
         }
         
         // Get signal in dB
-        const float signalDb = maxSignal;
+        float signalDb = maxSignal;
         
         // Guardrails to prevent regressions
         assert(std::isfinite(signalDb));
@@ -2519,32 +2537,46 @@ private:
         // Debug the maxSignal value
         flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", signalDb, kMax);
         
+        // Create reference ranges only if start <= end
         std::vector<std::pair<int, int>> refRanges;
         if (leftStart <= leftEnd) refRanges.emplace_back(leftStart, leftEnd);
         if (rightStart <= rightEnd) refRanges.emplace_back(rightStart, rightEnd);
+        
+        // Debug the reference ranges
+        flog::debug("Scanner: Reference ranges: {}", debugRanges(refRanges));
         
         // Collect finite dB values
         std::vector<float> refVals;
         refVals.reserve(refWidthBins * 2);
         for (auto [a,b] : refRanges) {
+            assert(a >= 0 && a < fftSize);
+            assert(b >= 0 && b < fftSize);
+            assert(a <= b); // Ensure proper range order
+            
             for (int i=a; i<=b; ++i) {
-                float v = psdDb[i];
-                if (std::isfinite(v)) refVals.push_back(v);
+                if (i >= 0 && i < dataWidth) {
+                    float v = psdDb[i];
+                    if (std::isfinite(v)) refVals.push_back(v);
+                }
             }
         }
+        
+        // Check if we have enough reference values
         if (refVals.empty()) {
             flog::warn("Scanner: CFAR: empty reference set; skipping frame");
             return -INFINITY;
         }
         
-        // Stats in dB
+        // Calculate noise floor statistics (min, max, median)
         auto [mnIt, mxIt] = std::minmax_element(refVals.begin(), refVals.end());
+        
         // Calculate median (robust method)
         std::sort(refVals.begin(), refVals.end());
-        const float noiseDb = refVals.empty() ? -80.0f : 
-                            (refVals.size() % 2 == 0) ? 
-                            (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
-                            refVals[refVals.size()/2];
+        const float noiseDb = (refVals.size() % 2 == 0) ? 
+                             (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
+                             refVals[refVals.size()/2];
+                             
+        // Log noise floor statistics with proper size_t count
         flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
                     noiseDb, *mnIt, *mxIt, static_cast<int>(refVals.size()));
                     
@@ -2569,20 +2601,33 @@ private:
         }
         
         // Check for invalid signal and noise values
-        if (std::abs(maxSignal) > 200.0f || std::isnan(maxSignal) || std::isinf(maxSignal)) {
-            flog::error("Scanner: Invalid signal value: {:.1f} dB! Using default.", maxSignal);
-            maxSignal = -100.0f;  // Set to a reasonable default
+        if (std::abs(signalDb) > 200.0f || std::isnan(signalDb) || std::isinf(signalDb)) {
+            flog::error("Scanner: Invalid signal value: {:.1f} dB! Using default.", signalDb);
+            const float defaultSignal = -100.0f;
+            signalDb = defaultSignal;  // Set to a reasonable default
         }
         
-        if (std::abs(noiseFloor) > 200.0f || std::isnan(noiseFloor) || std::isinf(noiseFloor)) {
-            flog::error("Scanner: Invalid noise floor value: {:.1f} dB! Using default.", noiseFloor);
+        if (std::abs(noiseDb) > 200.0f || std::isnan(noiseDb) || std::isinf(noiseDb)) {
+            flog::error("Scanner: Invalid noise floor value: {:.1f} dB! Using default.", noiseDb);
             noiseFloor = -120.0f;  // Set to a reasonable default
+        } else {
+            noiseFloor = noiseDb;  // Use the calculated median
         }
+        
+        // Ensure variables are consistent
+        assert(std::isfinite(signalDb));
+        assert(std::isfinite(noiseFloor));
+        assert(refVals.size() > 0);
         
         // CFAR threshold (in dB)
         const float kDb = scannerThresholdDb;
         const float thresholdDb = noiseFloor + kDb;
         const float marginDb = signalDb - thresholdDb;
+        
+        // Ensure threshold variables are consistent
+        assert(std::isfinite(thresholdDb));
+        assert(std::isfinite(marginDb));
+        
         bool detected = (marginDb >= 0.0f && signalDb > -90.0f); // Ensure signal is above threshold and reasonable
         
         // Log CFAR detection with margin
@@ -2593,7 +2638,9 @@ private:
         
         // Add more detailed debug info with correct format specifiers
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, binWidthHz(sampleRate, fftSize), lowSignalBin, highSignalBin, debugRanges(refRanges));
+                  fftSize, (double)sampleRate / (double)fftSize, 
+                  static_cast<int>(lowSignalBin), static_cast<int>(highSignalBin), 
+                  debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;

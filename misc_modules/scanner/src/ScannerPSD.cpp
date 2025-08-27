@@ -297,9 +297,23 @@ const float* ScannerPSD::acquireLatestPSD(int& width) {
     // Check if we have any data yet
     static int callCount = 0;
     if (++callCount % 10 == 0) {
-        auto [mnIt, mxIt] = std::minmax_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+        // Find actual min/max values in the spectrum (not FFT size)
+        auto [mnIt, mxIt] = std::minmax_element(
+            m_avgPowerSpectrum.begin(), 
+            m_avgPowerSpectrum.end(),
+            [](float a, float b) { 
+                if (!std::isfinite(a)) return false;
+                if (!std::isfinite(b)) return true;
+                return a < b; 
+            }
+        );
+        
+        // Ensure values are finite
+        float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
+        float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
+        
         flog::info("Scanner: acquireLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
-                  m_fftSize, *mnIt, *mxIt);
+                  m_fftSize, minVal, maxVal);
     }
     
     width = m_fftSize;
@@ -327,9 +341,23 @@ bool ScannerPSD::copyLatestPSD(std::vector<float>& out, int& width) const {
     // Log PSD range info occasionally
     static int callCount = 0;
     if (++callCount % 10 == 0) {
-        auto [mnIt, mxIt] = std::minmax_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+        // Find actual min/max values in the spectrum (not FFT size)
+        auto [mnIt, mxIt] = std::minmax_element(
+            m_avgPowerSpectrum.begin(), 
+            m_avgPowerSpectrum.end(),
+            [](float a, float b) { 
+                if (!std::isfinite(a)) return false;
+                if (!std::isfinite(b)) return true;
+                return a < b; 
+            }
+        );
+        
+        // Ensure values are finite
+        float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
+        float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
+        
         flog::info("Scanner: copyLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
-                  m_fftSize, *mnIt, *mxIt);
+                  m_fftSize, minVal, maxVal);
     }
     
     return true;
