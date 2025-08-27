@@ -170,7 +170,7 @@ bool ScannerPSD::process() {
 bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
     if (!m_initialized || frame.size() < m_fftSize) {
         flog::error("Scanner: Cannot process frame - initialized: {}, frame size: {} (need {})",
-                           m_initialized ? "true" : "false", frame.size(), m_fftSize);
+                           m_initialized ? "true" : "false", static_cast<int>(frame.size()), m_fftSize);
         return false;
     }
     

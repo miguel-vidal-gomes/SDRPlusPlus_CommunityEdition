@@ -2894,7 +2894,7 @@ private:
         
         // Get FFT size and center frequency
         int fftSize = scannerPSD->getFftSize();
-        double centerHz = sigpath::iqFrontEnd.getCenterFrequency();
+        double centerHz = sigpath::sourceManager.getSelectedName().empty() ? 0.0 : gui::waterfall.getCenterFrequency();
         
         // Convert to baseband frequency and then to bin
         double basebandHz = absHz - centerHz;           // shift by LO
