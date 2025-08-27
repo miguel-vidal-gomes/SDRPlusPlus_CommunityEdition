@@ -312,6 +312,13 @@ const float* ScannerPSD::acquireLatestPSD(int& width) {
         float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
         float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
         
+        // Verify min/max are not equal to fftSize (common error)
+        if (std::abs(minVal - m_fftSize) < 0.1 || std::abs(maxVal - m_fftSize) < 0.1) {
+            flog::error("Scanner: PSD range calculation error (got FFT size instead of dB values)");
+            minVal = -100.0f;
+            maxVal = -20.0f;
+        }
+        
         flog::info("Scanner: acquireLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
                   m_fftSize, minVal, maxVal);
     }
@@ -355,6 +362,13 @@ bool ScannerPSD::copyLatestPSD(std::vector<float>& out, int& width) const {
         // Ensure values are finite
         float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
         float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
+        
+        // Verify min/max are not equal to fftSize (common error)
+        if (std::abs(minVal - m_fftSize) < 0.1 || std::abs(maxVal - m_fftSize) < 0.1) {
+            flog::error("Scanner: PSD range calculation error (got FFT size instead of dB values)");
+            minVal = -100.0f;
+            maxVal = -20.0f;
+        }
         
         flog::info("Scanner: copyLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
                   m_fftSize, minVal, maxVal);

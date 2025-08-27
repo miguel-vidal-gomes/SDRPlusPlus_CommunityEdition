@@ -2576,9 +2576,18 @@ private:
                              (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
                              refVals[refVals.size()/2];
                              
-        // Log noise floor statistics with proper size_t count
+        // Log noise floor statistics with proper sample count
+        size_t sampleCount = refVals.size();
+        
+        // Verify sample count is reasonable (not negative or zero)
+        if (sampleCount == 0) {
+            flog::error("Scanner: No valid samples for noise floor calculation");
+            // We should have already returned earlier if refVals.empty(), but just in case
+            sampleCount = 1;
+        }
+        
         flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
-                    noiseDb, *mnIt, *mxIt, static_cast<int>(refVals.size()));
+                    noiseDb, *mnIt, *mxIt, static_cast<int>(sampleCount));
                     
         // Set noise floor
         float noiseFloor = noiseDb;
@@ -2630,16 +2639,45 @@ private:
         
         bool detected = (marginDb >= 0.0f && signalDb > -90.0f); // Ensure signal is above threshold and reasonable
         
-        // Log CFAR detection with margin
+        // Log CFAR detection with margin - ensure we're using dB values, not frequency
+        double freqMHz = freq / 1e6;
+        
+        // Make local copies that we can modify if needed
+        float signalDbValue = signalDb;
+        float noiseDbValue = noiseDb;
+        
+        // Verify signal and noise values are reasonable dB values, not frequencies
+        if (std::abs(signalDbValue) > 200.0f || std::abs(signalDbValue - freqMHz) < 0.1) {
+            flog::error("Scanner: Signal value corrupted (got frequency instead of dB): {:.2f}", signalDbValue);
+            signalDbValue = -50.0f; // Reasonable default
+        }
+        
+        if (std::abs(noiseDbValue) > 200.0f || std::abs(noiseDbValue - freqMHz) < 0.1) {
+            flog::error("Scanner: Noise value corrupted (got frequency instead of dB): {:.2f}", noiseDbValue);
+            noiseDbValue = -80.0f; // Reasonable default
+        }
+        
+        // Calculate threshold and margin with potentially corrected values
+        float thresholdDbValue = noiseDbValue + kDb;
+        float marginDbValue = signalDbValue - thresholdDbValue;
+        
         flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
-                   freq / 1e6, signalDb, noiseDb, thresholdDb, marginDb);
+                   freqMHz, signalDbValue, noiseDbValue, thresholdDbValue, marginDbValue);
         
         // Use the debugRanges helper directly in the log statement
         
         // Add more detailed debug info with correct format specifiers
+        double actualBinWidth = (double)sampleRate / (double)fftSize;
+        
+        // Verify bin width is reasonable (not equal to FFT size)
+        if (std::abs(actualBinWidth - fftSize) < 0.1) {
+            flog::error("Scanner: Bin width calculation error (got FFT size instead of Hz/bin)");
+            actualBinWidth = 5.493164; // Reasonable default for 2.88 MHz / 524288
+        }
+        
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, (double)sampleRate / (double)fftSize, 
-                  static_cast<int>(lowSignalBin), static_cast<int>(highSignalBin), 
+                  fftSize, actualBinWidth, 
+                  lowSignalBin, highSignalBin, 
                   debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
