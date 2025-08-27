@@ -12,9 +12,15 @@ IQFrontEnd::~IQFrontEnd() {
     fftwf_destroy_plan(fftwPlan);
     fftwf_free(fftInBuf);
     fftwf_free(fftOutBuf);
+    dsp::buffer::free(scannerFftWindowBuf);
+    fftwf_destroy_plan(scannerFftwPlan);
+    fftwf_free(scannerFftInBuf);
+    fftwf_free(scannerFftOutBuf);
 }
 
-void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx) {
+void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, 
+                      int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx,
+                      int scannerFftSize, double scannerFftRate, FFTWindow scannerFftWindow, float* (*acquireScannerFFTBuffer)(void* ctx), void (*releaseScannerFFTBuffer)(void* ctx), void* scannerFftCtx) {
     _sampleRate = sampleRate;
     _decimRatio = decimRatio;
     _fftSize = fftSize;
@@ -23,6 +29,12 @@ void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool b
     _acquireFFTBuffer = acquireFFTBuffer;
     _releaseFFTBuffer = releaseFFTBuffer;
     _fftCtx = fftCtx;
+    _scannerFftSize = scannerFftSize;
+    _scannerFftRate = scannerFftRate;
+    _scannerFftWindow = scannerFftWindow;
+    _acquireScannerFFTBuffer = acquireScannerFFTBuffer;
+    _releaseScannerFFTBuffer = releaseScannerFFTBuffer;
+    _scannerFftCtx = scannerFftCtx;
 
     effectiveSr = _sampleRate / _decimRatio;
 
@@ -43,8 +55,12 @@ void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool b
     // TODO: Do something to avoid basically repeating this code twice
     int skip;
     genReshapeParams(effectiveSr, _fftSize, _fftRate, skip, _nzFFTSize);
-    reshape.init(&fftIn, fftSize, skip);
+    reshape.init(&fftIn, _fftSize, skip);
     fftSink.init(&reshape.out, handler, this);
+
+    genReshapeParams(effectiveSr, _scannerFftSize, _scannerFftRate, skip, _scannerNzFFTSize);
+    scannerReshape.init(&scannerFftIn, _scannerFftSize, skip);
+    scannerFftSink.init(&scannerReshape.out, scannerHandler, this);
 
     fftWindowBuf = dsp::buffer::alloc<float>(_nzFFTSize);
     if (_fftWindow == FFTWindow::RECTANGULAR) {
@@ -57,14 +73,34 @@ void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool b
         for (int i = 0; i < _nzFFTSize; i++) { fftWindowBuf[i] = dsp::window::nuttall(i, _nzFFTSize); }
     }
 
+    scannerFftWindowBuf = dsp::buffer::alloc<float>(_scannerNzFFTSize);
+    if (_scannerFftWindow == FFTWindow::RECTANGULAR) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = 0; }
+    }
+    else if (_scannerFftWindow == FFTWindow::BLACKMAN) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = dsp::window::blackman(i, _scannerNzFFTSize); }
+    }
+    else if (_scannerFftWindow == FFTWindow::NUTTALL) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = dsp::window::nuttall(i, _scannerNzFFTSize); }
+    }
+
     fftInBuf = (fftwf_complex*)fftwf_malloc(_fftSize * sizeof(fftwf_complex));
     fftOutBuf = (fftwf_complex*)fftwf_malloc(_fftSize * sizeof(fftwf_complex));
     fftwPlan = fftwf_plan_dft_1d(_fftSize, fftInBuf, fftOutBuf, FFTW_FORWARD, FFTW_ESTIMATE);
 
+    scannerFftInBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+    scannerFftOutBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+    scannerFftwPlan = fftwf_plan_dft_1d(_scannerFftSize, scannerFftInBuf, scannerFftOutBuf, FFTW_FORWARD, FFTW_ESTIMATE);
+
     // Clear the rest of the FFT input buffer
     dsp::buffer::clear(fftInBuf, _fftSize - _nzFFTSize, _nzFFTSize);
+    dsp::buffer::clear(scannerFftInBuf, _scannerFftSize - _scannerNzFFTSize, _scannerNzFFTSize);
 
     split.bindStream(&fftIn);
+    split.bindStream(&scannerFftIn);
+
+    // Register interface
+    registerInterface();
 
     _init = true;
 }
@@ -88,8 +124,9 @@ void IQFrontEnd::setSampleRate(double sampleRate) {
         vfo->setInSamplerate(effectiveSr);
     }
 
-    // Reconfigure the FFT
-    updateFFTPath();
+    // Reconfigure the FFTs
+    updateMainFFTPath();
+    updateScannerFFTPath();
 
     // Restart blocks
     dcBlock.tempStart();
@@ -184,17 +221,69 @@ void IQFrontEnd::removeVFO(std::string name) {
 
 void IQFrontEnd::setFFTSize(int size) {
     _fftSize = size;
-    updateFFTPath(true);
+    updateMainFFTPath(true);
 }
 
 void IQFrontEnd::setFFTRate(double rate) {
     _fftRate = rate;
-    updateFFTPath();
+    updateMainFFTPath();
 }
 
 void IQFrontEnd::setFFTWindow(FFTWindow fftWindow) {
     _fftWindow = fftWindow;
-    updateFFTPath();
+    updateMainFFTPath();
+}
+
+void IQFrontEnd::setScannerFFTSize(int size) {
+    _scannerFftSize = size;
+    updateScannerFFTPath();
+}
+
+void IQFrontEnd::setScannerFFTRate(double rate) {
+    _scannerFftRate = rate;
+    updateScannerFFTPath();
+}
+
+void IQFrontEnd::setScannerFFTWindow(FFTWindow fftWindow) {
+    _scannerFftWindow = fftWindow;
+    updateScannerFFTPath();
+}
+
+void IQFrontEnd::registerInterface() {
+    // Handle scanner FFT callbacks
+    core::modComManager.registerInterface("iq_frontend", "scanner_fft", 
+        [](int code, void* in, void* out, void* ctx) {
+            IQFrontEnd* _this = (IQFrontEnd*)ctx;
+            
+            switch (code) {
+                case 1: { // Register Scanner FFT Callbacks
+                    // Input: [0]=size, [1]=acquireCallback, [2]=releaseCallback, [3]=callbackCtx
+                    void** args = (void**)in;
+                    int* size = (int*)args[0];
+                    float* (*acquireCallback)(void*) = (float* (*)(void*))args[1];
+                    void (*releaseCallback)(void*) = (void (*)(void*))args[2];
+                    void* callbackCtx = args[3];
+                    
+                    // Update scanner FFT parameters
+                    _this->setScannerFFTSize(*size);
+                    _this->_acquireScannerFFTBuffer = acquireCallback;
+                    _this->_releaseScannerFFTBuffer = releaseCallback;
+                    _this->_scannerFftCtx = callbackCtx;
+                    break;
+                }
+                case 2: { // Set Scanner FFT Size
+                    // Input: [0]=size
+                    void** args = (void**)in;
+                    int* size = (int*)args[0];
+                    
+                    // Update scanner FFT size
+                    _this->setScannerFFTSize(*size);
+                    break;
+                }
+            }
+        }, 
+        this
+    );
 }
 
 void IQFrontEnd::flushInputBuffer() {
@@ -219,6 +308,8 @@ void IQFrontEnd::start() {
     // Start FFT chain
     reshape.start();
     fftSink.start();
+    scannerReshape.start();
+    scannerFftSink.start();
 }
 
 void IQFrontEnd::stop() {
@@ -239,6 +330,8 @@ void IQFrontEnd::stop() {
     // Stop FFT chain
     reshape.stop();
     fftSink.stop();
+    scannerReshape.stop();
+    scannerFftSink.stop();
 }
 
 double IQFrontEnd::getEffectiveSamplerate() {
@@ -266,7 +359,28 @@ void IQFrontEnd::handler(dsp::complex_t* data, int count, void* ctx) {
     _this->_releaseFFTBuffer(_this->_fftCtx);
 }
 
-void IQFrontEnd::updateFFTPath(bool updateWaterfall) {
+void IQFrontEnd::scannerHandler(dsp::complex_t* data, int count, void* ctx) {
+    IQFrontEnd* _this = (IQFrontEnd*)ctx;
+
+    // Apply window
+    volk_32fc_32f_multiply_32fc((lv_32fc_t*)_this->scannerFftInBuf, (lv_32fc_t*)data, _this->scannerFftWindowBuf, _this->_scannerNzFFTSize);
+
+    // Execute FFT
+    fftwf_execute(_this->scannerFftwPlan);
+
+    // Aquire buffer
+    float* fftBuf = _this->_acquireScannerFFTBuffer(_this->_scannerFftCtx);
+
+    // Convert the complex output of the FFT to dB amplitude
+    if (fftBuf) {
+        volk_32fc_s32f_power_spectrum_32f(fftBuf, (lv_32fc_t*)_this->scannerFftOutBuf, _this->_scannerFftSize, _this->_scannerFftSize);
+    }
+
+    // Release buffer
+    _this->_releaseScannerFFTBuffer(_this->_scannerFftCtx);
+}
+
+void IQFrontEnd::updateMainFFTPath(bool updateWaterfall) {
     // Temp stop branch
     reshape.tempStop();
     fftSink.tempStop();
@@ -306,4 +420,43 @@ void IQFrontEnd::updateFFTPath(bool updateWaterfall) {
     // Restart branch
     reshape.tempStart();
     fftSink.tempStart();
+}
+
+void IQFrontEnd::updateScannerFFTPath(bool updateWaterfall) {
+    // Temp stop branch
+    scannerReshape.tempStop();
+    scannerFftSink.tempStop();
+
+    // Update reshaper settings
+    int skip;
+    genReshapeParams(effectiveSr, _scannerFftSize, _scannerFftRate, skip, _scannerNzFFTSize);
+    scannerReshape.setKeep(_scannerNzFFTSize);
+    scannerReshape.setSkip(skip);
+
+    // Update window
+    dsp::buffer::free(scannerFftWindowBuf);
+    scannerFftWindowBuf = dsp::buffer::alloc<float>(_scannerNzFFTSize);
+    if (_scannerFftWindow == FFTWindow::RECTANGULAR) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = 1.0f * ((i % 2) ? -1.0f : 1.0f); }
+    }
+    else if (_scannerFftWindow == FFTWindow::BLACKMAN) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = dsp::window::blackman(i, _scannerNzFFTSize) * ((i % 2) ? -1.0f : 1.0f); }
+    }
+    else if (_scannerFftWindow == FFTWindow::NUTTALL) {
+        for (int i = 0; i < _scannerNzFFTSize; i++) { scannerFftWindowBuf[i] = dsp::window::nuttall(i, _scannerNzFFTSize) * ((i % 2) ? -1.0f : 1.0f); }
+    }
+
+    // Update FFT plan
+    fftwf_free(scannerFftInBuf);
+    fftwf_free(scannerFftOutBuf);
+    scannerFftInBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+    scannerFftOutBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+    scannerFftwPlan = fftwf_plan_dft_1d(_scannerFftSize, scannerFftInBuf, scannerFftOutBuf, FFTW_FORWARD, FFTW_ESTIMATE);
+
+    // Clear the rest of the FFT input buffer
+    dsp::buffer::clear(scannerFftInBuf, _scannerFftSize - _scannerNzFFTSize, _scannerNzFFTSize);
+
+    // Restart branch
+    scannerReshape.tempStart();
+    scannerFftSink.tempStart();
 }

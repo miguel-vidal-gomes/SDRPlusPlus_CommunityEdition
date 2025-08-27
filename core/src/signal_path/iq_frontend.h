@@ -20,7 +20,10 @@ public:
         NUTTALL
     };
 
-    void init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx);
+    void init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, 
+             int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx,
+             int scannerFftSize = 8192, double scannerFftRate = 10.0, FFTWindow scannerFftWindow = BLACKMAN, 
+             float* (*acquireScannerFFTBuffer)(void* ctx) = nullptr, void (*releaseScannerFFTBuffer)(void* ctx) = nullptr, void* scannerFftCtx = nullptr);
 
     void setInput(dsp::stream<dsp::complex_t>* in);
     void setSampleRate(double sampleRate);
@@ -41,6 +44,11 @@ public:
     void setFFTRate(double rate);
     void setFFTWindow(FFTWindow fftWindow);
 
+    void setScannerFFTSize(int size);
+    void setScannerFFTRate(double rate);
+    void setScannerFFTWindow(FFTWindow fftWindow);
+
+    void registerInterface();
     void flushInputBuffer();
 
     void start();
@@ -50,7 +58,9 @@ public:
 
 protected:
     static void handler(dsp::complex_t* data, int count, void* ctx);
-    void updateFFTPath(bool updateWaterfall = false);
+    static void scannerHandler(dsp::complex_t* data, int count, void* ctx);
+    void updateMainFFTPath(bool updateWaterfall = false);
+    void updateScannerFFTPath(bool updateWaterfall = false);
 
     static inline double genDCBlockRate(double sampleRate) {
         return 50.0 / sampleRate;
@@ -79,6 +89,11 @@ protected:
     dsp::buffer::Reshaper<dsp::complex_t> reshape;
     dsp::sink::Handler<dsp::complex_t> fftSink;
 
+    // Scanner FFT
+    dsp::stream<dsp::complex_t> scannerFftIn;
+    dsp::buffer::Reshaper<dsp::complex_t> scannerReshape;
+    dsp::sink::Handler<dsp::complex_t> scannerFftSink;
+
     // VFOs
     std::map<std::string, dsp::stream<dsp::complex_t>*> vfoStreams;
     std::map<std::string, dsp::channel::RxVFO*> vfos;
@@ -93,12 +108,27 @@ protected:
     void (*_releaseFFTBuffer)(void* ctx);
     void* _fftCtx;
 
+    // Scanner FFT Parameters
+    int _scannerFftSize;
+    double _scannerFftRate;
+    FFTWindow _scannerFftWindow;
+    float* (*_acquireScannerFFTBuffer)(void* ctx);
+    void (*_releaseScannerFFTBuffer)(void* ctx);
+    void* _scannerFftCtx;
+
     // Processing data
     int _nzFFTSize;
     float* fftWindowBuf;
     fftwf_complex *fftInBuf, *fftOutBuf;
     fftwf_plan fftwPlan;
     float* fftDbOut;
+
+    // Scanner Processing data
+    int _scannerNzFFTSize;
+    float* scannerFftWindowBuf;
+    fftwf_complex *scannerFftInBuf, *scannerFftOutBuf;
+    fftwf_plan scannerFftwPlan;
+    float* scannerFftDbOut;
 
     double effectiveSr;
 
