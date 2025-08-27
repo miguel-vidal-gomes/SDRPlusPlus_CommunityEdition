@@ -96,9 +96,15 @@ struct TuningProfile {
 };
 
 class ScannerModule : public ModuleManager::Instance {
+private:
+    std::unique_ptr<scanner::ScannerPSD> scannerPSD;
+
 public:
     ScannerModule(std::string name) {
         this->name = name;
+        
+        // Initialize the dedicated PSD engine
+        scannerPSD = std::make_unique<scanner::ScannerPSD>();
         
         // Initialize time points to current time to prevent crashes
         auto now = std::chrono::high_resolution_clock::now();
@@ -121,7 +127,7 @@ public:
     ~ScannerModule() {
         saveConfig();
         gui::menu.removeEntry(name);
-        stop();
+        stop(); // This will also stop the scannerPSD thread
     }
 
     void postInit() {}
@@ -1030,9 +1036,6 @@ private:
         // Initialize dedicated PSD/FFT engine if enabled
         if (useDedicatedFFT) {
             try {
-                // Create PSD engine
-                scannerPSD = std::make_unique<scanner::ScannerPSD>();
-                
                 // Get current sample rate from the IQ frontend
                 int sampleRate = sigpath::iqFrontEnd.getSampleRate();
                 flog::info("Scanner: Initializing dedicated FFT at {} Hz sample rate", sampleRate);
@@ -1047,7 +1050,7 @@ private:
                 sigpath::iqFrontEnd.bindIQStream(iqStream);
                 if (!iqStream) {
                     flog::error("Scanner: Failed to bind IQ stream");
-                    scannerPSD.reset();
+                    scannerPSD->reset();
                 } else {
                     // Set up IQ stream handler using a handler sink
                     auto handler = new dsp::sink::Handler<dsp::complex_t>();
@@ -1055,26 +1058,11 @@ private:
                         [](dsp::complex_t* data, int count, void* ctx) {
                             ScannerModule* _this = (ScannerModule*)ctx;
                             if (!_this || !_this->scannerPSD || !_this->running || !_this->useDedicatedFFT) {
-                                // Log when samples are skipped and why
-                                static int skipLogCounter = 0;
-                                if (++skipLogCounter % 100 == 0) {
-                                    flog::debug("Scanner: Skipping samples - module:{}, scannerPSD:{}, running:{}, useDedicatedFFT:{}",
-                                             _this ? "valid" : "null",
-                                             _this && _this->scannerPSD ? "valid" : "null",
-                                             _this && _this->running ? "true" : "false",
-                                             _this && _this->useDedicatedFFT ? "true" : "false");
-                                }
                                 return;
                             }
                             
                             // Feed samples to the scanner PSD
-                                            bool success = _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
-                if (!success) {
-                    static int errorLogCounter = 0;
-                    if (++errorLogCounter % 100 == 0) {  // Reduced frequency and severity
-                        flog::debug("Scanner: No frame produced yet, waiting for more samples");
-                    }
-                }
+                            _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
                         }, 
                         this
                     );
@@ -1087,10 +1075,9 @@ private:
             }
             catch (const std::exception& e) {
                 flog::error("Scanner: Exception initializing PSD engine: {}", e.what());
-                scannerPSD.reset();
+                scannerPSD->reset();
                 if (iqStream) {
                     if (iqStreamId) {
-                        // The handler will be deleted when the stream is deleted
                         iqStreamId = 0;
                     }
                     sigpath::iqFrontEnd.unbindIQStream(iqStream);
@@ -1108,61 +1095,48 @@ private:
                 applyCurrentRangeGain();
             } catch (const std::exception& e) {
                 flog::error("Scanner: Exception applying initial gain: {}", e.what());
-                // Continue anyway, gain is not critical for basic operation
             }
         }
         
-        // Start worker thread
+        // Start scan thread
         try {
-            workerThread = std::thread(&ScannerModule::worker, this);
-            flog::info("Scanner: Worker thread started successfully");
+            scanThread = std::thread(&ScannerModule::mainLoop, this);
+            flog::info("Scanner: Scan thread started successfully");
         } catch (const std::exception& e) {
-            flog::error("Scanner: Failed to start worker thread: {}", e.what());
+            flog::error("Scanner: Failed to start scan thread: {}", e.what());
             running = false;
             throw;
         }
     }
 
     void stop() {
+        std::unique_lock<std::recursive_mutex> lck(scanMtx);
         if (!running) { return; }
-        
-        // First set running to false to signal all threads to stop
         running = false;
-        flog::info("Scanner: Stopping scanner module");
-        
-        // Restore squelch level if modified
-        if (squelchDeltaActive) {
-            restoreSquelchLevel();
+        lck.unlock();
+
+        // Stop the PSD engine's processing thread and clean up
+        if (scannerPSD) {
+            scannerPSD->stop();
+            scannerPSD->reset();
         }
-        
-        // Wait for worker thread to complete
-        if (workerThread.joinable()) {
-            flog::info("Scanner: Waiting for worker thread to join");
-            workerThread.join();
-            flog::info("Scanner: Worker thread joined successfully");
-        }
-        
-        // Clean up dedicated FFT resources - first unbind the stream
+
+        // Clean up dedicated FFT resources
         if (iqStream) {
-            // First set iqStreamId to 0 to prevent any new handler calls
             if (iqStreamId) {
-                flog::info("Scanner: Clearing IQ stream handler");
                 iqStreamId = 0;
             }
-            
-            // Then unbind the stream from the frontend
-            flog::info("Scanner: Unbinding IQ stream");
             sigpath::iqFrontEnd.unbindIQStream(iqStream);
-            
-            // Finally delete the stream which will delete the handler
-            flog::info("Scanner: Deleting IQ stream");
             delete iqStream;
             iqStream = nullptr;
         }
+
+        flog::info("Scanner: Stopped");
         
-        // Reset the PSD engine last, after all threads have stopped
-        flog::info("Scanner: Resetting PSD engine");
-        scannerPSD.reset();
+        // Wait for scan thread to finish
+        if (scanThread.joinable()) {
+            scanThread.join();
+        }
     }
 
     void reset() {
@@ -1331,7 +1305,7 @@ private:
         initializeDiscreteIndices();
     }
 
-    void worker() {
+    void mainLoop() {
         flog::info("Scanner: Worker thread started");
         try {
             // Initialize timer for sleep_until to reduce drift
@@ -1514,262 +1488,110 @@ private:
                 
                     // Check for signal using either dedicated FFT or waterfall FFT
                     float maxLevel;
-                    float noiseFloorLevel = 0.0f;
-                    
+                    float noiseFloorDb = -200.0f; // Initialize to a low value
                     if (useDedicatedFFT && scannerPSD) {
-                        // Use CFAR detector with dedicated FFT
-                        maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
-                        // CRITICAL FIX: Signal must exceed BOTH:
-                        // 1. CFAR threshold (noise floor + threshold)
-                        // 2. User's absolute trigger level
-                        float cfarThreshold = noiseFloorLevel + scannerThresholdDb;
-                        if (maxLevel >= cfarThreshold && maxLevel >= level) {
-                            SCAN_DEBUG("Scanner: Signal level {:.1f} dB exceeds CFAR threshold {:.1f} dB and trigger level {:.1f} dB",
-                                     maxLevel, cfarThreshold, level);
-                            // Update noise floor when signal is present (only for auto mode)
-                            if (squelchDeltaAuto) {
-                                updateNoiseFloor(noiseFloorLevel);
-                            }
-                            
-                            // Apply squelch delta when receiving strong signal
-                            if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
-                                applySquelchDelta();
-                            }
-                            
-                            lastSignalTime = now;
-                        }
+                        maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorDb);
                     } else {
-                        // Fallback to waterfall FFT
                         maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
-                        if (maxLevel >= level) {
-                            // Legacy noise floor estimation
-                            if (squelchDeltaAuto) {
-                                updateNoiseFloor(maxLevel - 15.0f); // Estimate noise floor as 15dB below signal
-                            }
-                            
-                            // Apply squelch delta when receiving strong signal
-                            if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
-                                applySquelchDelta();
-                            }
-                            
-                            lastSignalTime = now;
-                        }
                     }
                     
-                    // Check if signal is lost
-                    auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
-                    if (timeSinceLastSignal.count() > lingerTime) {
-                        // Restore original squelch level when we leave receiving state
-                        if (squelchDeltaActive) {
-                            restoreSquelchLevel();
+                    if (maxLevel < level) {
+                        auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
+                        if (timeSinceLastSignal.count() > lingerTime) {
+                            receiving = false;
+                            
+                            // Restore squelch to its original level after signal is lost
+                            if (squelchDeltaActive) {
+                                restoreSquelchLevel();
+                            }
+                            
+                            SCAN_DEBUG("Scanner: Signal lost, resuming scan");
                         }
-                        
-                        receiving = false;
-                        SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
+                    }
+                    else {
+                        lastSignalTime = now;
                     }
                 }
                 else {
-                    flog::warn("Seeking signal");
                     double bottomLimit = current;
                     double topLimit = current;
-                    
-                    // ADAPTIVE SIGNAL SEARCH: Different behavior for single freq vs band scanning
-                    if (useFrequencyManager && currentEntryIsSingleFreq) {
-                        // SINGLE FREQUENCY: Only check signal at exact current frequency (no scanning)
-                        float maxLevel;
-                        float noiseFloorLevel = 0.0f;
-                        bool signalDetected = false;
-                        
-                        if (useDedicatedFFT && scannerPSD) {
-                            // Use CFAR detector with dedicated FFT for single frequency
-                            maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
-                            // CRITICAL FIX: Signal must exceed BOTH:
-                            // 1. CFAR threshold (noise floor + threshold)
-                            // 2. User's absolute trigger level
-                            float cfarThreshold = noiseFloorLevel + scannerThresholdDb;
-                            signalDetected = (maxLevel >= cfarThreshold && maxLevel >= level);
-                            if (signalDetected) {
-                                SCAN_DEBUG("Scanner: Signal level {:.1f} dB exceeds CFAR threshold {:.1f} dB and trigger level {:.1f} dB",
-                                         maxLevel, cfarThreshold, level);
-                            }
-                        } else {
-                            // Fallback to waterfall FFT for single frequency
-                            maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
-                            signalDetected = (maxLevel >= level);
-                        }
-                        
-                        if (signalDetected) {
-                            receiving = true;
-                            lastSignalTime = now;
-                            
-                            if (useDedicatedFFT && scannerPSD) {
-                                flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f}, noise: {:.1f})", 
-                                          current / 1e6, maxLevel, noiseFloorLevel);
-                            } else {
-                                flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", 
-                                          current / 1e6, maxLevel);
-                            }
-                            
-                            // TUNING PROFILE APPLICATION: Apply profile when signal found
-                            if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
-                                const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
-                                if (profile) {
-                                    applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "SIGNAL");
-                                }
-                            } else {
-                                if (applyProfiles && !currentTuningProfile) {
-                                    SCAN_DEBUG("Scanner: No profile available for {:.6f} MHz (Index:{})", current / 1e6, (int)currentScanIndex);
-                                }
-                            }
-                            
-                            continue; // Signal found, stay on this frequency
-                        }
-                        
-                        // No signal at exact frequency - continue to frequency stepping
-                        if (useDedicatedFFT && scannerPSD) {
-                            SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f}, noise: {:.1f}, threshold: {:.1f})", 
-                                      current / 1e6, maxLevel, noiseFloorLevel, noiseFloorLevel + scannerThresholdDb);
-                        } else {
-                            SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", 
-                                      current / 1e6, maxLevel, level);
-                        }
-                    } else {
-                        // BAND SCANNING: Search for signals across range using interval stepping
-                        bool found = false;
-                        
-                        if (useDedicatedFFT && scannerPSD) {
-                            // Use CFAR detector with dedicated FFT for band scanning
-                            found = findSignalCFAR(scanUp, bottomLimit, topLimit);
-                        } else {
-                            // Fallback to waterfall FFT for band scanning
-                            found = findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth);
-                        }
-                        
-                        if (found) {
-                            continue; // Signal found using band scanning
-                        }
-                    
-                        // Search for signal in the inverse scan direction if direction isn't enforced
-                        if (!reverseLock) {
-                            if (useDedicatedFFT && scannerPSD) {
-                                // Use CFAR detector with dedicated FFT for reverse band scanning
-                                if (findSignalCFAR(!scanUp, bottomLimit, topLimit)) {
-                                    continue; // Signal found using reverse band scanning
-                                }
-                            } else {
-                                // Fallback to waterfall FFT for reverse band scanning
-                                if (findSignal(!scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
-                                    continue; // Signal found using reverse band scanning
-                                }
-                            }
-                        }
-                        else { reverseLock = false; }
-                    }
-                    
-
-                    // There is no signal on the visible spectrum, tune in scan direction and retry
-                    // CRITICAL FIX: Use frequency manager integration or legacy frequency stepping
-                    if (useFrequencyManager) {
-                        // Use frequency manager for frequency stepping
-                                        if (!performFrequencyManagerScanning()) {
-                    // Fall back to legacy scanning if frequency manager unavailable
-                    flog::warn("Scanner: FM integration failed, falling back to legacy mode");
-                    performLegacyScanning();
-                }
-                    } else {
-                        // Legacy frequency stepping
-                        if (scanUp) {
-                        current = topLimit + interval;
-                            // Handle range wrapping for multi-range scanning
-                            if (current > currentStop) {
-                                // Move to next range or wrap to beginning of current range
-                            if (!frequencyRanges.empty()) {
-                                    auto activeRanges = getActiveRangeIndices();
-                                    if (!activeRanges.empty()) {
-                                        currentRangeIndex = (currentRangeIndex + 1) % activeRanges.size();
-                                        if (!getCurrentScanBounds(currentStart, currentStop)) {
-                                            current = startFreq; // Fallback
-                                        } else {
-                                            current = currentStart;
-                                            // Apply gain setting for new range
-                                            applyCurrentRangeGain();
-                                        }
-                                    } else {
-                                        current = currentStart;
-                                    }
-                                } else {
-                                    // Legacy single range wrapping
-                                    while (current > stopFreq) {
-                                    current = startFreq + (current - stopFreq - interval);
-                                    }
-                                    if (current < startFreq) { current = startFreq; }
-                                }
-                            }
-                        }
-                        else {
-                        current = bottomLimit - interval;
-                            // Handle range wrapping for multi-range scanning
-                            if (current < currentStart) {
-                                // Move to previous range or wrap to end of current range
-                            if (!frequencyRanges.empty()) {
-                                    auto activeRanges = getActiveRangeIndices();
-                                    if (!activeRanges.empty()) {
-                                        currentRangeIndex = (currentRangeIndex - 1 + activeRanges.size()) % activeRanges.size();
-                                        if (!getCurrentScanBounds(currentStart, currentStop)) {
-                                            current = stopFreq; // Fallback
-                                        } else {
-                                            current = currentStop;
-                                            // Apply gain setting for new range
-                                            applyCurrentRangeGain();
-                                        }
-                                    } else {
-                                        current = currentStop;
-                                    }
-                                } else {
-                                    // Legacy single range wrapping
-                                    while (current < startFreq) {
-                                    current = stopFreq - (startFreq - current - interval);
-                                    }
-                                    if (current > stopFreq) { current = stopFreq; }
-                            }
-                        }
-                    }
-                    
-                    // Update current range bounds after potential range change
-                    getCurrentScanBounds(currentStart, currentStop);
-                    
-                    // Add debug logging
-                    flog::warn("Scanner: Tuned to {:.0f} Hz (range: {:.0f} - {:.0f})", current, currentStart, currentStop);
-
-                    // If the new current frequency is outside the visible bandwidth, wait for retune
-                    if (current - (effectiveVfoWidth/2.0) < wfStart || current + (effectiveVfoWidth/2.0) > wfEnd) {
-                        lastTuneTime = now;
-                        tuning = true;
+                    bool detected = findSignalCFAR(scanUp, bottomLimit, topLimit);
+                    if (detected) {
+                        // Signal detected, handle it...
                     }
                 }
-                } // End of legacy frequency stepping
 
-                // FFT data already released above after copying
-                
-                } catch (const std::exception& e) {
-                    flog::error("Scanner: Exception in worker loop: {}", e.what());
-                    running = false;
-                    break;
-                } catch (...) {
-                    flog::error("Scanner: Unknown exception in worker loop");
-                    running = false;
-                    break;
+                if (!receiving) {
+                    // Update next frequency based on scanning direction
+                    if (scanUp) {
+                        current += interval;
+                        if (current > currentStop) {
+                            // If multi-range is active, move to the next range
+                            if (!frequencyRanges.empty()) {
+                                auto activeRanges = getActiveRangeIndices();
+                                if (!activeRanges.empty()) {
+                                    currentRangeIndex = (currentRangeIndex + 1) % activeRanges.size();
+                                    int rangeIdx = activeRanges[currentRangeIndex];
+                                    if (rangeIdx < frequencyRanges.size()) {
+                                        current = frequencyRanges[rangeIdx].startFreq;
+                                        flog::info("Scanner: Switched to next range: '{}' ({:.3f} - {:.3f} MHz)",
+                                                 frequencyRanges[rangeIdx].name,
+                                                 frequencyRanges[rangeIdx].startFreq / 1e6,
+                                                 frequencyRanges[rangeIdx].stopFreq / 1e6);
+                                        // Apply gain for the new range
+                                        applyCurrentRangeGain();
+                                    }
+                                }
+                            } else {
+                                // Legacy single-range mode: wrap around
+                                current = currentStart;
+                            }
+                        }
+                    } else { // scanDown
+                        current -= interval;
+                        if (current < currentStart) {
+                            // If multi-range is active, move to the next range
+                            if (!frequencyRanges.empty()) {
+                                auto activeRanges = getActiveRangeIndices();
+                                if (!activeRanges.empty()) {
+                                    currentRangeIndex = (currentRangeIndex - 1 + activeRanges.size()) % activeRanges.size();
+                                    int rangeIdx = activeRanges[currentRangeIndex];
+                                    if (rangeIdx < frequencyRanges.size()) {
+                                        current = frequencyRanges[rangeIdx].stopFreq;
+                                        flog::info("Scanner: Switched to next range: '{}' ({:.3f} - {:.3f} MHz)",
+                                                 frequencyRanges[rangeIdx].name,
+                                                 frequencyRanges[rangeIdx].startFreq / 1e6,
+                                                 frequencyRanges[rangeIdx].stopFreq / 1e6);
+                                        // Apply gain for the new range
+                                        applyCurrentRangeGain();
+                                    }
+                                }
+                            } else {
+                                // Legacy single-range mode: wrap around
+                                current = currentStop;
+                            }
+                        }
+                    }
                 }
             }
-        } catch (const std::exception& e) {
-            flog::error("Scanner: Critical exception in worker thread: {}", e.what());
-            running = false;
-        } catch (...) {
-            flog::error("Scanner: Critical unknown exception in worker thread");
-            running = false;
+            catch (const std::exception& e) {
+                flog::error("Scanner: Exception in worker thread: {}", e.what());
+                // Consider stopping the scanner on critical errors
+                // running = false; 
+            }
+            catch (...) {
+                flog::error("Scanner: Unknown exception in worker thread");
+                // running = false;
+            }
+            }
         }
-        
-        flog::info("Scanner: Worker thread ended");
+        catch (const std::exception& e) {
+            flog::error("Scanner: Unhandled exception in worker thread: {}", e.what());
+        }
+        catch (...) {
+            flog::error("Scanner: Unhandled unknown exception in worker thread");
+        }
+        flog::info("Scanner: Worker thread stopped");
     }
 
     // Find signals using dedicated scanner FFT with CFAR detection
@@ -2916,7 +2738,7 @@ private:
     bool configNeedsSave = false; // Flag for delayed config saving
     std::chrono::time_point<std::chrono::high_resolution_clock> lastSignalTime = std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> lastTuneTime = std::chrono::high_resolution_clock::now();
-    std::thread workerThread;
+    std::thread scanThread;
     // CRITICAL FIX: Use recursive mutex to allow re-locking from the same thread
     std::recursive_mutex scanMtx;
     
@@ -2997,7 +2819,6 @@ private:
     int passbandIndex = 6; // Default to 100% (index 6, recommended starting point)
     
     // Dedicated FFT/PSD parameters for scanner accuracy
-    std::unique_ptr<scanner::ScannerPSD> scannerPSD;
     bool useDedicatedFFT = false;
     int scannerFFTSize = 524288; // Default to optimal size (524288)
     float scannerOverlap = 0.5f; // Default to 50% overlap

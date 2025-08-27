@@ -7,6 +7,8 @@
 #include <atomic>
 #include <cstring>
 #include <cmath>
+#include <thread>
+#include <condition_variable>
 
 // Include FFT implementation
 #include <fftw3.h>
@@ -67,6 +69,9 @@ public:
     const float* acquireLatestPSD(int& width);
     void releaseLatestPSD();
     
+    void start();
+    void stop();
+
     // Sub-bin interpolation for accurate peak detection
     static double refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz);
     
@@ -132,8 +137,14 @@ private:
     std::vector<std::complex<float>> m_frameBuffer;
     
     // Multi-threading protection
-    mutable std::mutex m_mutex;
+    mutable std::recursive_mutex m_mutex;
     
+    // Processing thread
+    std::thread m_thread;
+    std::atomic<bool> m_running{false};
+    std::condition_variable m_cv;
+    std::mutex m_cvMutex;
+
     // State tracking
     bool m_initialized = false;
     std::atomic<bool> m_processing{false};
@@ -146,6 +157,9 @@ private:
     // Generate window function
     void generateWindow();
     
+    // Processing loop for the dedicated thread
+    void processingLoop();
+
     // Calculate smoothing alpha from time constant
     void calculateAlpha();
     

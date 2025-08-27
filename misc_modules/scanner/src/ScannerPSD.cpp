@@ -12,7 +12,7 @@ ScannerPSD::~ScannerPSD() {
 }
 
 void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float overlap, float avgTimeMs) {
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     
     // Validate input parameters
     if (fftSize <= 0 || sampleRate <= 0) {
@@ -70,10 +70,12 @@ void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float 
     m_initialized = true;
     m_firstFrame = true; // Mark as first frame for proper initialization
     m_processing.store(false, std::memory_order_release);
+
+    start();
 }
 
 void ScannerPSD::reset() {
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     
     if (!m_initialized) return;
     
@@ -103,6 +105,8 @@ void ScannerPSD::reset() {
     m_processing.store(false, std::memory_order_release);
     
     m_initialized = false;
+
+    stop();
 }
 
 void ScannerPSD::writeToRingBuffer(const std::complex<float>* data, size_t count) {
@@ -122,6 +126,9 @@ void ScannerPSD::writeToRingBuffer(const std::complex<float>* data, size_t count
     // Update write position
     m_writePos.store((writePos + count) % bufSize, std::memory_order_release);
     m_samplesAvailable.fetch_add(count, std::memory_order_release);
+
+    // Notify the processing thread that there's new data
+    m_cv.notify_one();
 }
 
 bool ScannerPSD::readFromRingBuffer(std::vector<std::complex<float>>& frame, size_t count) {
@@ -161,36 +168,17 @@ bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
     static int sampleCounter = 0;
     sampleCounter += count;
     static int lastLoggedCount = 0;
-    if (sampleCounter - lastLoggedCount > 100000) {
-        flog::info("Scanner: Fed {} samples to ScannerPSD (total: {})", count, sampleCounter);
+    if (sampleCounter - lastLoggedCount > 1000000) {  // Reduced logging frequency
+        flog::debug("Scanner: Fed {} samples to ScannerPSD (total: {})", count, sampleCounter);
         lastLoggedCount = sampleCounter;
     }
     
     bool newFrameReady = false;
     
-    // Write new samples to ring buffer (no lock needed)
+    // Write new samples to ring buffer (lock-free)
     writeToRingBuffer(samples, count);
     
-    // Process frames while we have enough samples
-    while (m_samplesAvailable.load(std::memory_order_acquire) >= m_fftSize) {
-        // Extract frame from ring buffer (no lock needed)
-        if (!readFromRingBuffer(m_frameBuffer, m_fftSize)) {
-            break;
-        }
-        
-        // Process the frame (this updates the power spectrum)
-        processFrame(m_frameBuffer);
-        newFrameReady = true;
-        
-        // Advance by hop size (discard samples we don't need)
-        size_t skipCount = m_fftSize - m_hopSize;
-        if (skipCount > 0) {
-            m_readPos.fetch_add(skipCount, std::memory_order_release);
-            m_samplesAvailable.fetch_sub(skipCount, std::memory_order_release);
-        }
-    }
-    
-    return newFrameReady;
+    return true;
 }
 
 bool ScannerPSD::process() {
@@ -213,119 +201,112 @@ bool ScannerPSD::process() {
 
 bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
     if (!m_initialized || frame.size() < m_fftSize) {
-        flog::error("Scanner: Cannot process frame - initialized: {}, frame size: {} (need {})",
-                           m_initialized ? "true" : "false", static_cast<int>(frame.size()), m_fftSize);
         return false;
     }
     
-    // Log FFT processing
-    static int fftCounter = 0;
-    if (++fftCounter % 10 == 0) {  // Log every 10 FFTs
-        flog::info("Scanner: Processing FFT #{} (size: {}, sample rate: {} Hz, bin width: {:.2f} Hz)", 
-                  fftCounter, m_fftSize, m_sampleRate, getBinWidthHz());
-    }
+    // Create local buffers for FFT processing
+    std::vector<std::complex<float>> fftIn(m_fftSize);
+    std::vector<float> powerSpectrum(m_fftSize);
     
-    // Check for valid data in frame
-    bool hasValidData = false;
+    // Apply window and prepare FFT input (no lock needed)
     for (int i = 0; i < m_fftSize; i++) {
-        if (std::abs(frame[i].real()) > 1e-6f || std::abs(frame[i].imag()) > 1e-6f) {
-            hasValidData = true;
-            break;
-        }
+        const auto& sample = frame[i];
+        float window = m_window[i];
+        m_fftwIn[i][0] = sample.real() * window;
+        m_fftwIn[i][1] = sample.imag() * window;
     }
     
-    if (!hasValidData) {
-        static int warningCounter = 0;
-        if (++warningCounter % 10 == 0) {
-            flog::warn("Scanner: Frame contains no valid data");
-        }
-        return false;
-    }
-    
-    // Apply window and copy to FFT input buffer
-    for (int i = 0; i < m_fftSize; i++) {
-        m_fftIn[i] = frame[i] * m_window[i];
-    }
-    
-    // Copy input data to FFTW input buffer
-    for (int i = 0; i < m_fftSize; i++) {
-        m_fftwIn[i][0] = m_fftIn[i].real();
-        m_fftwIn[i][1] = m_fftIn[i].imag();
-    }
-    
-    // Execute FFTW
+    // Execute FFT (no lock needed)
     fftwf_execute(m_fftwPlan);
     
-    // Copy FFTW output to our output buffer
+    // Calculate power spectrum into local buffer (no lock needed)
     for (int i = 0; i < m_fftSize; i++) {
-        m_fftOut[i] = std::complex<float>(m_fftwOut[i][0], m_fftwOut[i][1]);
-    }
-    
-    // Get current write buffer index
-    int writeIdx = m_writeBuffer.load(std::memory_order_acquire);
-    int processIdx = m_processBuffer.load(std::memory_order_acquire);
-    
-    // Ensure all buffers are properly sized
-    for (auto& buf : m_psdBuffers) {
-        if (buf.size() != m_fftSize) {
-            buf.resize(m_fftSize, -200.0f);
-        }
-    }
-    
-    // Calculate power spectrum (shifted to center DC)
-    for (int i = 0; i < m_fftSize; i++) {
-        int binIdx = (i + m_fftSize/2) % m_fftSize;
-        
-        // Calculate power using VOLK for consistency with waterfall FFT
-        float power = std::norm(m_fftOut[i]);
-        
-        // Convert to dB with proper scaling (same as waterfall)
+        float re = m_fftwOut[i][0];
+        float im = m_fftwOut[i][1];
+        float power = re * re + im * im;
         float powerDb = 10.0f * log10f(std::max(1e-15f, power)) - 20.0f * log10f(m_fftSize);
-        
-        // Store shifted result in write buffer
-        m_psdBuffers[writeIdx][binIdx] = powerDb;
+        int binIdx = (i + m_fftSize/2) % m_fftSize;
+        powerSpectrum[binIdx] = powerDb;
     }
     
-    // Apply EMA smoothing
+    // Get buffer indices atomically
+    const int writeIdx = m_writeBuffer.load(std::memory_order_acquire);
+    const int processIdx = m_processBuffer.load(std::memory_order_acquire);
+    
+    // Ensure write buffer is properly sized
+    if (m_psdBuffers[writeIdx].size() != m_fftSize) {
+        m_psdBuffers[writeIdx].resize(m_fftSize, -200.0f);
+    }
     if (m_firstFrame) {
-        std::copy(m_psdBuffers[writeIdx].begin(), 
-                 m_psdBuffers[writeIdx].end(), 
-                 m_psdBuffers[processIdx].begin());
+        std::lock_guard<std::recursive_mutex> lck(m_mutex);
+        m_psdBuffers[processIdx] = powerSpectrum;
         m_firstFrame = false;
     } else {
+        const float alpha = m_alpha;
+        const float beta = 1.0f - alpha;
+        std::vector<float> smoothedSpectrum(m_fftSize);
+        
+        // Do smoothing on local buffer
         for (int i = 0; i < m_fftSize; i++) {
-            m_psdBuffers[processIdx][i] = m_alpha * m_psdBuffers[writeIdx][i] + 
-                                        (1.0f - m_alpha) * m_psdBuffers[processIdx][i];
+            smoothedSpectrum[i] = alpha * powerSpectrum[i] + beta * m_psdBuffers[processIdx][i];
+        }
+        
+        // Copy smoothed spectrum to process buffer (minimal lock)
+        {
+            std::lock_guard<std::recursive_mutex> lck(m_mutex);
+            m_psdBuffers[processIdx] = smoothedSpectrum;
         }
     }
     
-    // Rate-limited logging of spectrum range
+    // Rate-limited logging (reduced frequency)
     static auto lastLogTime = std::chrono::steady_clock::now();
     static int logCounter = 0;
     ++logCounter;
     
     auto now = std::chrono::steady_clock::now();
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime).count() >= 1) {
-        float minVal = -100.0f, maxVal = -100.0f;
-        if (!m_psdBuffers[processIdx].empty()) {
-            minVal = *std::min_element(m_psdBuffers[processIdx].begin(), m_psdBuffers[processIdx].end());
-            maxVal = *std::max_element(m_psdBuffers[processIdx].begin(), m_psdBuffers[processIdx].end());
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime).count() >= 5) {  // 5-second interval
+        const auto& buf = m_psdBuffers[processIdx];
+        if (!buf.empty()) {
+            auto [minIt, maxIt] = std::minmax_element(buf.begin(), buf.end());
+            flog::debug("Scanner: Processed {} FFTs, power range [{:.1f}, {:.1f}] dB", 
+                      logCounter, *minIt, *maxIt);
         }
-        flog::info("Scanner: Processed {} FFTs, power range [{:.1f}, {:.1f}] dB", 
-                  logCounter, minVal, maxVal);
         logCounter = 0;
         lastLogTime = now;
     }
     
-    // Atomic buffer rotation (no mutex needed)
-    int readIdx = m_readBuffer.load(std::memory_order_acquire);
+    // Atomic buffer rotation with memory fence
+    std::atomic_thread_fence(std::memory_order_release);
     
-    // Rotate buffers: write -> process -> read -> write
-    m_writeBuffer.store((writeIdx + 1) % 3, std::memory_order_release);
-    m_processBuffer.store((processIdx + 1) % 3, std::memory_order_release);
-    m_readBuffer.store((readIdx + 1) % 3, std::memory_order_release);
+    // Rotate buffers atomically in one shot
+    int readIdx = m_readBuffer.load(std::memory_order_acquire);
+    int nextWrite = (writeIdx + 1) % 3;
+    int nextProcess = (processIdx + 1) % 3;
+    int nextRead = (readIdx + 1) % 3;
+    
+    m_writeBuffer.store(nextWrite, std::memory_order_release);
+    m_processBuffer.store(nextProcess, std::memory_order_release);
+    m_readBuffer.store(nextRead, std::memory_order_release);
+    
+    std::atomic_thread_fence(std::memory_order_acquire);
     
     return true;
+}
+
+void ScannerPSD::start() {
+    if (m_running) {
+        return;
+    }
+    m_running = true;
+    m_thread = std::thread(&ScannerPSD::processingLoop, this);
+}
+
+void ScannerPSD::stop() {
+    m_running = false;
+    m_cv.notify_all();
+    if (m_thread.joinable()) {
+        m_thread.join();
+    }
 }
 
 const float* ScannerPSD::acquireLatestPSD(int& width) {
@@ -422,7 +403,7 @@ void ScannerPSD::setOverlap(float overlap) {
     if (overlap < 0.0f || overlap >= 1.0f) return;
     if (overlap == m_overlap) return;
     
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     
     m_overlap = overlap;
     
@@ -437,7 +418,7 @@ void ScannerPSD::setOverlap(float overlap) {
 void ScannerPSD::setWindow(WindowType type) {
     if (type == m_windowType) return;
     
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     
     m_windowType = type;
     
@@ -449,7 +430,7 @@ void ScannerPSD::setAverageTimeMs(float ms) {
     if (ms <= 0.0f) return;
     if (ms == m_avgTimeMs) return;
     
-    std::lock_guard<std::mutex> lck(m_mutex);
+    std::lock_guard<std::recursive_mutex> lck(m_mutex);
     
     m_avgTimeMs = ms;
     
@@ -570,6 +551,37 @@ float getWindowValue(int n, int N, WindowType type) {
             
         default:
             return 1.0f;
+    }
+}
+
+void ScannerPSD::processingLoop() {
+    while (m_running) {
+        std::unique_lock<std::mutex> lk(m_cvMutex);
+        m_cv.wait(lk, [&]{ return m_samplesAvailable.load(std::memory_order_acquire) >= m_fftSize || !m_running; });
+
+        if (!m_running) {
+            break;
+        }
+        
+        while (m_samplesAvailable.load(std::memory_order_acquire) >= m_fftSize) {
+            // Create a local frame buffer for this iteration
+            std::vector<std::complex<float>> localFrame(m_fftSize);
+            
+            // Extract frame from ring buffer (lock-free)
+            if (!readFromRingBuffer(localFrame, m_fftSize)) {
+                break;
+            }
+            
+            // Process the frame outside any locks
+            processFrame(localFrame);
+            
+            // Advance read position (lock-free)
+            size_t skipCount = m_fftSize - m_hopSize;
+            if (skipCount > 0) {
+                m_readPos.fetch_add(skipCount, std::memory_order_release);
+                m_samplesAvailable.fetch_sub(skipCount, std::memory_order_release);
+            }
+        }
     }
 }
 
