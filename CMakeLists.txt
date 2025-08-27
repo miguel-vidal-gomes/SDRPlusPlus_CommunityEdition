@@ -78,6 +78,11 @@ set(SDRPP_MODULE_CMAKE "${CMAKE_SOURCE_DIR}/sdrpp_module.cmake")
 # Root source folder
 set(SDRPP_CORE_ROOT "${CMAKE_SOURCE_DIR}/core/src/")
 
+# Allow CI to override VERSION_STR via environment
+if(DEFINED ENV{BUILD_VERSION})
+  add_compile_definitions(VERSION_STR=\"$ENV{BUILD_VERSION}\")
+endif()
+
 # Compiler flags
 if (${CMAKE_BUILD_TYPE} MATCHES "Debug")
     # Debug Flags

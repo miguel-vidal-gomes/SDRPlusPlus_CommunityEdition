@@ -22,7 +22,11 @@ cp -R root/res/* $BUNDLE/Contents/Resources/
 bundle_create_icns root/res/icons/sdrpp_ce.macos.png $BUNDLE/Contents/Resources/sdrppce
 
 # Create the property list
-bundle_create_plist sdrppce "SDR++CE Community Edition" org.sdrppce.sdrppce 1.2.3-CE-nightly sdrp sdrpp_ce sdrppce $BUNDLE/Contents/Info.plist
+# Use BUILD_VERSION from environment if available, otherwise use the hardcoded version
+VERSION_STR="${BUILD_VERSION:-1.2.3-CE-nightly}"
+# Remove leading 'v' if present for CFBundleVersion
+CFBundleVersion="${VERSION_STR#v}"
+bundle_create_plist sdrppce "SDR++CE Community Edition" org.sdrppce.sdrppce "$CFBundleVersion" sdrp sdrpp_ce sdrppce $BUNDLE/Contents/Info.plist
 
 # ========================= Install binaries =========================
 

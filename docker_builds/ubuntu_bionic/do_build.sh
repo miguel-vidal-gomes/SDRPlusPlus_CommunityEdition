@@ -100,6 +100,12 @@ cd build
 cmake .. -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=OFF -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_OVERRIDE_STD_FILESYSTEM=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON
 make VERBOSE=1 -j2
 
+# Verify version is embedded
+if [ ! -z "$BUILD_VERSION" ]; then
+  echo "Checking for version string: $BUILD_VERSION"
+  strings ./sdrpp_ce | grep -F "$BUILD_VERSION" || echo "WARNING: Version string not found in binary"
+fi
+
 # Generate package
 cd ..
 sh make_debian_package.sh ./build 'libfftw3-dev, libglfw3-dev, libvolk1-dev, librtaudio-dev, libzstd-dev'
