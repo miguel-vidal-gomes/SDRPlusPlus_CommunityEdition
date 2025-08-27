@@ -2464,10 +2464,16 @@ private:
         assert(highSignalBin >= 0 && highSignalBin < fftSize);
         
         // Define reference regions (on both sides, outside guard band)
-        int lowRefStart = std::max(0, lowSignalBin - guardBins - refBins);
-        int lowRefEnd = std::max(0, lowSignalBin - guardBins - 1);
-        int highRefStart = std::min(dataWidth - 1, highSignalBin + guardBins + 1);
-        int highRefEnd = std::min(dataWidth - 1, highSignalBin + guardBins + refBins);
+        const int N = fftSize;
+        auto clamp = [&](int x){ return std::min(std::max(x, 0), N-1); };
+        
+        // Left band: end just before guard zone
+        const int leftEnd = clamp(lowSignalBin - guardBins - 1);
+        const int leftStart = clamp(leftEnd - (refBins - 1));
+        
+        // Right band: start just after guard zone
+        const int rightStart = clamp(highSignalBin + guardBins + 1);
+        const int rightEnd = clamp(rightStart + (refBins - 1));
         
         // Find maximum power in signal region
         float maxSignal = -INFINITY;
@@ -2493,13 +2499,8 @@ private:
         std::vector<std::pair<int, int>> refRanges;
         
         // Add reference regions on both sides of the ROI, outside guard bands
-        if (lowRefStart <= lowRefEnd) {
-            refRanges.emplace_back(lowRefStart, lowRefEnd);
-        }
-        
-        if (highRefStart <= highRefEnd) {
-            refRanges.emplace_back(highRefStart, highRefEnd);
-        }
+        refRanges.emplace_back(leftStart, leftEnd);
+        refRanges.emplace_back(rightStart, rightEnd);
         
         // Safety asserts for reference ranges
         for (const auto& [a, b] : refRanges) {
@@ -2508,24 +2509,20 @@ private:
             assert(a <= b);  // Range order
         }
         
-        // Calculate noise floor using reference regions
-        // Use a robust method (median or trimmed mean)
+        // Collect finite dB values from reference regions
         std::vector<float> refValues;
-        refValues.reserve(fftSize); // Allocate enough space for worst case
-        
-        // Collect reference values from all ranges
-        for (const auto& range : refRanges) {
-            for (int i = range.first; i <= range.second; i++) {
-                if (i < 0 || i >= dataWidth) continue;
-                if (std::isfinite(data[i])) {
-                    refValues.push_back(data[i]);
-                }
+        refValues.reserve(N);
+        for (auto [a, b] : refRanges) {
+            if (a > b) continue;                 // nothing here, skip
+            for (int i = a; i <= b; ++i) {
+                float v = data[i];
+                if (std::isfinite(v)) refValues.push_back(v);
             }
         }
         
         // If no reference values, use fallback approach
         if (refValues.empty()) {
-            flog::warn("Scanner: No valid reference values, using fallback approach");
+            flog::warn("Scanner: CFAR: empty reference set; using fallback approach");
             
             // Fallback: use whole spectrum minus ROI
             for (int i = 0; i < dataWidth; i++) {
@@ -2535,30 +2532,31 @@ private:
                     }
                 }
             }
+            
+            if (refValues.empty()) {
+                flog::warn("Scanner: CFAR: fallback also empty; skipping detection");
+                scannerPSD->releaseLatestPSD();
+                return -INFINITY;
+            }
         }
-        
-        // Remove any non-finite values (shouldn't happen with previous checks, but just in case)
-        refValues.erase(std::remove_if(refValues.begin(), refValues.end(),
-            [](float x){ return !std::isfinite(x); }), refValues.end());
         
         // Calculate noise floor (median for robustness against outliers)
-        float noiseFloor = -80.0f; // Default if no reference values
-        if (!refValues.empty()) {
-            std::sort(refValues.begin(), refValues.end());
-            if (refValues.size() % 2 == 0) {
-                noiseFloor = (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f;
-            } else {
-                noiseFloor = refValues[refValues.size()/2];
-            }
-            
-            // Debug the noise floor values
-            float minNoise = refValues.front();
-            float maxNoise = refValues.back();
-            flog::info("Scanner: Noise floor calculation: median {:.1f} dB, min {:.1f} dB, max {:.1f} dB, from {} samples",
-                      noiseFloor, minNoise, maxNoise, static_cast<int>(refValues.size()));
+        float noiseFloor = -80.0f; // Default if something goes wrong
+        
+        // Get stats from reference values
+        auto [minIt, maxIt] = std::minmax_element(refValues.begin(), refValues.end());
+        
+        // Calculate median
+        std::sort(refValues.begin(), refValues.end());
+        if (refValues.size() % 2 == 0) {
+            noiseFloor = (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f;
         } else {
-            flog::warn("Scanner: No reference values for noise floor calculation, using default {:.1f} dB", noiseFloor);
+            noiseFloor = refValues[refValues.size()/2];
         }
+        
+        // Log noise floor stats with proper format
+        flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
+                  noiseFloor, *minIt, *maxIt, static_cast<int>(refValues.size()));
         
         // Store noise floor for caller
         noiseFloorDb = noiseFloor;
@@ -2599,12 +2597,11 @@ private:
         flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
                   freq / 1e6, maxSignal, noiseFloor, thresholdDb, marginDb);
         
-        // Use the debugRanges helper for reference ranges
-        std::string refRangesStr = debugRanges(refRanges);
+        // Use the debugRanges helper directly in the log statement
         
         // Add more detailed debug info with correct format specifiers
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, binHz, lowSignalBin, highSignalBin, refRangesStr);
+                  fftSize, binHz, lowSignalBin, highSignalBin, debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
