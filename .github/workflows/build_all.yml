@@ -849,11 +849,15 @@ jobs:
 
         
 update_nightly_release:
+  
   needs: create_full_archive
   if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+  
   runs-on: ubuntu-latest
+  
   permissions:
     contents: write
+  
   steps:
     - name: Checkout (needed for git tag/push)
       uses: actions/checkout@v4
