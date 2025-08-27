@@ -78,31 +78,9 @@ set(SDRPP_MODULE_CMAKE "${CMAKE_SOURCE_DIR}/sdrpp_module.cmake")
 # Root source folder
 set(SDRPP_CORE_ROOT "${CMAKE_SOURCE_DIR}/core/src/")
 
-# Generate version information
-execute_process(COMMAND git describe --tags --always --dirty
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                OUTPUT_VARIABLE GIT_DESC
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-# Fallback if building from a source archive
-if(NOT GIT_DESC)
-  set(GIT_DESC "v1.2.3-CE-unknown")
-endif()
-
-# Allow CI to override (e.g., NIGHTLY-2025-08-27+8640052)
+# Allow CI to override VERSION_STR via environment
 if(DEFINED ENV{BUILD_VERSION})
-  set(GIT_DESC "$ENV{BUILD_VERSION}")
-endif()
-
-# Set the version string as a CMake variable that can be passed to subdirectories
-set(APP_VERSION_STR "${GIT_DESC}" CACHE STRING "Application version string")
-
-# Add it as a compile definition for the main executable
-if(GIT_DESC STREQUAL "")
-  # If GIT_DESC is empty, define a flag to handle it in code
-  add_compile_definitions(APP_VERSION_STR_EMPTY)
-else()
-  add_compile_definitions(APP_VERSION_STR="${GIT_DESC}")
+  add_compile_definitions(VERSION_STR=\"$ENV{BUILD_VERSION}\")
 endif()
 
 # Compiler flags
