@@ -2435,7 +2435,7 @@ private:
         }
         
         flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
-                  binWidthHz(sampleRate, fftSize), sampleRate, fftSize);
+                  binHz, sampleRate, fftSize);
         
         // Calculate the bin index for the center frequency using DC-centered mapping
         int centerBinInt = absHzToDcBin(freq);
@@ -2464,21 +2464,19 @@ private:
         
         // Define reference regions (on both sides, outside guard band)
         const int N = fftSize;
-        auto clamp = [&](int x){ return std::min(std::max(x, 0), N-1); };
-        
-        // Inputs (already mapped to bins via absHzToDcBin())
+        auto clamp = [&](int x){ return std::min(std::max(x,0), N-1); };
+
         assert(lowSignalBin >= 0 && lowSignalBin < N);
         assert(highSignalBin >= 0 && highSignalBin < N);
-        
-        // Sizes in bins
+
         const int guardBins = hzToBins(scannerGuardHz, sampleRate, fftSize);
         const int refWidthBins = std::max(1, hzToBins(scannerRefHz, sampleRate, fftSize));
-        
-        // Left ref band: directly before the guard zone on left side of ROI
+
+        // Left band: immediately before ROI with guard
         const int leftEnd = clamp(lowSignalBin - guardBins - 1);
         const int leftStart = clamp(leftEnd - (refWidthBins - 1));
-        
-        // Right ref band: directly after the guard zone on right side of ROI
+
+        // Right band: immediately after ROI with guard
         const int rightStart = clamp(highSignalBin + guardBins + 1);
         const int rightEnd = clamp(rightStart + (refWidthBins - 1));
         
@@ -2526,55 +2524,56 @@ private:
             assert(a <= b);  // Range order
         }
         
-        // Collect finite values from PSD-in-dB
-        std::vector<float> refValues;
-        refValues.reserve(refWidthBins * 2);
-        for (auto [a, b] : refRanges) {
-            for (int i = a; i <= b; ++i) {
+        // Collect finite dB values
+        std::vector<float> refVals;
+        refVals.reserve(refWidthBins * 2);
+        for (auto [a,b] : refRanges) {
+            for (int i=a; i<=b; ++i) {
                 float v = data[i];
-                if (std::isfinite(v)) refValues.push_back(v);
+                if (std::isfinite(v)) refVals.push_back(v);
             }
         }
         
-        // If no reference values, use fallback approach
-        if (refValues.empty()) {
-            flog::warn("Scanner: CFAR: empty reference set; skip frame");
+        if (refVals.empty()) {
+            flog::warn("Scanner: CFAR: empty reference set; skipping frame");
             
             // Fallback: use whole spectrum minus ROI
             for (int i = 0; i < dataWidth; i++) {
                 if (i < lowSignalBin || i > highSignalBin) {
                     if (std::isfinite(data[i])) {
-                        refValues.push_back(data[i]);
+                        refVals.push_back(data[i]);
                     }
                 }
             }
             
-            if (refValues.empty()) {
+            if (refVals.empty()) {
                 flog::warn("Scanner: CFAR: fallback also empty; skipping detection");
                 scannerPSD->releaseLatestPSD();
                 return -INFINITY;
             }
         }
         
-        // Calculate noise floor (median for robustness against outliers)
-        float noiseFloor = -80.0f; // Default if something goes wrong
+        // Sort for median calculation
+        std::sort(refVals.begin(), refVals.end());
         
-        // Get stats from reference values
-        auto [mnIt, mxIt] = std::minmax_element(refValues.begin(), refValues.end());
-        const float noiseDb = refValues.empty() ? -80.0f : 
-                             (refValues.size() % 2 == 0) ? 
-                             (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f :
-                             refValues[refValues.size()/2];
+        // Stats in dB (and size_t count!)
+        auto [mnIt, mxIt] = std::minmax_element(refVals.begin(), refVals.end());
+        const float noiseDb = refVals.empty() ? -80.0f : 
+                             (refVals.size() % 2 == 0) ? 
+                             (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
+                             refVals[refVals.size()/2];
+        const size_t refCount = refVals.size();
         
-        noiseFloor = noiseDb;
+        // Set noise floor
+        float noiseFloor = noiseDb;
         
         // Guardrails to prevent regressions
         assert(std::isfinite(noiseDb));
-        assert(refValues.size() > 0);
+        assert(refCount > 0);
         
         // Log noise floor stats with proper format
         flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
-                  noiseDb, *mnIt, *mxIt, static_cast<int>(refValues.size()));
+                  noiseDb, *mnIt, *mxIt, static_cast<int>(refCount));
         
         // Store noise floor for caller
         noiseFloorDb = noiseFloor;
@@ -2620,7 +2619,7 @@ private:
         
         // Add more detailed debug info with correct format specifiers
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, binWidthHz(sampleRate, fftSize), lowSignalBin, highSignalBin, debugRanges(refRanges));
+                  fftSize, binHz, lowSignalBin, highSignalBin, debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
