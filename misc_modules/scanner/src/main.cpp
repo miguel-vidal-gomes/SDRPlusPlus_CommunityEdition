@@ -162,6 +162,7 @@ public:
             g_hasIQFrontendIface = true;
             
             // First, set the scanner's FFT size in the IQFrontEnd
+            flog::info("Scanner: Sending FFT size {0} to IQFrontEnd interface", scannerFftSize);
             if (!core::modComManager.callInterface(iq_interface::kIQFrontendIface, 0, &scannerFftSize, nullptr)) {
                 flog::error("Scanner: Failed to set FFT size via interface");
                 g_hasIQFrontendIface = false;
@@ -423,11 +424,11 @@ public:
         currentFreqIndex = 0;
         
         // Get all frequency lists from the frequency manager
-        // TODO: Get frequency manager module
-        
-        // For now, just simulate frequency manager not found
-        flog::warn("Scanner: Frequency manager module not found");
-        return;
+        auto it = core::moduleManager.instances.find("Frequency Manager");
+        if (it == core::moduleManager.instances.end()) {
+            flog::warn("Scanner: Frequency manager module not found");
+            return;
+        }
         
         // This is a simplified implementation - in a real implementation,
         // we would query the frequency manager module for its entries
@@ -824,6 +825,7 @@ private:
 
             // Correctly notify IQFrontEnd of the new size if the interface exists
             if (g_hasIQFrontendIface) {
+                flog::info("Scanner: Sending updated FFT size {0} to IQFrontEnd interface", _this->scannerFftSize);
                 if (!core::modComManager.callInterface(iq_interface::kIQFrontendIface, 0, &_this->scannerFftSize, nullptr)) {
                     flog::warn("Scanner: Failed to update FFT size via interface");
                 }
@@ -1200,8 +1202,8 @@ private:
     std::chrono::high_resolution_clock::time_point lastTuneTime;
 
     // Scanner FFT parameters
-    int scannerFftSize = 8192;
-    static constexpr int SCANNER_FFT_SIZES[] = {1024, 2048, 4096, 8192, 16384, 32768};
+    uint32_t scannerFftSize = 8192;
+    static constexpr uint32_t SCANNER_FFT_SIZES[] = {1024, 2048, 4096, 8192, 16384, 32768};
     static constexpr const char* SCANNER_FFT_SIZE_LABELS[] = {"1024", "2048", "4096", "8192", "16384", "32768"};
     static constexpr int SCANNER_FFT_SIZE_COUNT = 6;
     int scannerFftSizeIndex = 3;

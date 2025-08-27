@@ -27,7 +27,7 @@ public:
 
     void init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, 
              int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx,
-             int scannerFftSize = 8192, double scannerFftRate = 10.0, FFTWindow scannerFftWindow = BLACKMAN, 
+             uint32_t scannerFftSize = 8192, double scannerFftRate = 10.0, FFTWindow scannerFftWindow = BLACKMAN, 
              float* (*acquireScannerFFTBuffer)(void* ctx) = nullptr, void (*releaseScannerFFTBuffer)(void* ctx) = nullptr, void* scannerFftCtx = nullptr);
 
     void setInput(dsp::stream<dsp::complex_t>* in);
@@ -49,7 +49,7 @@ public:
     void setFFTRate(double rate);
     void setFFTWindow(FFTWindow fftWindow);
 
-    void setScannerFFTSize(int size);
+    void setScannerFFTSize(uint32_t size);
     void setScannerFFTRate(double rate);
     void setScannerFFTWindow(FFTWindow fftWindow);
 
@@ -114,7 +114,7 @@ protected:
     void* _fftCtx;
 
     // Scanner FFT Parameters
-    int _scannerFftSize;
+    uint32_t _scannerFftSize;
     double _scannerFftRate;
     FFTWindow _scannerFftWindow;
     float* (*_acquireScannerFFTBuffer)(void* ctx);

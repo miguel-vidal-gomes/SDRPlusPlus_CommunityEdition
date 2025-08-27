@@ -20,7 +20,7 @@ IQFrontEnd::~IQFrontEnd() {
 
 void IQFrontEnd::init(dsp::stream<dsp::complex_t>* in, double sampleRate, bool buffering, int decimRatio, bool dcBlocking, 
                       int fftSize, double fftRate, FFTWindow fftWindow, float* (*acquireFFTBuffer)(void* ctx), void (*releaseFFTBuffer)(void* ctx), void* fftCtx,
-                      int scannerFftSize, double scannerFftRate, FFTWindow scannerFftWindow, float* (*acquireScannerFFTBuffer)(void* ctx), void (*releaseScannerFFTBuffer)(void* ctx), void* scannerFftCtx) {
+                      uint32_t scannerFftSize, double scannerFftRate, FFTWindow scannerFftWindow, float* (*acquireScannerFFTBuffer)(void* ctx), void (*releaseScannerFFTBuffer)(void* ctx), void* scannerFftCtx) {
     _sampleRate = sampleRate;
     _decimRatio = decimRatio;
     _fftSize = fftSize;
@@ -234,14 +234,21 @@ void IQFrontEnd::setFFTWindow(FFTWindow fftWindow) {
     updateMainFFTPath();
 }
 
-void IQFrontEnd::setScannerFFTSize(int size) {
+void IQFrontEnd::setScannerFFTSize(uint32_t size) {
+    // Log the incoming size for debugging
+    flog::info("IQFrontEnd: Setting scanner FFT size to {0}", size);
+    
     // Safety check for reasonable FFT size limits
-    if (size <= 0 || size > 1048576) { // 1M max size as safety limit
+    if (size == 0 || size > 1048576) { // 1M max size as safety limit
         flog::error("IQFrontEnd: Invalid scanner FFT size {0}, limiting to 8192", size);
         _scannerFftSize = 8192; // Reset to a safe default
     } else {
         _scannerFftSize = size;
     }
+    
+    // Log the final size after validation
+    flog::info("IQFrontEnd: Scanner FFT size set to {0}", _scannerFftSize);
+    
     updateScannerFFTPath();
 }
 
@@ -266,28 +273,28 @@ void IQFrontEnd::registerInterface() {
             IQFrontEnd* _this = (IQFrontEnd*)ctx;
             
             switch (code) {
-                case 1: { // Register Scanner FFT Callbacks
-                    // Input: [0]=size, [1]=acquireCallback, [2]=releaseCallback, [3]=callbackCtx
-                    void** args = (void**)in;
-                    int* size = (int*)args[0];
-                    float* (*acquireCallback)(void*) = (float* (*)(void*))args[1];
-                    void (*releaseCallback)(void*) = (void (*)(void*))args[2];
-                    void* callbackCtx = args[3];
+                case 0: { // Set Scanner FFT Size
+                    // Input: size
+                    uint32_t* size = (uint32_t*)in;
                     
-                    // Update scanner FFT parameters
-                    _this->setScannerFFTSize(*size);
-                    _this->_acquireScannerFFTBuffer = acquireCallback;
-                    _this->_releaseScannerFFTBuffer = releaseCallback;
-                    _this->_scannerFftCtx = callbackCtx;
-                    break;
-                }
-                case 2: { // Set Scanner FFT Size
-                    // Input: [0]=size
-                    void** args = (void**)in;
-                    int* size = (int*)args[0];
+                    // Log the pointer and value for debugging
+                    flog::info("IQFrontEnd: Received scanner FFT size request with value {0}", *size);
                     
                     // Update scanner FFT size
                     _this->setScannerFFTSize(*size);
+                    break;
+                }
+                case 1: { // Register Scanner FFT Callbacks
+                    // Input: [0]=acquireCallback, [1]=releaseCallback, [2]=callbackCtx
+                    void** args = (void**)in;
+                    float* (*acquireCallback)(void*) = (float* (*)(void*))args[0];
+                    void (*releaseCallback)(void*) = (void (*)(void*))args[1];
+                    void* callbackCtx = args[2];
+                    
+                    // Update scanner FFT parameters
+                    _this->_acquireScannerFFTBuffer = acquireCallback;
+                    _this->_releaseScannerFFTBuffer = releaseCallback;
+                    _this->_scannerFftCtx = callbackCtx;
                     break;
                 }
             }
