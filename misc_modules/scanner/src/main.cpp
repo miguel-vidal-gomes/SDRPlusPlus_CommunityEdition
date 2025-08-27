@@ -1102,27 +1102,43 @@ private:
 
     void stop() {
         if (!running) { return; }
+        
+        // First set running to false to signal all threads to stop
         running = false;
+        flog::info("Scanner: Stopping scanner module");
         
         // Restore squelch level if modified
         if (squelchDeltaActive) {
             restoreSquelchLevel();
         }
         
+        // Wait for worker thread to complete
         if (workerThread.joinable()) {
+            flog::info("Scanner: Waiting for worker thread to join");
             workerThread.join();
+            flog::info("Scanner: Worker thread joined successfully");
         }
         
-        // Clean up dedicated FFT resources
+        // Clean up dedicated FFT resources - first unbind the stream
         if (iqStream) {
+            // First set iqStreamId to 0 to prevent any new handler calls
             if (iqStreamId) {
-                // The handler will be deleted when the stream is deleted
+                flog::info("Scanner: Clearing IQ stream handler");
                 iqStreamId = 0;
             }
+            
+            // Then unbind the stream from the frontend
+            flog::info("Scanner: Unbinding IQ stream");
             sigpath::iqFrontEnd.unbindIQStream(iqStream);
+            
+            // Finally delete the stream which will delete the handler
+            flog::info("Scanner: Deleting IQ stream");
             delete iqStream;
             iqStream = nullptr;
         }
+        
+        // Reset the PSD engine last, after all threads have stopped
+        flog::info("Scanner: Resetting PSD engine");
         scannerPSD.reset();
     }
 
@@ -2421,9 +2437,8 @@ private:
         flog::info("Scanner: Bin width: {:.2f} Hz (sample rate: {} Hz, FFT size: {})", 
                   binHz, sampleRate, fftSize);
         
-        // Calculate the bin index for the center frequency
-        double centerBin = freq / binHz;
-        int centerBinInt = (int)round(centerBin);
+        // Calculate the bin index for the center frequency using DC-centered mapping
+        int centerBinInt = absHzToDcBin(freq);
         
         // Calculate width in bins
         int widthBins = (int)round(width / binHz);
@@ -2437,6 +2452,13 @@ private:
         int lowSignalBin = std::max(0, centerBinInt - halfWidth);
         int highSignalBin = std::min(dataWidth - 1, centerBinInt + halfWidth);
         
+        // Sanity check for bin indices
+        if (lowSignalBin < 0 || lowSignalBin >= fftSize || highSignalBin < 0 || highSignalBin >= fftSize) {
+            flog::error("Scanner: Invalid ROI bins: [{}, {}], FFT size: {}", lowSignalBin, highSignalBin, fftSize);
+            scannerPSD->releaseLatestPSD();
+            return -INFINITY;
+        }
+        
         // Define reference regions (on both sides, outside guard band)
         int lowRefStart = std::max(0, lowSignalBin - guardBins - refBins);
         int lowRefEnd = std::max(0, lowSignalBin - guardBins - 1);
@@ -2448,29 +2470,65 @@ private:
         int maxBin = centerBinInt;
         for (int i = lowSignalBin; i <= highSignalBin; i++) {
             if (i < 0 || i >= dataWidth) continue;
-            if (data[i] > maxSignal) {
+            if (std::isfinite(data[i]) && data[i] > maxSignal) {
                 maxSignal = data[i];
                 maxBin = i;
             }
         }
         
+        // If no valid signal found, use a reasonable default
+        if (!std::isfinite(maxSignal)) {
+            flog::warn("Scanner: No valid signal found in ROI, using default value");
+            maxSignal = -100.0f;
+        }
+        
         // Debug the maxSignal value
         flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", maxSignal, maxBin);
+        
+        // Define reference regions using vector of ranges for better handling
+        std::vector<std::pair<int, int>> refRanges;
+        
+        // Add reference regions on both sides of the ROI, outside guard bands
+        if (lowRefStart <= lowRefEnd) {
+            refRanges.emplace_back(lowRefStart, lowRefEnd);
+        }
+        
+        if (highRefStart <= highRefEnd) {
+            refRanges.emplace_back(highRefStart, highRefEnd);
+        }
         
         // Calculate noise floor using reference regions
         // Use a robust method (median or trimmed mean)
         std::vector<float> refValues;
-        refValues.reserve((lowRefEnd - lowRefStart + 1) + (highRefEnd - highRefStart + 1));
+        refValues.reserve(fftSize); // Allocate enough space for worst case
         
-        // Collect low reference region values
-        for (int i = lowRefStart; i <= lowRefEnd; i++) {
-            if (i >= 0 && i < dataWidth) refValues.push_back(data[i]);
+        // Collect reference values from all ranges
+        for (const auto& range : refRanges) {
+            for (int i = range.first; i <= range.second; i++) {
+                if (i < 0 || i >= dataWidth) continue;
+                if (std::isfinite(data[i])) {
+                    refValues.push_back(data[i]);
+                }
+            }
         }
         
-        // Collect high reference region values
-        for (int i = highRefStart; i <= highRefEnd; i++) {
-            if (i >= 0 && i < dataWidth) refValues.push_back(data[i]);
+        // If no reference values, use fallback approach
+        if (refValues.empty()) {
+            flog::warn("Scanner: No valid reference values, using fallback approach");
+            
+            // Fallback: use whole spectrum minus ROI
+            for (int i = 0; i < dataWidth; i++) {
+                if (i < lowSignalBin || i > highSignalBin) {
+                    if (std::isfinite(data[i])) {
+                        refValues.push_back(data[i]);
+                    }
+                }
+            }
         }
+        
+        // Remove any non-finite values (shouldn't happen with previous checks, but just in case)
+        refValues.erase(std::remove_if(refValues.begin(), refValues.end(),
+            [](float x){ return !std::isfinite(x); }), refValues.end());
         
         // Calculate noise floor (median for robustness against outliers)
         float noiseFloor = -80.0f; // Default if no reference values
@@ -2529,9 +2587,16 @@ private:
                   freq / 1e6, maxSignal, noiseFloor, thresholdDb, 
                   detected ? "DETECTED" : "REJECTED");
                   
+        // Create a debug string for reference ranges
+        std::string refRangesStr;
+        for (size_t i = 0; i < refRanges.size(); ++i) {
+            if (i > 0) refRangesStr += ", ";
+            refRangesStr += "[" + std::to_string(refRanges[i].first) + ".." + std::to_string(refRanges[i].second) + "]";
+        }
+        
         // Add more detailed debug info
-        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.2f} Hz, ROI bins: [{}, {}], ref bins: [{}, {}] + [{}, {}]",
-                  scannerFFTSize, binHz, lowSignalBin, highSignalBin, lowRefStart, lowRefEnd, highRefStart, highRefEnd);
+        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.2f} Hz, ROI bins: [{}, {}], ref ranges: {}",
+                  fftSize, binHz, lowSignalBin, highSignalBin, refRangesStr);
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
@@ -2821,6 +2886,34 @@ private:
     // Gets the current bin width in Hz
     double getBinWidthHz() {
         return scannerPSD ? scannerPSD->getBinWidthHz() : 0.0;
+    }
+    
+    // Map absolute RF (Hz) to DC-centered bin index [0..N-1], where N/2 is 0 Hz baseband
+    int absHzToDcBin(double absHz) {
+        if (!scannerPSD) return 0;
+        
+        // Get FFT size and center frequency
+        int fftSize = scannerPSD->getFftSize();
+        double centerHz = sigpath::iqFrontEnd.getCenterFrequency();
+        
+        // Convert to baseband frequency and then to bin
+        double basebandHz = absHz - centerHz;           // shift by LO
+        double k = basebandHz / getBinWidthHz() + (fftSize * 0.5);
+        
+        // Clamp to valid range
+        if (k < 0) k = 0;
+        if (k > fftSize - 1) k = fftSize - 1;
+        return (int)std::llround(k);
+    }
+    
+    // Helper to handle wraparound ranges
+    void pushRange(std::vector<std::pair<int, int>>& ranges, int start, int end, int fftSize) {
+        if (start <= end) {
+            ranges.emplace_back(start, end);
+        } else {
+            ranges.emplace_back(0, end);
+            ranges.emplace_back(start, fftSize-1);
+        }
     }
     
     // IQ stream handler is now implemented as a lambda in the start() method

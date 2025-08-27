@@ -40,6 +40,9 @@ public:
     // Process samples in buffer and generate power spectrum
     bool process();
     
+    // Process a frame of samples without locking
+    bool processFrame(const std::vector<std::complex<float>>& frame);
+    
     // Get current power spectrum frame (dB)
     const std::vector<float>& getPowerSpectrum() const;
     
@@ -82,6 +85,9 @@ private:
     // EMA smoothing parameter
     double m_alpha = 0.0;      // Calculated from avgTimeMs
     
+    // PSD normalization factor
+    float m_psdScale = 1.0f;   // Scale factor for power spectrum normalization
+    
     // FFT engine
     fftwf_plan m_fftwPlan;
     fftwf_complex* m_fftwIn;
@@ -104,12 +110,16 @@ private:
     // State tracking
     bool m_initialized = false;
     std::atomic<bool> m_processing{false};
+    bool m_firstFrame = true;   // Track first frame for proper initialization
     
     // Generate window function
     void generateWindow();
     
     // Calculate smoothing alpha from time constant
     void calculateAlpha();
+    
+    // Helper function to get window value
+    float getWindowValue(int n, int N, WindowType type);
 };
 
 } // namespace scanner

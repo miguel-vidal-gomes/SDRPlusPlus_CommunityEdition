@@ -56,12 +56,13 @@ void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float 
     // Calculate smoothing parameter
     calculateAlpha();
     
-    // Reset buffers
-    std::fill(m_powerSpectrum.begin(), m_powerSpectrum.end(), -100.0f);
-    std::fill(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end(), -100.0f);
+    // Reset buffers - initialize to a very low but finite value
+    std::fill(m_powerSpectrum.begin(), m_powerSpectrum.end(), -200.0f);
+    std::fill(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end(), -200.0f);
     m_bufferOffset = 0;
     
     m_initialized = true;
+    m_firstFrame = true; // Mark as first frame for proper initialization
 }
 
 void ScannerPSD::reset() {
@@ -93,9 +94,8 @@ void ScannerPSD::reset() {
 }
 
 bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
-    if (!m_initialized || m_processing) {
-        flog::error("Scanner: Cannot feed samples - initialized: {}, processing: {}", 
-                           m_initialized ? "true" : "false", m_processing.load() ? "true" : "false");
+    if (!m_initialized) {
+        flog::error("Scanner: Cannot feed samples - not initialized");
         return false;
     }
     
@@ -110,33 +110,44 @@ bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
     
     bool newFrameReady = false;
     
+    // Lock only during buffer manipulation
     {
         std::lock_guard<std::mutex> lck(m_mutex);
         
-        // Copy samples into buffer
-        if (count + m_bufferOffset > m_sampleBuffer.size()) {
-            // Buffer overflow - resize to accommodate
-            m_sampleBuffer.resize(count + m_bufferOffset);
-        }
+        // Copy samples to buffer
+        int remainingSpace = m_sampleBuffer.size() - m_bufferOffset;
+        int copyCount = std::min(count, remainingSpace);
         
-        std::memcpy(&m_sampleBuffer[m_bufferOffset], samples, count * sizeof(std::complex<float>));
-        m_bufferOffset += count;
+        std::memcpy(&m_sampleBuffer[m_bufferOffset], samples, copyCount * sizeof(std::complex<float>));
+        m_bufferOffset += copyCount;
+    }
+    
+    // Process all available frames without holding the lock
+    for (;;) {
+        std::vector<std::complex<float>> frame;
         
-        // Check if we have enough samples for FFT
-        if (m_bufferOffset >= m_fftSize) {
-            // Process a frame
-            process();
+        // Lock only to check/extract a frame
+        {
+            std::lock_guard<std::mutex> lck(m_mutex);
             
-            // Shift buffer by hop size
+            // If we don't have enough samples for a frame, break
+            if (m_bufferOffset < m_fftSize) break;
+            
+            // Copy one frame's worth of samples
+            frame.assign(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_fftSize);
+            
+            // Advance buffer by hop size
             int remaining = m_bufferOffset - m_hopSize;
             if (remaining > 0) {
-                std::memmove(&m_sampleBuffer[0], &m_sampleBuffer[m_hopSize], 
-                            remaining * sizeof(std::complex<float>));
+                std::memmove(&m_sampleBuffer[0], &m_sampleBuffer[m_hopSize],
+                            remaining * sizeof(m_sampleBuffer[0]));
             }
             m_bufferOffset = remaining;
-            
-            newFrameReady = true;
         }
+        
+        // Process the frame without holding the lock
+        processFrame(frame);
+        newFrameReady = true;
     }
     
     return newFrameReady;
@@ -149,6 +160,20 @@ bool ScannerPSD::process() {
         return false;
     }
     
+    // Create a local copy of the buffer to process
+    std::vector<std::complex<float>> frame(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_fftSize);
+    
+    // Process the frame
+    return processFrame(frame);
+}
+
+bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
+    if (!m_initialized || frame.size() < m_fftSize) {
+        flog::error("Scanner: Cannot process frame - initialized: {}, frame size: {} (need {})",
+                           m_initialized ? "true" : "false", frame.size(), m_fftSize);
+        return false;
+    }
+    
     // Log FFT processing
     static int fftCounter = 0;
     if (++fftCounter % 10 == 0) {  // Log every 10 FFTs
@@ -156,12 +181,10 @@ bool ScannerPSD::process() {
                   fftCounter, m_fftSize, m_sampleRate, getBinWidthHz());
     }
     
-    m_processing = true;
-    
-    // Check for valid data in buffer
+    // Check for valid data in frame
     bool hasValidData = false;
     for (int i = 0; i < m_fftSize; i++) {
-        if (std::abs(m_sampleBuffer[i].real()) > 1e-6f || std::abs(m_sampleBuffer[i].imag()) > 1e-6f) {
+        if (std::abs(frame[i].real()) > 1e-6f || std::abs(frame[i].imag()) > 1e-6f) {
             hasValidData = true;
             break;
         }
@@ -170,13 +193,14 @@ bool ScannerPSD::process() {
     if (!hasValidData) {
         static int warningCounter = 0;
         if (++warningCounter % 10 == 0) {
-            flog::warn("Scanner: Sample buffer contains no valid data");
+            flog::warn("Scanner: Frame contains no valid data");
         }
+        return false;
     }
     
     // Apply window and copy to FFT input buffer
     for (int i = 0; i < m_fftSize; i++) {
-        m_fftIn[i] = m_sampleBuffer[i] * m_window[i];
+        m_fftIn[i] = frame[i] * m_window[i];
     }
     
     // Copy input data to FFTW input buffer
@@ -193,64 +217,63 @@ bool ScannerPSD::process() {
         m_fftOut[i] = std::complex<float>(m_fftwOut[i][0], m_fftwOut[i][1]);
     }
     
-    // Calculate power spectrum (shifted to center DC)
-    for (int i = 0; i < m_fftSize; i++) {
-        int binIdx = (i + m_fftSize/2) % m_fftSize;
+    // Calculate and update power spectrum with mutex protection
+    {
+        std::lock_guard<std::mutex> lck(m_mutex);
         
-        // Calculate power as |z|² and normalize by FFT size
-        // Use proper normalization factor for power spectrum
-        float power = std::norm(m_fftOut[i]) / (float)(m_fftSize * m_fftSize);
-        
-        // Convert to dB with proper floor
-        constexpr float minPower = 1e-15f;
-        constexpr float refPower = 1.0f;
-        float powerDb = 10.0f * log10f(std::max(power, minPower) / refPower);
-        
-        // Store shifted result - initialize to -100 dB if we're just starting
-        if (m_firstFrame) {
-            m_avgPowerSpectrum[binIdx] = powerDb;
-        } else {
-            // Apply exponential moving average
-            m_avgPowerSpectrum[binIdx] = (1.0f - m_alpha) * m_avgPowerSpectrum[binIdx] + m_alpha * powerDb;
-        }
-        
-        // Store in power spectrum
-        m_powerSpectrum[binIdx] = powerDb;
-        
-        // Debug output for first few bins and center bin
-        if (i == 0 || i == m_fftSize/4 || i == m_fftSize/2 || i == 3*m_fftSize/4 || i == m_fftSize-1) {
-            static int debugCounter = 0;
-            if (++debugCounter % 100 == 0) {  // Limit debug output
-                flog::debug("Scanner: FFT bin {} (shifted to {}): power={:.6e}, powerDb={:.2f} dB", 
-                          i, binIdx, power, powerDb);
+        // Calculate power spectrum (shifted to center DC)
+        for (int i = 0; i < m_fftSize; i++) {
+            int binIdx = (i + m_fftSize/2) % m_fftSize;
+            
+            // Calculate power as |z|² and normalize by FFT size and window
+            // Use proper normalization factor for power spectrum
+            float power = std::norm(m_fftOut[i]) * m_psdScale;
+            
+            // Convert to dB with proper floor
+            constexpr float minPower = 1e-20f;
+            constexpr float refPower = 1.0f;
+            float powerDb = 10.0f * log10f(std::max(power, minPower) / refPower);
+            
+            // Store shifted result - initialize to -100 dB if we're just starting
+            if (m_firstFrame) {
+                m_avgPowerSpectrum[binIdx] = powerDb;
+            } else {
+                // Apply exponential moving average
+                m_avgPowerSpectrum[binIdx] = (1.0f - m_alpha) * m_avgPowerSpectrum[binIdx] + m_alpha * powerDb;
+            }
+            
+            // Store in power spectrum
+            m_powerSpectrum[binIdx] = powerDb;
+            
+            // Debug output for first few bins and center bin
+            if (i == 0 || i == m_fftSize/4 || i == m_fftSize/2 || i == 3*m_fftSize/4 || i == m_fftSize-1) {
+                static int debugCounter = 0;
+                if (++debugCounter % 100 == 0) {  // Limit debug output
+                    flog::debug("Scanner: FFT bin {} (shifted to {}): power={:.6e}, powerDb={:.2f} dB", 
+                              i, binIdx, power, powerDb);
+                }
             }
         }
-    }
-    
-    // Debug power spectrum values
-    static int debugCounter = 0;
-    if (++debugCounter % 10 == 0) {  // Log every 10 FFTs
-        float minVal = -100.0f, maxVal = -100.0f, avgVal = 0.0f;
-        if (!m_powerSpectrum.empty()) {
-            minVal = *std::min_element(m_powerSpectrum.begin(), m_powerSpectrum.end());
-            maxVal = *std::max_element(m_powerSpectrum.begin(), m_powerSpectrum.end());
-            avgVal = std::accumulate(m_powerSpectrum.begin(), m_powerSpectrum.end(), 0.0f) / m_powerSpectrum.size();
-            flog::info("Scanner: Power spectrum range: [{:.1f}, {:.1f}] dB, avg: {:.1f} dB", 
-                      minVal, maxVal, avgVal);
+        
+        // Debug power spectrum values
+        static int debugCounter = 0;
+        if (++debugCounter % 10 == 0) {  // Log every 10 FFTs
+            float minVal = -100.0f, maxVal = -100.0f;
+            if (!m_avgPowerSpectrum.empty()) {
+                minVal = *std::min_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+                maxVal = *std::max_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+            }
+            flog::info("Scanner: Power spectrum range [{:.1f}, {:.1f}] dB", minVal, maxVal);
         }
+        
+        m_firstFrame = false;
     }
     
-    // Apply time-domain averaging (EMA)
-    for (int i = 0; i < m_fftSize; i++) {
-        m_avgPowerSpectrum[i] = (1.0f - m_alpha) * m_avgPowerSpectrum[i] + m_alpha * m_powerSpectrum[i];
-    }
-    
-    m_processing = false;
     return true;
 }
 
 const std::vector<float>& ScannerPSD::getPowerSpectrum() const {
-    return m_avgPowerSpectrum;
+    return m_powerSpectrum;
 }
 
 const float* ScannerPSD::acquireLatestPSD(int& width) {
@@ -271,31 +294,13 @@ const float* ScannerPSD::acquireLatestPSD(int& width) {
     // Check if we have any data yet
     static int callCount = 0;
     if (++callCount % 10 == 0) {
-        // Check if the power spectrum contains valid data
-        bool hasValidData = false;
-        float minVal = 0.0f, maxVal = -200.0f;
-        
+        float minVal = -100.0f, maxVal = -100.0f;
         if (!m_avgPowerSpectrum.empty()) {
-            // Check for non-default values
-            for (size_t i = 0; i < m_avgPowerSpectrum.size(); i++) {
-                if (m_avgPowerSpectrum[i] != -100.0f) {
-                    hasValidData = true;
-                    break;
-                }
-            }
-            
-            if (hasValidData) {
-                minVal = *std::min_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
-                maxVal = *std::max_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
-                
-                flog::info("Scanner: acquireLatestPSD returning {} samples, range [{:.1f}, {:.1f}] dB", 
-                          m_fftSize, minVal, maxVal);
-            } else {
-                flog::warn("Scanner: acquireLatestPSD returning {} samples, but no valid data yet", m_fftSize);
-            }
-        } else {
-            flog::error("Scanner: acquireLatestPSD called but power spectrum is empty");
+            minVal = *std::min_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+            maxVal = *std::max_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
         }
+        flog::info("Scanner: acquireLatestPSD returning {} samples, range [{:.1f}, {:.1f}] dB", 
+                  m_fftSize, minVal, maxVal);
     }
     
     width = m_fftSize;
@@ -312,74 +317,90 @@ void ScannerPSD::releaseLatestPSD() {
 }
 
 double ScannerPSD::refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz) {
-    // Ensure we have valid indices for parabolic interpolation
-    if (binIndex <= 0 || binIndex >= PdB.size() - 1) {
+    // Ensure we have a valid bin index with neighbors
+    if (binIndex <= 0 || binIndex >= (int)PdB.size() - 1) {
         return binIndex * binWidthHz;
     }
     
-    float L = PdB[binIndex-1];
-    float C = PdB[binIndex];
-    float R = PdB[binIndex+1];
+    // Get power values for the peak and its neighbors
+    double L = static_cast<double>(PdB[binIndex - 1]);
+    double C = static_cast<double>(PdB[binIndex]);
+    double R = static_cast<double>(PdB[binIndex + 1]);
     
-    // Parabolic interpolation formula
-    double num = 0.5 * (static_cast<double>(L) - static_cast<double>(R));
-    double den = (static_cast<double>(L) - 2.0*static_cast<double>(C) + static_cast<double>(R));
-    if (den < 1e-6) den = 1e-6;  // Avoid division by small values
+    // Calculate the sub-bin offset using parabolic interpolation
+    double num = 0.5 * (L - R);
+    double den = (L - 2.0*C + R);
+    if (std::abs(den) < 1e-6) den = 1e-6;  // Avoid division by small values
     double deltaBins = num / den;
-    // Clamp to range [-0.5, 0.5]
+    
+    // Clamp to reasonable range
     if (deltaBins < -0.5) deltaBins = -0.5;
     if (deltaBins > 0.5) deltaBins = 0.5;
     
-    // Return frequency with sub-bin precision
-    return (binIndex + deltaBins) * binWidthHz;
+    // Calculate refined frequency
+    double refinedBin = binIndex + deltaBins;
+    double refinedHz = refinedBin * binWidthHz;
+    
+    return refinedHz;
 }
 
 void ScannerPSD::setFftSize(int size) {
-    if (m_fftSize == size) return;
+    if (size <= 0) return;
+    if (size == m_fftSize) return;
     
-    // Reinitialize with new FFT size
+    // Re-initialize with new size
     init(size, m_sampleRate, m_windowType, m_overlap, m_avgTimeMs);
 }
 
 void ScannerPSD::setOverlap(float overlap) {
-    if (std::abs(m_overlap - overlap) < 0.001f) return;
+    if (overlap < 0.0f || overlap >= 1.0f) return;
+    if (overlap == m_overlap) return;
     
-    // Update overlap and recalculate hop size
     std::lock_guard<std::mutex> lck(m_mutex);
-    m_overlap = std::clamp(overlap, 0.0f, 0.99f);
+    
+    m_overlap = overlap;
+    
+    // Recalculate hop size
     m_hopSize = static_cast<int>(m_fftSize * (1.0f - m_overlap));
     if (m_hopSize < 1) m_hopSize = 1;
+    
+    // Recalculate alpha
+    calculateAlpha();
 }
 
 void ScannerPSD::setWindow(WindowType type) {
-    if (m_windowType == type) return;
+    if (type == m_windowType) return;
     
-    // Update window type and regenerate window
     std::lock_guard<std::mutex> lck(m_mutex);
+    
     m_windowType = type;
+    
+    // Regenerate window
     generateWindow();
 }
 
 void ScannerPSD::setAverageTimeMs(float ms) {
-    if (std::abs(m_avgTimeMs - ms) < 0.001f) return;
+    if (ms <= 0.0f) return;
+    if (ms == m_avgTimeMs) return;
     
-    // Update averaging time and recalculate alpha
     std::lock_guard<std::mutex> lck(m_mutex);
+    
     m_avgTimeMs = ms;
+    
+    // Recalculate alpha
     calculateAlpha();
 }
 
 void ScannerPSD::setSampleRate(int rate) {
-    if (m_sampleRate == rate) return;
+    if (rate <= 0) return;
+    if (rate == m_sampleRate) return;
     
-    // Update sample rate and recalculate alpha
-    std::lock_guard<std::mutex> lck(m_mutex);
-    m_sampleRate = rate;
-    calculateAlpha();
+    // Re-initialize with new sample rate
+    init(m_fftSize, rate, m_windowType, m_overlap, m_avgTimeMs);
 }
 
 double ScannerPSD::getBinWidthHz() const {
-    if (m_sampleRate <= 0 || m_fftSize <= 0) return 0.0;
+    if (m_fftSize <= 0) return 0.0;
     return static_cast<double>(m_sampleRate) / static_cast<double>(m_fftSize);
 }
 
@@ -431,48 +452,58 @@ void ScannerPSD::generateWindow() {
                 m_window[i] = 0.5 * (1.0 - cos(2.0 * M_PI * ratio));
             }
             break;
-            
-        default:
-            // Default to Blackman-Harris
-            for (int i = 0; i < m_fftSize; i++) {
-                double ratio = (double)i / (double)(m_fftSize - 1);
-                m_window[i] = 0.42 - 0.5 * cos(2.0 * M_PI * ratio) + 0.08 * cos(4.0 * M_PI * ratio);
-            }
-            break;
     }
     
-    // Normalize window for proper scaling
-    double sum = 0.0;
-    for (int i = 0; i < m_fftSize; i++) {
-        sum += m_window[i];
+    // Compute window power normalization
+    double sumw2 = 0.0;
+    for (int i = 0; i < m_fftSize; ++i) {
+        sumw2 += double(m_window[i]) * double(m_window[i]);
     }
+    float U = float(sumw2 / double(m_fftSize));         // RMS window power
+    m_psdScale = 1.0f / float(m_fftSize) / U;           // scale for |X|^2 → power/Hz-ish
     
-    if (sum > 0.0) {
-        double normFactor = m_fftSize / sum;
-        for (int i = 0; i < m_fftSize; i++) {
-            m_window[i] *= normFactor;
-        }
-    }
+    flog::info("Scanner: Window normalization factor: {:.6f}", m_psdScale);
 }
 
 void ScannerPSD::calculateAlpha() {
-    if (m_sampleRate <= 0 || m_fftSize <= 0 || m_hopSize <= 0) {
-        m_alpha = 0.1f; // Default value if we don't have valid parameters
-        return;
+    // Calculate alpha for exponential moving average based on time constant
+    double hopRate = static_cast<double>(m_sampleRate) / 
+                    (static_cast<double>(m_fftSize) * (1.0 - static_cast<double>(m_overlap)));
+    double tauS = static_cast<double>(m_avgTimeMs) / 1000.0;
+    m_alpha = static_cast<float>(1.0 - std::exp(-1.0 / (hopRate * tauS)));
+    
+    flog::info("Scanner: EMA alpha: {:.6f} (time constant: {:.1f} ms, hop rate: {:.1f} Hz)", 
+              m_alpha, m_avgTimeMs, hopRate);
+}
+
+float getWindowValue(int n, int N, WindowType type) {
+    double ratio = (double)n / (double)(N - 1);
+    
+    switch (type) {
+        case WindowType::RECTANGULAR:
+            return 1.0f;
+            
+        case WindowType::BLACKMAN:
+            return 0.42 - 0.5 * cos(2.0 * M_PI * ratio) + 0.08 * cos(4.0 * M_PI * ratio);
+            
+        case WindowType::BLACKMAN_HARRIS_7:
+            return 0.27105140069342f -
+                   0.43329793923448f * cos(2.0 * M_PI * ratio) +
+                   0.21812299954311f * cos(4.0 * M_PI * ratio) -
+                   0.06592544638803f * cos(6.0 * M_PI * ratio) +
+                   0.01081174209837f * cos(8.0 * M_PI * ratio) -
+                   0.00077658482522f * cos(10.0 * M_PI * ratio) +
+                   0.00001388721735f * cos(12.0 * M_PI * ratio);
+                   
+        case WindowType::HAMMING:
+            return 0.54 - 0.46 * cos(2.0 * M_PI * ratio);
+            
+        case WindowType::HANN:
+            return 0.5 * (1.0 - cos(2.0 * M_PI * ratio));
+            
+        default:
+            return 1.0f;
     }
-    
-    // Calculate frames per second based on sample rate, FFT size, and overlap
-    double framesPerSec = static_cast<double>(m_sampleRate) / static_cast<double>(m_hopSize);
-    
-    // Convert time constant from ms to seconds
-    double timeConstantSec = m_avgTimeMs / 1000.0;
-    
-    // Calculate alpha for EMA filter: alpha = 1 - exp(-1/(framesPerSec * timeConstant))
-    m_alpha = 1.0 - exp(-1.0 / (framesPerSec * timeConstantSec));
-    
-    // Clamp to reasonable values
-    m_alpha = std::clamp(m_alpha, 0.01, 1.0);
 }
 
 } // namespace scanner
-
