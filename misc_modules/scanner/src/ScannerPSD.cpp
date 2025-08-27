@@ -297,10 +297,9 @@ const float* ScannerPSD::acquireLatestPSD(int& width) {
     // Check if we have any data yet
     static int callCount = 0;
     if (++callCount % 10 == 0) {
-        // Get actual min/max values from the spectrum
-        auto [minIt, maxIt] = std::minmax_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+        auto [mnIt, mxIt] = std::minmax_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
         flog::info("Scanner: acquireLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
-                  m_fftSize, *minIt, *maxIt);
+                  m_fftSize, *mnIt, *mxIt);
     }
     
     width = m_fftSize;

@@ -2461,9 +2461,6 @@ private:
         int widthBins = (int)round(width / binHz);
         int halfWidth = widthBins / 2;
         
-        // Calculate reference band sizes in bins
-        int refBins = hzToBins(scannerRefHz);
-        
         // Define the signal region of interest (ROI)
         int lowSignalBin = std::max(0, centerBinInt - halfWidth);
         int highSignalBin = std::min(dataWidth - 1, centerBinInt + halfWidth);
@@ -2471,13 +2468,8 @@ private:
         // Sanity check for bin indices
         if (lowSignalBin < 0 || lowSignalBin >= fftSize || highSignalBin < 0 || highSignalBin >= fftSize) {
             flog::error("Scanner: Invalid ROI bins: [{}, {}], FFT size: {}", lowSignalBin, highSignalBin, fftSize);
-            scannerPSD->releaseLatestPSD();
             return -INFINITY;
         }
-        
-        // Additional safety asserts for debugging
-        assert(lowSignalBin >= 0 && lowSignalBin < fftSize);
-        assert(highSignalBin >= 0 && highSignalBin < fftSize);
         
         // Define reference regions (on both sides, outside guard band)
         const int N = fftSize;
@@ -2486,16 +2478,16 @@ private:
         assert(lowSignalBin >= 0 && lowSignalBin < N);
         assert(highSignalBin >= 0 && highSignalBin < N);
 
-        const int guardBins = hzToBins(scannerGuardHz, sampleRate, fftSize);
+        const int guardBins    = hzToBins(scannerGuardHz, sampleRate, fftSize);
         const int refWidthBins = std::max(1, hzToBins(scannerRefHz, sampleRate, fftSize));
 
-        // Left band: immediately before ROI with guard
-        const int leftEnd = clamp(lowSignalBin - guardBins - 1);
+        // Left band just before ROI (with guard)
+        const int leftEnd   = clamp(lowSignalBin - guardBins - 1);
         const int leftStart = clamp(leftEnd - (refWidthBins - 1));
 
-        // Right band: immediately after ROI with guard
+        // Right band just after ROI (with guard)
         const int rightStart = clamp(highSignalBin + guardBins + 1);
-        const int rightEnd = clamp(rightStart + (refWidthBins - 1));
+        const int rightEnd   = clamp(rightStart + (refWidthBins - 1));
         
         // Find maximum power in signal region (peak in ROI in dB)
         float maxSignal = -INFINITY;
@@ -2527,19 +2519,9 @@ private:
         // Debug the maxSignal value
         flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", signalDb, kMax);
         
-        // Define reference regions using vector of ranges for better handling
         std::vector<std::pair<int, int>> refRanges;
-        
-        // Add reference regions on both sides of the ROI, outside guard bands
         if (leftStart <= leftEnd) refRanges.emplace_back(leftStart, leftEnd);
         if (rightStart <= rightEnd) refRanges.emplace_back(rightStart, rightEnd);
-        
-        // Safety asserts for reference ranges
-        for (const auto& [a, b] : refRanges) {
-            assert(a >= 0 && a < fftSize);
-            assert(b >= 0 && b < fftSize);
-            assert(a <= b);  // Range order
-        }
         
         // Collect finite dB values
         std::vector<float> refVals;
@@ -2550,46 +2532,24 @@ private:
                 if (std::isfinite(v)) refVals.push_back(v);
             }
         }
-        
         if (refVals.empty()) {
             flog::warn("Scanner: CFAR: empty reference set; skipping frame");
-            
-            // Fallback: use whole spectrum minus ROI
-            for (int i = 0; i < dataWidth; i++) {
-                if (i < lowSignalBin || i > highSignalBin) {
-                    if (std::isfinite(psdDb[i])) {
-                        refVals.push_back(psdDb[i]);
-                    }
-                }
-            }
-            
-            if (refVals.empty()) {
-                flog::warn("Scanner: CFAR: fallback also empty; skipping detection");
-                return -INFINITY;
-            }
+            return -INFINITY;
         }
         
-        // Sort for median calculation
-        std::sort(refVals.begin(), refVals.end());
-        
-        // Stats in dB (and size_t count!)
+        // Stats in dB
         auto [mnIt, mxIt] = std::minmax_element(refVals.begin(), refVals.end());
+        // Calculate median (robust method)
+        std::sort(refVals.begin(), refVals.end());
         const float noiseDb = refVals.empty() ? -80.0f : 
-                             (refVals.size() % 2 == 0) ? 
-                             (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
-                             refVals[refVals.size()/2];
-        const size_t refCount = refVals.size();
-        
+                            (refVals.size() % 2 == 0) ? 
+                            (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
+                            refVals[refVals.size()/2];
+        flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
+                    noiseDb, *mnIt, *mxIt, static_cast<int>(refVals.size()));
+                    
         // Set noise floor
         float noiseFloor = noiseDb;
-        
-        // Guardrails to prevent regressions
-        assert(std::isfinite(noiseDb));
-        assert(refCount > 0);
-        
-        // Log noise floor stats with proper format
-        flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
-                  noiseDb, *mnIt, *mxIt, static_cast<int>(refCount));
         
         // Store noise floor for caller
         noiseFloorDb = noiseFloor;
@@ -2627,7 +2587,7 @@ private:
         
         // Log CFAR detection with margin
         flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
-                  freq / 1e6, signalDb, noiseFloor, thresholdDb, marginDb);
+                   freq / 1e6, signalDb, noiseDb, thresholdDb, marginDb);
         
         // Use the debugRanges helper directly in the log statement
         
