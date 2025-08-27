@@ -50,6 +50,9 @@ public:
     const float* acquireLatestPSD(int& width);
     void releaseLatestPSD();
     
+    // Copy the latest PSD data (in dB) to the provided vector
+    bool copyLatestPSD(std::vector<float>& out, int& width) const;
+    
     // Sub-bin interpolation for accurate peak detection
     static double refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz);
     

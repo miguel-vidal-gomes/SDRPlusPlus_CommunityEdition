@@ -316,6 +316,26 @@ void ScannerPSD::releaseLatestPSD() {
     }
 }
 
+bool ScannerPSD::copyLatestPSD(std::vector<float>& out, int& width) const {
+    std::lock_guard<std::mutex> lk(m_mutex);  // short lock, just for copy
+    if (!m_initialized || m_avgPowerSpectrum.empty()) { 
+        width = 0; 
+        return false; 
+    }
+    out = m_avgPowerSpectrum; // copy snapshot
+    width = m_fftSize;
+    
+    // Log PSD range info occasionally
+    static int callCount = 0;
+    if (++callCount % 10 == 0) {
+        auto [mnIt, mxIt] = std::minmax_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+        flog::info("Scanner: copyLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
+                  m_fftSize, *mnIt, *mxIt);
+    }
+    
+    return true;
+}
+
 double ScannerPSD::refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz) {
     // Ensure we have a valid bin index with neighbors
     if (binIndex <= 0 || binIndex >= (int)PdB.size() - 1) {

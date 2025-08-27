@@ -14,6 +14,24 @@
 #include "scanner_log.h" // Custom logging macros
 #include "ScannerPSD.hpp" // Dedicated FFT processing for scanner accuracy
 
+// Helper functions for scanner accuracy
+inline double binWidthHz(int sampleRate, int fftSize) {
+    return double(sampleRate) / double(fftSize);
+}
+
+inline int hzToBins(double hz, int sampleRate, int fftSize) {
+    return std::max(0, int(std::llround(hz / binWidthHz(sampleRate, fftSize))));
+}
+
+static std::string debugRanges(const std::vector<std::pair<int,int>>& rr){
+    std::string s; s.reserve(rr.size()*16);
+    for (size_t i=0;i<rr.size();++i){
+        if(i) s += " ";
+        s += "[" + std::to_string(rr[i].first) + "," + std::to_string(rr[i].second) + "]";
+    }
+    return s.empty() ? "-" : s;
+}
+
 // Windows MSVC compatibility 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -2407,11 +2425,10 @@ private:
         }
         
         // Get the scanner PSD data
+        std::vector<float> psdDb;
         int dataWidth = 0;
-        const float* data = scannerPSD->acquireLatestPSD(dataWidth);
-        if (!data || dataWidth <= 0) {
-            flog::error("Scanner: Failed to acquire PSD data (data={}, width={})", data ? "non-null" : "null", dataWidth);
-            if (data) scannerPSD->releaseLatestPSD();
+        if (!scannerPSD->copyLatestPSD(psdDb, dataWidth)) {
+            flog::warn("Scanner: No PSD snapshot available yet");
             return -INFINITY;
         }
         
@@ -2435,7 +2452,7 @@ private:
         }
         
         flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
-                  binHz, sampleRate, fftSize);
+                  binWidthHz(sampleRate, fftSize), sampleRate, fftSize);
         
         // Calculate the bin index for the center frequency using DC-centered mapping
         int centerBinInt = absHzToDcBin(freq);
@@ -2487,8 +2504,8 @@ private:
         
         for (int i = lowSignalBin; i <= highSignalBin; i++) {
             if (i < 0 || i >= dataWidth) continue;
-            if (std::isfinite(data[i]) && data[i] > maxSignal) {
-                maxSignal = data[i];
+            if (std::isfinite(psdDb[i]) && psdDb[i] > maxSignal) {
+                maxSignal = psdDb[i];
                 maxBin = i;
                 kMax = i;
             }
@@ -2529,7 +2546,7 @@ private:
         refVals.reserve(refWidthBins * 2);
         for (auto [a,b] : refRanges) {
             for (int i=a; i<=b; ++i) {
-                float v = data[i];
+                float v = psdDb[i];
                 if (std::isfinite(v)) refVals.push_back(v);
             }
         }
@@ -2540,15 +2557,14 @@ private:
             // Fallback: use whole spectrum minus ROI
             for (int i = 0; i < dataWidth; i++) {
                 if (i < lowSignalBin || i > highSignalBin) {
-                    if (std::isfinite(data[i])) {
-                        refVals.push_back(data[i]);
+                    if (std::isfinite(psdDb[i])) {
+                        refVals.push_back(psdDb[i]);
                     }
                 }
             }
             
             if (refVals.empty()) {
                 flog::warn("Scanner: CFAR: fallback also empty; skipping detection");
-                scannerPSD->releaseLatestPSD();
                 return -INFINITY;
             }
         }
@@ -2580,8 +2596,8 @@ private:
         
         // Sub-bin interpolation for accurate peak location
         if (maxBin > 0 && maxBin < dataWidth - 1) {
-            // Create vector reference to PSD data for the refineFrequencyHz function
-            std::vector<float> psdSlice(data + maxBin - 1, data + maxBin + 2);
+            // Create vector for parabolic interpolation
+            std::vector<float> psdSlice = {psdDb[maxBin-1], psdDb[maxBin], psdDb[maxBin+1]};
             
             // Refine frequency with parabolic interpolation
             double refinedHz = scanner::ScannerPSD::refineFrequencyHz(psdSlice, 1, binHz);
@@ -2591,8 +2607,6 @@ private:
             SCAN_DEBUG("Scanner: Peak refined from {:.1f} Hz to {:.1f} Hz (bin {}, correction: {:.2f} bins)",
                       maxBin * binHz, refinedFreq, maxBin, refinedHz/binHz - 1.0);
         }
-        
-        scannerPSD->releaseLatestPSD();
         
         // Check for invalid signal and noise values
         if (std::abs(maxSignal) > 200.0f || std::isnan(maxSignal) || std::isinf(maxSignal)) {
@@ -2619,7 +2633,7 @@ private:
         
         // Add more detailed debug info with correct format specifiers
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, binHz, lowSignalBin, highSignalBin, debugRanges(refRanges));
+                  fftSize, binWidthHz(sampleRate, fftSize), lowSignalBin, highSignalBin, debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
