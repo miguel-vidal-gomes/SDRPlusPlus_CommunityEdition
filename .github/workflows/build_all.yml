@@ -251,11 +251,6 @@ jobs:
           working-directory: ${{runner.workspace}}
           run: cd $GITHUB_WORKSPACE && sh make_macos_bundle.sh ${{runner.workspace}}/build ./SDR++CE.app
 
-        - name: Stamp Info.plist with version
-          run: |
-            plutil -replace CFBundleShortVersionString -string "${{ env.VERSION_STR }}" "SDR++CE.app/Contents/Info.plist"
-            plutil -replace CFBundleVersion           -string "${{ env.VERSION_STR }}" "SDR++CE.app/Contents/Info.plist"
-
         - name: Run Build Quality Tests
           working-directory: ${{github.workspace}}
           run: ./ci_tests/test_macos_build.sh ${{runner.workspace}}/build ./SDR++CE.app
@@ -364,11 +359,6 @@ jobs:
         - name: Create macOS Bundle
           working-directory: ${{runner.workspace}}
           run: cd $GITHUB_WORKSPACE && sh make_macos_bundle.sh ${{runner.workspace}}/build ./SDR++CE.app
-
-        - name: Stamp Info.plist with version
-          run: |
-            plutil -replace CFBundleShortVersionString -string "${{ env.VERSION_STR }}" "SDR++CE.app/Contents/Info.plist"
-            plutil -replace CFBundleVersion           -string "${{ env.VERSION_STR }}" "SDR++CE.app/Contents/Info.plist"
 
         - name: Run Build Quality Tests
           working-directory: ${{github.workspace}}
