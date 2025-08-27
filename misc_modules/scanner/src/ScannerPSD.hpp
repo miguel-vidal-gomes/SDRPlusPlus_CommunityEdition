@@ -87,6 +87,7 @@ private:
     
     // PSD normalization factor
     float m_psdScale = 1.0f;   // Scale factor for power spectrum normalization
+    float m_windowU = 1.0f;    // RMS window power
     
     // FFT engine
     fftwf_plan m_fftwPlan;
@@ -120,6 +121,12 @@ private:
     
     // Helper function to get window value
     float getWindowValue(int n, int N, WindowType type);
+    
+    // Helper function to convert linear power to dB with safety floor
+    static inline float lin2db(float power) {
+        constexpr float EPS = 1e-20f;
+        return 10.0f * log10f(std::max(power, EPS));
+    }
 };
 
 } // namespace scanner

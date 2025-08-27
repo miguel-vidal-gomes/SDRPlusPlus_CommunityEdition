@@ -99,6 +99,11 @@ bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
         return false;
     }
     
+    if (!samples || count <= 0) {
+        flog::error("Scanner: Invalid samples pointer or count: {}", count);
+        return false;
+    }
+    
     // Debug logging for sample feeding
     static int sampleCounter = 0;
     sampleCounter += count;
@@ -230,9 +235,7 @@ bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
             float power = std::norm(m_fftOut[i]) * m_psdScale;
             
             // Convert to dB with proper floor
-            constexpr float minPower = 1e-20f;
-            constexpr float refPower = 1.0f;
-            float powerDb = 10.0f * log10f(std::max(power, minPower) / refPower);
+            float powerDb = lin2db(power);
             
             // Store shifted result - initialize to -100 dB if we're just starting
             if (m_firstFrame) {
@@ -294,10 +297,18 @@ const float* ScannerPSD::acquireLatestPSD(int& width) {
     // Check if we have any data yet
     static int callCount = 0;
     if (++callCount % 10 == 0) {
-        float minVal = -100.0f, maxVal = -100.0f;
+        float minVal = -200.0f, maxVal = -200.0f;
         if (!m_avgPowerSpectrum.empty()) {
-            minVal = *std::min_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
-            maxVal = *std::max_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
+            auto [minIt, maxIt] = std::minmax_element(
+                m_avgPowerSpectrum.begin(), 
+                m_avgPowerSpectrum.end(),
+                [](float a, float b) { 
+                    return std::isfinite(a) && std::isfinite(b) ? a < b : 
+                           std::isfinite(a) ? true : false; 
+                }
+            );
+            minVal = std::isfinite(*minIt) ? *minIt : -200.0f;
+            maxVal = std::isfinite(*maxIt) ? *maxIt : -200.0f;
         }
         flog::info("Scanner: acquireLatestPSD returning {} samples, range [{:.1f}, {:.1f}] dB", 
                   m_fftSize, minVal, maxVal);
@@ -459,10 +470,11 @@ void ScannerPSD::generateWindow() {
     for (int i = 0; i < m_fftSize; ++i) {
         sumw2 += double(m_window[i]) * double(m_window[i]);
     }
-    float U = float(sumw2 / double(m_fftSize));         // RMS window power
-    m_psdScale = 1.0f / float(m_fftSize) / U;           // scale for |X|^2 → power/Hz-ish
+    m_windowU = float(sumw2 / double(m_fftSize));       // RMS window power
+    m_psdScale = 1.0f / float(m_fftSize) / m_windowU;   // scale for |X|^2 → power/Hz-ish
     
-    flog::info("Scanner: Window normalization factor: {:.6f}", m_psdScale);
+    flog::info("Scanner: Window normalization factor: {:.6f} (window power: {:.6f})", 
+              m_psdScale, m_windowU);
 }
 
 void ScannerPSD::calculateAlpha() {

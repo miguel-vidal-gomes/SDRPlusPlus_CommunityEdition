@@ -1045,13 +1045,13 @@ private:
                             }
                             
                             // Feed samples to the scanner PSD
-                            bool success = _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
-                            if (!success) {
-                                static int errorLogCounter = 0;
-                                if (++errorLogCounter % 10 == 0) {
-                                    flog::warn("Scanner: Failed to feed samples to ScannerPSD");
-                                }
-                            }
+                                            bool success = _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
+                if (!success) {
+                    static int errorLogCounter = 0;
+                    if (++errorLogCounter % 100 == 0) {  // Reduced frequency and severity
+                        flog::debug("Scanner: No frame produced yet, waiting for more samples");
+                    }
+                }
                         }, 
                         this
                     );
@@ -2434,7 +2434,7 @@ private:
             }
         }
         
-        flog::info("Scanner: Bin width: {:.2f} Hz (sample rate: {} Hz, FFT size: {})", 
+        flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
                   binHz, sampleRate, fftSize);
         
         // Calculate the bin index for the center frequency using DC-centered mapping
@@ -2458,6 +2458,10 @@ private:
             scannerPSD->releaseLatestPSD();
             return -INFINITY;
         }
+        
+        // Additional safety asserts for debugging
+        assert(lowSignalBin >= 0 && lowSignalBin < fftSize);
+        assert(highSignalBin >= 0 && highSignalBin < fftSize);
         
         // Define reference regions (on both sides, outside guard band)
         int lowRefStart = std::max(0, lowSignalBin - guardBins - refBins);
@@ -2495,6 +2499,13 @@ private:
         
         if (highRefStart <= highRefEnd) {
             refRanges.emplace_back(highRefStart, highRefEnd);
+        }
+        
+        // Safety asserts for reference ranges
+        for (const auto& [a, b] : refRanges) {
+            assert(a >= 0 && a < fftSize);
+            assert(b >= 0 && b < fftSize);
+            assert(a <= b);  // Range order
         }
         
         // Calculate noise floor using reference regions
@@ -2568,10 +2579,6 @@ private:
         
         scannerPSD->releaseLatestPSD();
         
-        // Always log CFAR detection details for debugging
-        float thresholdDb = noiseFloor + scannerThresholdDb;
-        bool detected = (maxSignal >= thresholdDb && maxSignal > -90.0f); // Ensure signal is above noise floor and reasonable
-        
         // Check for invalid signal and noise values
         if (std::abs(maxSignal) > 200.0f || std::isnan(maxSignal) || std::isinf(maxSignal)) {
             flog::error("Scanner: Invalid signal value: {:.1f} dB! Using default.", maxSignal);
@@ -2583,19 +2590,20 @@ private:
             noiseFloor = -120.0f;  // Set to a reasonable default
         }
         
-        flog::info("Scanner: CFAR detection at {:.6f} MHz - signal: {:.1f} dB, noise: {:.1f} dB, threshold: {:.1f} dB, result: {}",
-                  freq / 1e6, maxSignal, noiseFloor, thresholdDb, 
-                  detected ? "DETECTED" : "REJECTED");
-                  
-        // Create a debug string for reference ranges
-        std::string refRangesStr;
-        for (size_t i = 0; i < refRanges.size(); ++i) {
-            if (i > 0) refRangesStr += ", ";
-            refRangesStr += "[" + std::to_string(refRanges[i].first) + ".." + std::to_string(refRanges[i].second) + "]";
-        }
+        // Calculate threshold and margin
+        float thresholdDb = noiseFloor + scannerThresholdDb;
+        float marginDb = maxSignal - thresholdDb;
+        bool detected = (marginDb >= 0.0f && maxSignal > -90.0f); // Ensure signal is above threshold and reasonable
         
-        // Add more detailed debug info
-        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.2f} Hz, ROI bins: [{}, {}], ref ranges: {}",
+        // Log CFAR detection with margin
+        flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
+                  freq / 1e6, maxSignal, noiseFloor, thresholdDb, marginDb);
+        
+        // Use the debugRanges helper for reference ranges
+        std::string refRangesStr = debugRanges(refRanges);
+        
+        // Add more detailed debug info with correct format specifiers
+        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
                   fftSize, binHz, lowSignalBin, highSignalBin, refRangesStr);
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
@@ -2906,6 +2914,19 @@ private:
         return (int)std::llround(k);
     }
     
+    // Map DC-centered bin index [0..N-1] back to absolute RF frequency
+    double dcBinToAbsHz(int k, double deltaBins = 0.0) {
+        if (!scannerPSD) return 0.0;
+        
+        // Get FFT size and center frequency
+        int fftSize = scannerPSD->getFftSize();
+        double centerHz = sigpath::sourceManager.getSelectedName().empty() ? 0.0 : gui::waterfall.getCenterFrequency();
+        
+        // Convert from bin to baseband frequency, then to absolute
+        double centered = (double(k) + deltaBins) - 0.5 * double(fftSize);
+        return centerHz + centered * getBinWidthHz();
+    }
+    
     // Helper to handle wraparound ranges
     void pushRange(std::vector<std::pair<int, int>>& ranges, int start, int end, int fftSize) {
         if (start <= end) {
@@ -2914,6 +2935,17 @@ private:
             ranges.emplace_back(0, end);
             ranges.emplace_back(start, fftSize-1);
         }
+    }
+    
+    // Helper to stringify ranges for debugging
+    static std::string debugRanges(const std::vector<std::pair<int,int>>& rr) {
+        std::string s; 
+        s.reserve(rr.size() * 16);
+        for (size_t i = 0; i < rr.size(); ++i) {
+            if (i) s += " ";
+            s += "[" + std::to_string(rr[i].first) + "," + std::to_string(rr[i].second) + "]";
+        }
+        return s.empty() ? "-" : s;
     }
     
     // IQ stream handler is now implemented as a lambda in the start() method
