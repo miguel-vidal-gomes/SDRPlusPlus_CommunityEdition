@@ -1,0 +1,3 @@
+2025-08-25 17:22:40.218 sdrpp_ce[33792:286406] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 17:22:40.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+Found Rafael Micro R820T tuner

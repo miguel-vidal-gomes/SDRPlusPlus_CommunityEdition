@@ -1,0 +1,2453 @@
+2025-08-25 17:52:20.301 sdrpp_ce[54826:368440] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 17:52:20.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading config
+[0m[25/08/2025 17:52:20.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading icons
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading band plans
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading band plans color table
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading modules
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_sdr_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/meteor_demodulator.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspy_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_sink.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/scanner.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/radio.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_server.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_sink.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/m17_decoder.dylib
+[M17_DEBUG] _INIT_() called - starting module initialization
+[M17_DEBUG] _INIT_() - setting config path
+[M17_DEBUG] _INIT_() - loading config
+[M17_DEBUG] _INIT_() - enabling autosave
+[M17_DEBUG] _INIT_() completed successfully
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/frequency_manager.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/recorder.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/file_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspyhf_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_client.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/iq_exporter.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hermes_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/discord_integration.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rfspace_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Found Rafael Micro R820T tuner
+Plugins/rtl_tcp_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hackrf_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/sdrpp_server_source.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/pager_decoder.dylib
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Airspy Source (airspy_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing AirspyHF+ Source (airspyhf_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Audio Sink (audio_sink)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Audio Source (audio_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Discord Integration (discord_integration)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing File Source (file_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Frequency Manager (frequency_manager)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing HackRF Source (hackrf_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Hermes Source (hermes_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing IQ Exporter (iq_exporter)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing M17 Voice Decoder (m17_decoder)
+[M17_DEBUG] _CREATE_INSTANCE_() called for name: M17 Voice Decoder
+[M17_DEBUG] About to create M17DecoderModule instance
+[M17_DEBUG] M17DecoderModule constructor started for: M17 Voice Decoder
+[M17_DEBUG] Constructor - name set
+[M17_DEBUG] Constructor - basic initialization completed
+[M17_DEBUG] M17DecoderModule constructor completed!
+[M17_DEBUG] M17DecoderModule instance created successfully
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Meteor Demodulator (meteor_demodulator)
+[Resamp] predec: 32, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Network Sink (network_sink)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Network Source (network_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing Pager Decoder (pager_decoder)
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing RFspace Source (rfspace_source)
+[0m[25/08/2025 17:52:20.000] [[32mINFO[0m] Initializing RTL-SDR Source (rtl_sdr_source)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing RTL-TCP Source (rtl_tcp_source)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing Radio (radio)
+[Resamp] predec: 32, interp: 4, decim: 5, inacc: 0.000000%, taps: 380
+[Resamp] predec: 4, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 128, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:52:21.000] [[33mWARN[0m] Demod switch took 344 us
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing Recorder (recorder)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing Rigctl Client (rigctl_client)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing Rigctl Server (rigctl_server)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing SDR++ Server Source (sdrpp_server_source)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Initializing Scanner (scanner)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Scanner: Initializing scanner module 'Scanner'
+[0m[25/08/2025 17:52:21.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:52:21.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Scanner: Scanner module 'Scanner' initialized successfully
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading color maps
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/inferno.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/turbo.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/vivid.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/gqrx.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/electric.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/plasma.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/greyscale.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/temper_colors.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/viridis.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/magma.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/smoke.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/websdr.json
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic_green.json
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Menu Select!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Airspy Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for AirspyHF+ Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Audio Sink
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Audio Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Discord Integration
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for File Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Frequency Manager
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for HackRF Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Hermes Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for IQ Exporter
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for M17 Voice Decoder
+[M17_DEBUG] M17DecoderModule postInit() started
+[M17_DEBUG] postInit - loading config
+[M17_DEBUG] postInit - config loaded
+[M17_DEBUG] postInit - creating VFO
+[Resamp] predec: 64, interp: 576, decim: 625, inacc: 0.000000%, taps: 47500
+[M17_DEBUG] postInit - VFO created
+[M17_DEBUG] postInit - initializing DSP chain
+[M17_DEBUG] M17Decoder hier_block init starting...
+[M17_DEBUG] Initializing GFSK demodulator...
+[M17_DEBUG] Initializing doubler...
+[M17_DEBUG] Initializing 4FSK slicer...
+[M17_DEBUG] Initializing frame demux...
+[M17_DEBUG] Initializing LSF FEC...
+[M17_DEBUG] Initializing payload FEC...
+[M17_DEBUG] Initializing LICH decoder...
+[M17_DEBUG] Initializing audio decoder...
+[M17_DEBUG] M17Codec2Decode::init() called
+[M17_DEBUG] Codec2 init: Creating codec2 instance
+[M17_DEBUG] Codec2 init: samples per frame = 160, double = 320
+[M17_DEBUG] Codec2 init: Memory allocated successfully
+[M17_DEBUG] Audio decoder initialized
+[M17_DEBUG] Initializing packet null sink...
+[M17_DEBUG] Packet null sink initialized
+[M17_DEBUG] Setting output pointers...
+[M17_DEBUG] Output pointers set
+[M17_DEBUG] Registering blocks with hier_block...
+[M17_DEBUG] Registering demod...
+[M17_DEBUG] Registering doubler...
+[M17_DEBUG] Registering slice...
+[M17_DEBUG] Registering demux...
+[M17_DEBUG] Registering lsfFEC...
+[M17_DEBUG] Registering payloadFEC...
+[M17_DEBUG] Registering decodeLICH...
+[M17_DEBUG] Registering decodeAudio...
+[M17_DEBUG] Registering ns2...
+[M17_DEBUG] All blocks registered successfully
+[M17_DEBUG] Setting _block_init flag...
+[M17_DEBUG] M17Decoder hier_block init completed successfully
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[M17_DEBUG] postInit - DSP chain initialized
+[M17_DEBUG] postInit - starting DSP components
+[M17_DEBUG] postInit - DSP components started
+[M17_DEBUG] postInit - setting up audio stream
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] postInit - audio stream set up
+[M17_DEBUG] postInit - registering menu
+[M17_DEBUG] postInit - menu registered
+[M17_DEBUG] M17DecoderModule postInit() completed successfully!
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Meteor Demodulator
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Network Sink
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Network Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Pager Decoder
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for RFspace Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for RTL-SDR Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for RTL-TCP Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Radio
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Recorder
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Rigctl Client
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Rigctl Server
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for SDR++ Server Source
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Running post-init for Scanner
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] Ready.
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[Resamp] predec: 8192, interp: 10, decim: 3, inacc: 0.000000%, taps: 760
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] New DSP samplerate: 14400.000000 (source samplerate is 14400.000000)
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:52:21.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:52:23.000] [[32mINFO[0m] FileSourceModule 'File Source': Start!
+[0m[25/08/2025 17:52:23.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[M17_DEBUG] M17Slice4FSK processing 25 samples (counter: 0)
+[M17_DEBUG] M17FrameDemux processing 50 samples, detect=FALSE (counter: 0)
+[M17_DEBUG] Creating diagram in diagHandler context
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32441, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 58559, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61258, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 46823, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 44867, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Enabling M17 decoder
+[M17_DEBUG] M17 decoder enabled successfully
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[0m[25/08/2025 17:53:21.000] [[32mINFO[0m] Exiting successfully

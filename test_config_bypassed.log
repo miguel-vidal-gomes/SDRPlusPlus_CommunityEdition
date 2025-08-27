@@ -1,0 +1,82 @@
+2025-08-25 17:39:14.427 sdrpp_ce[40174:315870] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 17:39:14.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading config
+[0m[25/08/2025 17:39:14.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading icons
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading band plans
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading band plans color table
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading modules
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_sdr_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/meteor_demodulator.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspy_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_sink.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/scanner.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/radio.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_server.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_sink.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/m17_decoder.dylib
+[M17_DEBUG] _INIT_() called - starting module initialization
+[M17_DEBUG] _INIT_() - setting config path
+[M17_DEBUG] _INIT_() - loading config
+[M17_DEBUG] _INIT_() - enabling autosave
+[M17_DEBUG] _INIT_() completed successfully
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/frequency_manager.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/recorder.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/file_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspyhf_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_client.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/iq_exporter.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hermes_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/discord_integration.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rfspace_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Found Rafael Micro R820T tuner
+[0m[25/08/2025 17:39:15.000] [[31mERROR[0m] Module 'spectran_http_source' doesn't exist
+[0m[25/08/2025 17:39:15.000] [[31mERROR[0m] Module 'spyserver_source' doesn't exist
+Plugins/rtl_tcp_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hackrf_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/sdrpp_server_source.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/pager_decoder.dylib
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Airspy Source (airspy_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing AirspyHF+ Source (airspyhf_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Audio Sink (audio_sink)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Audio Source (audio_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Discord Integration (discord_integration)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing File Source (file_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Frequency Manager (frequency_manager)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing HackRF Source (hackrf_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Hermes Source (hermes_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing IQ Exporter (iq_exporter)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Meteor Demodulator (meteor_demodulator)
+[Resamp] predec: 32, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Network Sink (network_sink)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Network Source (network_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing Pager Decoder (pager_decoder)
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing RFspace Source (rfspace_source)
+[0m[25/08/2025 17:39:14.000] [[32mINFO[0m] Initializing RTL-SDR Source (rtl_sdr_source)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing RTL-TCP Source (rtl_tcp_source)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Radio (radio)
+[Resamp] predec: 32, interp: 4, decim: 5, inacc: 0.000000%, taps: 380
+[Resamp] predec: 4, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 128, interp: 441, decim: 625, inacc: 0.000000%, taps: 47500
+[0m[25/08/2025 17:39:15.000] [[33mWARN[0m] Demod switch took 1081 us
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] RtAudio stream open
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Recorder (recorder)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Rigctl Client (rigctl_client)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Rigctl Server (rigctl_server)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing SDR++ Server Source (sdrpp_server_source)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Scanner (scanner)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Scanner: Initializing scanner module 'Scanner'
+[0m[25/08/2025 17:39:15.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:39:15.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Scanner: Scanner module 'Scanner' initialized successfully
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing Spectran HTTP Source (spectran_http_source)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing SpyServer Source (spyserver_source)
+[0m[25/08/2025 17:39:15.000] [[32mINFO[0m] Initializing m17 decoder (m17_decoder)
+[M17_DEBUG] _CREATE_INSTANCE_() called for name: m17 decoder
+[M17_DEBUG] About to create M17DecoderModule instance
+[M17_DEBUG] M17DecoderModule constructor started for: m17 decode

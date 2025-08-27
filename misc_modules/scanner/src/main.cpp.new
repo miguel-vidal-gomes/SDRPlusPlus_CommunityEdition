@@ -1,0 +1,748 @@
+#include <imgui.h>
+#include <module.h>
+#include <gui/gui.h>
+#include <gui/style.h>
+#include <signal_path/signal_path.h>
+#include <chrono>
+#include <algorithm>
+#include <fstream>
+#include <core.h>
+#include <radio_interface.h>
+#include <sstream>
+#include <cstring>
+#include <set>
+#include "scanner_log.h"
+
+// Windows MSVC compatibility
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
+// Frequency range structure for multiple scanning ranges
+struct FrequencyRange {
+    std::string name;
+    double startFreq;
+    double stopFreq;
+    bool enabled;
+    float gain;  // Gain setting for this frequency range (in dB)
+    
+    FrequencyRange() : name("New Range"), startFreq(88000000.0), stopFreq(108000000.0), enabled(true), gain(20.0f) {}
+    FrequencyRange(const std::string& n, double start, double stop, bool en = true, float g = 20.0f) 
+        : name(n), startFreq(start), stopFreq(stop), enabled(en), gain(g) {}
+};
+
+SDRPP_MOD_INFO{
+    /* Name:            */ "scanner",
+    /* Description:     */ "Frequency scanner for SDR++",
+    /* Author:          */ "Ryzerth",
+    /* Version:         */ 0, 1, 0,
+    /* Max instances    */ 1
+};
+
+ConfigManager config;
+
+// Forward declarations for frequency manager integration
+struct FrequencyBookmark;
+class FrequencyManagerModule;
+
+// CRITICAL: Use frequency manager's real TuningProfile struct (no local copy!)
+// Forward declaration only - real definition in frequency_manager module
+struct TuningProfile {
+    // INTERFACE CONTRACT: This must match frequency_manager's TuningProfile exactly
+    // Fields are accessed via interface, not direct member access
+    int demodMode;
+    float bandwidth;
+    bool squelchEnabled;
+    float squelchLevel;
+    int deemphasisMode;
+    bool agcEnabled;
+    float rfGain;
+    double centerOffset;
+    std::string name;
+    bool autoApply;
+    
+    // SAFETY: Only access this struct through frequency manager interface
+    // Direct field access is UNSAFE due to potential ABI differences
+};
+
+class ScannerModule : public ModuleManager::Instance {
+public:
+    ScannerModule(std::string name) {
+        this->name = name;
+        
+        // Initialize time points to current time to prevent crashes
+        auto now = std::chrono::high_resolution_clock::now();
+        lastSignalTime = now;
+        lastTuneTime = now;
+        
+        // Ensure scanner starts in a safe state
+        running = false;
+        tuning = false;
+        receiving = false;
+        
+        flog::info("Scanner: Initializing scanner module '{}'", name);
+        
+        gui::menu.registerEntry(name, menuHandler, this, NULL);
+        loadConfig();
+        
+        flog::info("Scanner: Scanner module '{}' initialized successfully", name);
+    }
+
+    ~ScannerModule() {
+        saveConfig();
+        gui::menu.removeEntry(name);
+        stop();
+        if (scannerFftData) {
+            delete[] scannerFftData;
+            scannerFftData = nullptr;
+        }
+    }
+
+    void postInit() {
+        // Register scanner FFT callbacks with IQFrontEnd
+        void* args[] = { &scannerFftSize, (void*)acquireScannerFFTBuffer, (void*)releaseScannerFFTBuffer, this };
+        core::modComManager.callInterface("iq_frontend", 1, args, nullptr);
+    }
+
+    void enable() {
+        enabled = true;
+    }
+
+    void disable() {
+        enabled = false;
+    }
+
+    bool isEnabled() {
+        return enabled;
+    }
+    
+    // Range management methods
+    void addFrequencyRange(const std::string& name, double start, double stop, bool enabled = true, float gain = 20.0f) {
+        frequencyRanges.emplace_back(name, start, stop, enabled, gain);
+        saveConfig();
+    }
+    
+    void removeFrequencyRange(int index) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges.erase(frequencyRanges.begin() + index);
+            if (currentRangeIndex >= frequencyRanges.size() && !frequencyRanges.empty()) {
+                currentRangeIndex = frequencyRanges.size() - 1;
+            }
+            saveConfig();
+        }
+    }
+    
+    void toggleFrequencyRange(int index) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges[index].enabled = !frequencyRanges[index].enabled;
+            saveConfig();
+        }
+    }
+    
+    void updateFrequencyRange(int index, const std::string& name, double start, double stop, float gain) {
+        if (index >= 0 && index < frequencyRanges.size()) {
+            frequencyRanges[index].name = name;
+            frequencyRanges[index].startFreq = start;
+            frequencyRanges[index].stopFreq = stop;
+            frequencyRanges[index].gain = gain;
+            saveConfig();
+            flog::info("Scanner: Updated range '{}' - gain set to {:.1f} dB", name, gain);
+        }
+    }
+    
+    // Get current active ranges for scanning
+    std::vector<int> getActiveRangeIndices() {
+        std::vector<int> activeRanges;
+        for (int i = 0; i < frequencyRanges.size(); i++) {
+            if (frequencyRanges[i].enabled) {
+                activeRanges.push_back(i);
+            }
+        }
+        return activeRanges;
+    }
+    
+    // Get current scanning bounds (supports both single range and multi-range)
+    bool getCurrentScanBounds(double& currentStart, double& currentStop) {
+        if (frequencyRanges.empty()) {
+            // Fall back to legacy single range
+            currentStart = startFreq;
+            currentStop = stopFreq;
+            return true;
+        }
+        
+        // Multi-range mode: get current active range
+            auto activeRanges = getActiveRangeIndices();
+            if (activeRanges.empty()) {
+                return false; // No active ranges
+            }
+            
+            // Ensure current range index is valid
+            if (currentRangeIndex >= activeRanges.size()) {
+                currentRangeIndex = 0;
+            }
+            
+            int rangeIdx = activeRanges[currentRangeIndex];
+            // Critical bounds check to prevent crash
+            if (rangeIdx >= frequencyRanges.size()) return false;
+            
+            currentStart = frequencyRanges[rangeIdx].startFreq;
+            currentStop = frequencyRanges[rangeIdx].stopFreq;
+            return true;
+        }
+    
+    // Get recommended gain for current range
+    float getCurrentRangeGain() {
+        if (frequencyRanges.empty()) return 20.0f;
+        
+        auto activeRanges = getActiveRangeIndices();
+        if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return 20.0f;
+        
+        int rangeIdx = activeRanges[currentRangeIndex];
+        // Critical bounds check to prevent crash
+        if (rangeIdx >= frequencyRanges.size()) return 20.0f;
+        
+        return frequencyRanges[rangeIdx].gain;
+    }
+    
+    // Apply or recommend gain setting for current range
+    void applyCurrentRangeGain() {
+        if (frequencyRanges.empty()) return;
+        
+        auto activeRanges = getActiveRangeIndices();
+        if (activeRanges.empty() || currentRangeIndex >= activeRanges.size()) return;
+        
+        int rangeIdx = activeRanges[currentRangeIndex];
+        // Critical bounds check to prevent crash
+        if (rangeIdx >= frequencyRanges.size()) return;
+        
+        float targetGain = frequencyRanges[rangeIdx].gain;
+        
+        try {
+            std::string sourceName = sigpath::sourceManager.getSelectedName();
+            if (!sourceName.empty()) {
+                // Use the new SourceManager::setGain() method
+                sigpath::sourceManager.setGain(targetGain);
+                flog::info("Scanner: Applied gain {:.1f} dB for range '{}' (source: {})",
+                          targetGain, frequencyRanges[rangeIdx].name, sourceName);
+            } else {
+                SCAN_DEBUG("Scanner: No source selected, cannot apply gain for range '{}'",
+                          frequencyRanges[rangeIdx].name);
+            }
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Exception in applyCurrentRangeGain: {}", e.what());
+        } catch (...) {
+            flog::error("Scanner: Unknown exception in applyCurrentRangeGain");
+        }
+    }
+
+    // Scanner FFT buffer acquisition callback
+    static float* acquireScannerFFTBuffer(void* ctx) {
+        ScannerModule* _this = (ScannerModule*)ctx;
+        _this->scannerFftMtx.lock();
+        if (!_this->scannerFftData) {
+             _this->scannerFftData = new float[_this->scannerFftSize];
+        }
+        return _this->scannerFftData;
+    }
+    
+    // Scanner FFT buffer release callback
+    static void releaseScannerFFTBuffer(void* ctx) {
+        ScannerModule* _this = (ScannerModule*)ctx;
+        _this->scannerFftMtx.unlock();
+    }
+
+
+private:
+    static void menuHandler(void* ctx) {
+        ScannerModule* _this = (ScannerModule*)ctx;
+        float menuWidth = ImGui::GetContentRegionAvail().x;
+        
+        // === SCANNER READY STATUS ===
+        // Scanner now uses Frequency Manager exclusively for simplified operation
+        ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "Scanner uses Frequency Manager entries");
+        ImGui::TextWrapped("Enable scanning for specific entries in Frequency Manager to include them in scan list.");
+        ImGui::Separator();
+        
+        // REMOVED: Legacy range manager - scanner now uses Frequency Manager exclusively
+        if (false) {  // Legacy code removed for cleaner UI
+            ImGui::Begin("Scanner Range Manager", &_this->showRangeManager);
+            
+            // Add new range section
+            ImGui::Text("Add New Range");
+            ImGui::Separator();
+            ImGui::InputText("Name", _this->newRangeName, sizeof(_this->newRangeName));
+            ImGui::InputDouble("Start (Hz)", &_this->newRangeStart, 100000.0, 1000000.0, "%.0f");
+            ImGui::InputDouble("Stop (Hz)", &_this->newRangeStop, 100000.0, 1000000.0, "%.0f");
+            ImGui::InputFloat("Gain (dB)", &_this->newRangeGain, 1.0f, 10.0f, "%.1f");
+            
+            if (ImGui::Button("Add Range")) {
+                _this->addFrequencyRange(std::string(_this->newRangeName), _this->newRangeStart, _this->newRangeStop, true, _this->newRangeGain);
+                strcpy(_this->newRangeName, "New Range");
+                _this->newRangeStart = 88000000.0;
+                _this->newRangeStop = 108000000.0;
+                _this->newRangeGain = 20.0f;
+            }
+            
+            ImGui::Spacing();
+            ImGui::Text("Existing Ranges");
+            ImGui::Separator();
+            
+            // List existing ranges
+            for (int i = 0; i < _this->frequencyRanges.size(); i++) {
+                auto& range = _this->frequencyRanges[i];
+                ImGui::PushID(i);
+                ImGui::Checkbox("##enabled", &range.enabled);
+                ImGui::SameLine();
+                
+                char nameBuf[128];
+                strcpy(nameBuf, range.name.c_str());
+                ImGui::SetNextItemWidth(menuWidth * 0.3f);
+                if (ImGui::InputText("##name", nameBuf, sizeof(nameBuf))) {
+                    range.name = std::string(nameBuf);
+                }
+                ImGui::SameLine();
+                
+                ImGui::SetNextItemWidth(menuWidth * 0.25f);
+                ImGui::InputDouble("##start", &range.startFreq, 1000, 100000, "%.0f Hz");
+                ImGui::SameLine();
+                
+                ImGui::SetNextItemWidth(menuWidth * 0.25f);
+                ImGui::InputDouble("##stop", &range.stopFreq, 1000, 100000, "%.0f Hz");
+                ImGui::SameLine();
+                
+                ImGui::SetNextItemWidth(menuWidth * 0.15f);
+                ImGui::InputFloat("##gain", &range.gain, 1.0f, 0.0f, "%.1f dB");
+                ImGui::SameLine();
+                
+                if (ImGui::Button("Update")) {
+                    _this->updateFrequencyRange(i, range.name, range.startFreq, range.stopFreq, range.gain);
+                }
+                ImGui::SameLine();
+                
+                if (ImGui::Button("Remove")) {
+                    _this->removeFrequencyRange(i);
+                }
+                ImGui::PopID();
+            }
+            ImGui::End();
+        }
+        
+        // Show scanner parameters
+        ImGui::Text("Scanner Parameters");
+        ImGui::Separator();
+        
+        ImGui::LeftLabel("Level");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderFloat("##level", &_this->level, -120.0f, 0.0f, "%.1f dBFS")) {
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Interval");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderInt("##interval", &_this->interval, 10, 1000, "%d ms")) {
+            _this->saveConfig();
+        }
+
+        ImGui::LeftLabel("Scanner FFT Size");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::Combo("##scanner_fft_size", &_this->scannerFftSizeIndex, SCANNER_FFT_SIZE_LABELS, SCANNER_FFT_SIZE_COUNT)) {
+            _this->scannerFftSize = SCANNER_FFT_SIZES[_this->scannerFftSizeIndex];
+            void* args[] = { &_this->scannerFftSize };
+            core::modComManager.callInterface("iq_frontend", 2, args, nullptr);
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Scan Rate");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderInt("##scan_rate", &_this->scanRate, 1, 100, "%d Hz")) {
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Linger Time");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderInt("##linger_time", &_this->lingerTime, 0, 5000, "%d ms")) {
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Tuning Time");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderInt("##tuning_time", &_this->tuningTime, 0, 1000, "%d ms")) {
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Scan direction");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        const char* items[] = { "Up", "Down" };
+        if (ImGui::Combo("##scan_direction", (int*)&_this->scanUp, items, IM_ARRAYSIZE(items))) {
+            _this->saveConfig();
+        }
+        
+        if (ImGui::Checkbox("Reverse Lock", &_this->reverseLock)) {
+            _this->saveConfig();
+        }
+        ImGui::SameLine();
+        if (ImGui::Checkbox("One Shot", &_this->oneShot)) {
+            _this->saveConfig();
+        }
+        
+        // Frequency Manager settings
+        ImGui::Spacing();
+        ImGui::Text("Frequency Manager Integration");
+        ImGui::Separator();
+        
+        if (ImGui::Checkbox("Use Frequency Manager", &_this->useFrequencyManager)) {
+            _this->saveConfig();
+            if (_this->useFrequencyManager) {
+                _this->rescanFrequencyManager();
+            }
+        }
+        
+        if (ImGui::Checkbox("Apply Tuning Profiles", &_this->applyProfiles)) {
+            _this->saveConfig();
+        }
+        
+        if (ImGui::Checkbox("Cycle After Linger", &_this->cycleAfterLinger)) {
+            _this->saveConfig();
+        }
+        
+        ImGui::LeftLabel("Dwell Time");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderInt("##dwell_time", &_this->dwellTime, 0, 60000, "%d ms")) {
+            _this->saveConfig();
+        }
+        
+        // Squelch settings
+        ImGui::Spacing();
+        ImGui::Text("Squelch Control");
+        ImGui::Separator();
+        
+        ImGui::LeftLabel("Squelch Delta");
+        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+        if (ImGui::SliderFloat("##squelch_delta", &_this->squelchDelta, 0.0f, 50.0f, "%.1f dB")) {
+            _this->saveConfig();
+        }
+        
+        if (ImGui::Checkbox("Auto Squelch Delta", &_this->squelchDeltaAuto)) {
+            _this->saveConfig();
+        }
+        
+        // Blacklist settings
+        ImGui::Spacing();
+        ImGui::Text("Blacklist");
+        ImGui::Separator();
+        
+        if (ImGui::Button("Clear Blacklist")) {
+            _this->blacklist.clear();
+            _this->saveConfig();
+        }
+        ImGui::SameLine();
+        ImGui::Text("%zu entries", _this->blacklist.size());
+        
+        // Scanner control
+        ImGui::Spacing();
+        ImGui::Text("Scanner Control");
+        ImGui::Separator();
+        
+        if (ImGui::Button(!_this->running ? "Start" : "Stop", ImVec2(menuWidth, 0))) {
+            if (!_this->running) {
+                _this->start();
+            }
+            else {
+                _this->stop();
+            }
+        }
+    }
+
+    void start() {
+        if (running) { return; }
+        running = true;
+        
+        // If using Frequency Manager, rescan entries before starting
+        if (useFrequencyManager) {
+            rescanFrequencyManager();
+            if (scannableFrequencies.empty()) {
+                flog::warn("Scanner: No scannable frequencies found in Frequency Manager. Stopping.");
+                running = false;
+                return;
+            }
+        }
+        
+        workerThread = std::thread(&ScannerModule::worker, this);
+    }
+
+    void stop() {
+        if (!running) { return; }
+        running = false;
+        if (workerThread.joinable()) {
+            workerThread.join();
+        }
+    }
+
+    void worker() {
+        flog::info("Scanner: Worker thread started");
+        
+        double current = gui::waterfall.getCenterFrequency();
+        std::chrono::high_resolution_clock::time_point lastScanTime, tuneTime;
+        
+        while(running) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            
+            auto now = std::chrono::high_resolution_clock::now();
+            
+            if (!sigpath::sourceManager.isStarted()) {
+                flog::warn("Scanner: Radio source stopped, stopping scanner");
+                running = false;
+                return;
+            }
+
+            if (gui::waterfall.selectedVFO.empty()) {
+                running = false;
+                return;
+            }
+            
+            double currentStart, currentStop;
+            if (!getCurrentScanBounds(currentStart, currentStop)) {
+                flog::warn("Scanner: No active frequency ranges, stopping");
+                running = false;
+                return;
+            }
+            
+            if (!useFrequencyManager && (current < currentStart || current > currentStop)) {
+                flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
+                current = currentStart;
+            }
+            tuneTime = std::chrono::high_resolution_clock::now();
+            
+            if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
+                applySquelchDelta();
+            }
+            
+            tuner::normalTuning(gui::waterfall.selectedVFO, current);
+
+            if (tuning) {
+                SCAN_DEBUG("Scanner: Tuning in progress...");
+                auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
+                if (timeSinceLastTune.count() > tuningTime) {
+                    tuning = false;
+                    SCAN_DEBUG("Scanner: Tuning completed");
+                }
+                continue;
+            }
+
+            scannerFftMtx.lock();
+            if (!scannerFftData) {
+                scannerFftMtx.unlock();
+                continue;
+            }
+            
+            // Now work with the FFT data directly
+            float* data = scannerFftData;
+            int dataWidth = scannerFftSize;
+            
+            if (dataWidth <= 0) {
+                scannerFftMtx.unlock();
+                continue; // Invalid data width
+            }
+            
+            double wfCenter = gui::waterfall.getViewOffset() + gui::waterfall.getCenterFrequency();
+            double wfWidth = gui::waterfall.getViewBandwidth();
+            double wfStart = wfCenter - (wfWidth / 2.0);
+            double wfEnd = wfCenter + (wfWidth / 2.0);
+            
+            double baseVfoWidth = sigpath::vfoManager.getBandwidth(gui::waterfall.selectedVFO);
+            double effectiveVfoWidth;
+            
+            if (useFrequencyManager && currentEntryIsSingleFreq) {
+                effectiveVfoWidth = 5000.0;
+            } else {
+                effectiveVfoWidth = baseVfoWidth;
+            }
+
+            if (receiving) {
+                SCAN_DEBUG("Scanner: Receiving signal...");
+            
+                float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
+                if (maxLevel >= level) {
+                    if (squelchDeltaAuto) {
+                        updateNoiseFloor(maxLevel - 15.0f);
+                    }
+                    
+                    if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
+                        applySquelchDelta();
+                    }
+                    
+                    lastSignalTime = now;
+                }
+                else {
+                    auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
+                    if (timeSinceLastSignal.count() > lingerTime) {
+                        if (squelchDeltaActive) {
+                            restoreSquelchLevel();
+                        }
+                        
+                        receiving = false;
+                        SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
+                    }
+                }
+            }
+            else {
+                flog::warn("Seeking signal");
+                double bottomLimit = current;
+                double topLimit = current;
+                
+                if (useFrequencyManager && currentEntryIsSingleFreq) {
+                    float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
+                    if (maxLevel >= level) {
+                        receiving = true;
+                        lastSignalTime = now;
+                        flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
+                        
+                        if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
+                            const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+                            if (profile) {
+                                applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "SIGNAL");
+                            }
+                        }
+                        
+                        scannerFftMtx.unlock();
+                        continue;
+                    }
+                } else {
+                    if (findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
+                        scannerFftMtx.unlock();
+                        continue;
+                    }
+                
+                    if (!reverseLock) {
+                        if (findSignal(!scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
+                            scannerFftMtx.unlock();
+                            continue;
+                        }
+                    }
+                    else { reverseLock = false; }
+                }
+                
+                if (useFrequencyManager) {
+                    if (!performFrequencyManagerScanning()) {
+                        flog::warn("Scanner: FM integration failed, falling back to legacy mode");
+                        performLegacyScanning();
+                    }
+                } else {
+                    if (scanUp) {
+                        current = topLimit + interval;
+                        if (current > currentStop) {
+                            if (!frequencyRanges.empty()) {
+                                currentRangeIndex = (currentRangeIndex + 1) % getActiveRangeIndices().size();
+                                current = frequencyRanges[getActiveRangeIndices()[currentRangeIndex]].startFreq;
+                            } else {
+                                current = currentStart;
+                            }
+                        }
+                    } else {
+                        current = bottomLimit - interval;
+                        if (current < currentStart) {
+                             if (!frequencyRanges.empty()) {
+                                currentRangeIndex = (currentRangeIndex - 1 + getActiveRangeIndices().size()) % getActiveRangeIndices().size();
+                                current = frequencyRanges[getActiveRangeIndices()[currentRangeIndex]].stopFreq;
+                            } else {
+                                current = currentStop;
+                            }
+                        }
+                    }
+                }
+            }
+            scannerFftMtx.unlock();
+        }
+    }
+
+    // Member variables
+    std::string name;
+    bool enabled = false;
+    bool running = false;
+    double startFreq = 88000000.0;
+    double stopFreq = 108000000.0;
+    float level = -40.0f;
+    int interval = 250;
+    int scanRate = 10;
+    int lingerTime = 1000;
+    int tuningTime = 100;
+    bool scanUp = true;
+    bool reverseLock = false;
+    bool oneShot = false;
+    bool useFrequencyManager = true;
+    bool applyProfiles = true;
+    bool cycleAfterLinger = false;
+    int dwellTime = 0;
+    float squelchDelta = 0.0f;
+    bool squelchDeltaAuto = false;
+    std::set<double> blacklist;
+
+    std::vector<FrequencyRange> frequencyRanges;
+    int currentRangeIndex = 0;
+    bool showRangeManager = false;
+    char newRangeName[128] = "New Range";
+    double newRangeStart = 88000000.0;
+    double newRangeStop = 108000000.0;
+    float newRangeGain = 20.0f;
+
+    std::thread workerThread;
+    bool tuning = false;
+    bool receiving = false;
+    std::chrono::high_resolution_clock::time_point lastSignalTime;
+    std::chrono::high_resolution_clock::time_point lastTuneTime;
+
+    // Scanner FFT parameters
+    int scannerFftSize = 8192;
+    static constexpr int SCANNER_FFT_SIZES[] = {1024, 2048, 4096, 8192, 16384, 32768};
+    static constexpr const char* SCANNER_FFT_SIZE_LABELS[] = {"1024", "2048", "4096", "8192", "16384", "32768"};
+    static constexpr int SCANNER_FFT_SIZE_COUNT = 6;
+    int scannerFftSizeIndex = 3;
+    
+    // Scanner FFT buffer
+    float* scannerFftData = nullptr;
+    std::mutex scannerFftMtx;
+
+    // Internal state
+    bool currentEntryIsSingleFreq = false;
+    const void* currentTuningProfile = nullptr;
+    size_t currentScanIndex = 0;
+    std::vector<double> scannableFrequencies;
+
+    bool squelchDeltaActive = false;
+    float originalSquelchLevel = 0.0f;
+    float noiseFloor = -100.0f;
+};
+
+void _INIT_() {
+    config.setPath(core::configManager.getGeneralModuleConfigPath("scanner"));
+    
+    // Define default config values
+    config.def["startFreq"] = 88000000.0;
+    config.def["stopFreq"] = 108000000.0;
+    config.def["level"] = -40.0f;
+    config.def["interval"] = 250;
+    config.def["scanRate"] = 10;
+    config.def["lingerTime"] = 1000;
+    config.def["tuningTime"] = 100;
+    config.def["scanUp"] = true;
+    config.def["reverseLock"] = false;
+    config.def["oneShot"] = false;
+    config.def["useFrequencyManager"] = true;
+    config.def["applyProfiles"] = true;
+    config.def["cycleAfterLinger"] = false;
+    config.def["dwellTime"] = 0;
+    config.def["squelchDelta"] = 0.0f;
+    config.def["squelchDeltaAuto"] = false;
+    config.def["scannerFftSize"] = 8192;
+    
+    json blacklist_json = json::array();
+    config.def["blacklist"] = blacklist_json;
+
+    json ranges_json = json::array();
+    config.def["frequencyRanges"] = ranges_json;
+}
+
+SDRPP_MOD_ENTRY(ScannerModule, "scanner", "Scanner", 1);

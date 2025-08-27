@@ -151,6 +151,9 @@ namespace ImGui {
         float* acquireLatestFFT(int& width);
         void releaseLatestFFT();
 
+        float* acquireRawFFT(int& width);
+        void releaseRawFFT();
+
         bool centerFreqMoved = false;
         bool vfoFreqChanged = false;
         bool bandplanEnabled = false;
@@ -248,6 +251,7 @@ namespace ImGui {
 
         std::recursive_mutex buf_mtx;
         std::recursive_mutex latestFFTMtx;
+        std::recursive_mutex rawFFTMtx;
         std::mutex texMtx;
         std::mutex smoothingBufMtx;
 

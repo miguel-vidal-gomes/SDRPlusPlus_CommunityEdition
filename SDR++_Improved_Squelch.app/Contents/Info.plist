@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+    <dict>
+        <key>CFBundleName</key><string>sdrppce</string>
+        <key>CFBundleDisplayName</key><string>SDR++CE Community Edition</string>
+        <key>CFBundleIdentifier</key><string>oorg.sdrppce.sdrppce</string>
+        <key>CFBundleVersion</key><string>1.2.3-CE</string>
+        <key>CFBundlePackageType</key><string>APPL</string>
+        <key>CFBundleSignature</key><string>sdrp</string>
+        <key>CFBundleExecutable</key><string>sdrpp_ce</string>
+        <key>CFBundleIconFile</key><string>sdrppce</string>
+    </dict>
+</plist>

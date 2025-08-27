@@ -1,0 +1,8 @@
+[0m[27/08/2025 08:36:23.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE-nightly
+Unknown argument
+-a --addr		Server mode address
+   --autostart		Automatically start the SDR after loading
+-h --help		Show help
+-p --port		Server mode port
+-r --root		Root directory, where all config files are stored
+-s --server		Run in server mode

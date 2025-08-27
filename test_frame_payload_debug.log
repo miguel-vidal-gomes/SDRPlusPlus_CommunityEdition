@@ -1,0 +1,785 @@
+2025-08-25 18:24:25.074 sdrpp_ce[80225:464461] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 18:24:25.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+[0m[25/08/2025 18:24:24.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE
+[0m[25/08/2025 18:24:24.000] [[32mINFO[0m] Loading config
+[0m[25/08/2025 18:24:25.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading icons
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading band plans
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading band plans color table
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading modules
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_sdr_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/meteor_demodulator.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspy_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_sink.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/scanner.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/radio.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_server.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_sink.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/m17_decoder.dylib
+[M17_DEBUG] _INIT_() called - starting module initialization
+[M17_DEBUG] _INIT_() - setting config path
+[M17_DEBUG] _INIT_() - loading config
+[M17_DEBUG] _INIT_() - enabling autosave
+[M17_DEBUG] _INIT_() completed successfully
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/frequency_manager.dylib
+[0m[25/08/2025 18:24:25.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/recorder.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/file_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspyhf_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_client.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/iq_exporter.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hermes_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/discord_integration.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rfspace_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /UFound Rafael Micro R820T tuner
+sers/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_tcp_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hackrf_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/sdrpp_server_source.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/pager_decoder.dylib
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Airspy Source (airspy_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing AirspyHF+ Source (airspyhf_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Audio Sink (audio_sink)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Audio Source (audio_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Discord Integration (discord_integration)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing File Source (file_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Frequency Manager (frequency_manager)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing HackRF Source (hackrf_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Hermes Source (hermes_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing IQ Exporter (iq_exporter)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing M17 Voice Decoder (m17_decoder)
+[M17_DEBUG] _CREATE_INSTANCE_() called for name: M17 Voice Decoder
+[M17_DEBUG] About to create M17DecoderModule instance
+[M17_DEBUG] M17DecoderModule constructor started for: M17 Voice Decoder
+[M17_DEBUG] Constructor - name set
+[M17_DEBUG] Constructor - basic initialization completed
+[M17_DEBUG] M17DecoderModule constructor completed!
+[M17_DEBUG] M17DecoderModule instance created successfully
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Meteor Demodulator (meteor_demodulator)
+[Resamp] predec: 32, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Network Sink (network_sink)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Network Source (network_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Pager Decoder (pager_decoder)
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing RFspace Source (rfspace_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing RTL-SDR Source (rtl_sdr_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing RTL-TCP Source (rtl_tcp_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Radio (radio)
+[Resamp] predec: 32, interp: 4, decim: 5, inacc: 0.000000%, taps: 380
+[Resamp] predec: 4, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 128, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:24:25.000] [[33mWARN[0m] Demod switch took 300 us
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Recorder (recorder)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Rigctl Client (rigctl_client)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Rigctl Server (rigctl_server)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing SDR++ Server Source (sdrpp_server_source)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Initializing Scanner (scanner)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Scanner: Initializing scanner module 'Scanner'
+[0m[25/08/2025 18:24:25.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 18:24:25.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Scanner: Scanner module 'Scanner' initialized successfully
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading color maps
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/inferno.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/turbo.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/vivid.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/gqrx.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/electric.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/plasma.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/greyscale.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/temper_colors.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/viridis.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/magma.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/smoke.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/websdr.json
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic_green.json
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Menu Select!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Airspy Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for AirspyHF+ Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Audio Sink
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Audio Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Discord Integration
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for File Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Frequency Manager
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for HackRF Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Hermes Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for IQ Exporter
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for M17 Voice Decoder
+[M17_DEBUG] M17DecoderModule postInit() started
+[M17_DEBUG] postInit - loading config
+[M17_DEBUG] postInit - config loaded
+[M17_DEBUG] postInit - creating VFO
+[Resamp] predec: 64, interp: 576, decim: 625, inacc: 0.000000%, taps: 47500
+[M17_DEBUG] postInit - VFO created
+[M17_DEBUG] postInit - initializing DSP chain
+[M17_DEBUG] M17Decoder hier_block init starting...
+[M17_DEBUG] Initializing GFSK demodulator...
+[M17_DEBUG] Initializing doubler...
+[M17_DEBUG] Initializing 4FSK slicer...
+[M17_DEBUG] Initializing frame demux...
+[M17_DEBUG] Initializing LSF FEC...
+[M17_DEBUG] Initializing payload FEC...
+[M17_DEBUG] Initializing LICH decoder...
+[M17_DEBUG] Initializing audio decoder...
+[M17_DEBUG] M17Codec2Decode::init() called
+[M17_DEBUG] Codec2 init: Creating codec2 instance
+[M17_DEBUG] Codec2 init: samples per frame = 160, double = 320
+[M17_DEBUG] Codec2 init: Memory allocated successfully
+[M17_DEBUG] Audio decoder initialized
+[M17_DEBUG] Initializing packet null sink...
+[M17_DEBUG] Packet null sink initialized
+[M17_DEBUG] Setting output pointers...
+[M17_DEBUG] Output pointers set
+[M17_DEBUG] Registering blocks with hier_block...
+[M17_DEBUG] Registering demod...
+[M17_DEBUG] Registering doubler...
+[M17_DEBUG] Registering slice...
+[M17_DEBUG] Registering demux...
+[M17_DEBUG] Registering lsfFEC...
+[M17_DEBUG] Registering payloadFEC...
+[M17_DEBUG] Registering decodeLICH...
+[M17_DEBUG] Registering decodeAudio...
+[M17_DEBUG] Registering ns2...
+[M17_DEBUG] All blocks registered successfully
+[M17_DEBUG] Setting _block_init flag...
+[M17_DEBUG] M17Decoder hier_block init completed successfully
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[M17_DEBUG] postInit - DSP chain initialized
+[M17_DEBUG] postInit - starting DSP components
+[M17_DEBUG] postInit - DSP components started
+[M17_DEBUG] postInit - setting up audio stream
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[Resamp] predec: 8192, interp: 441, decim: 80, inacc: 0.000000%, taps: 33516
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] postInit - audio stream set up
+[M17_DEBUG] postInit - registering menu
+[M17_DEBUG] postInit - menu registered
+[M17_DEBUG] M17DecoderModule postInit() completed successfully!
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Meteor Demodulator
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Network Sink
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Network Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Pager Decoder
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for RFspace Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for RTL-SDR Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for RTL-TCP Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Radio
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Recorder
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Rigctl Client
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Rigctl Server
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for SDR++ Server Source
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Running post-init for Scanner
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] Ready.
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[Resamp] predec: 2, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] New DSP samplerate: 48000.000000 (source samplerate is 48000.000000)
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:24:25.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:24:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Start!
+[0m[25/08/2025 18:24:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[M17_DEBUG] M17Slice4FSK processing 24 samples (counter: 0)
+[M17_DEBUG] M17FrameDemux processing 48 samples, detect=FALSE (counter: 0)
+[M17_DEBUG] Creating diagram in diagHandler context
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32976, count=18
+[M17_DEBUG] Codec2 frame check: fn=32976 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 32976 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 2f 2d 9d d9 ba bc 6d a7
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9c 63 34 87 05 e9 58 c3
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=0 [1]=0 [160]=-5401 [161]=4922
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000000 [1]=0.000000 [160]=-0.164825 [161]=0.150208
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 46370, count=18
+[M17_DEBUG] Codec2 frame check: fn=46370 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 46370 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: c5 d2 8a 0e 4b 89 a6 2c
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 7a d6 9b 28 23 2f f6 ad
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=1406 [1]=-1375 [160]=-369 [161]=-400
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.042908 [1]=-0.041962 [160]=-0.011261 [161]=-0.012207
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 14547 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 57 d2 8a d9 7f 18 2b 2f
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 17 d4 af 28 6e 37 2a 39
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=439 [1]=2305 [160]=-607 [161]=982
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.013397 [1]=0.070343 [160]=-0.018524 [161]=0.029968
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47318, count=18
+[M17_DEBUG] Codec2 frame check: fn=47318 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 47318 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: bf 20 e5 19 51 a6 0b 34
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: da c5 d3 28 31 1c a7 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-4929 [1]=-8037 [160]=-4283 [161]=-4833
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.150421 [1]=-0.245270 [160]=-0.130707 [161]=-0.147491
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 56321, count=18
+[M17_DEBUG] Codec2 frame check: fn=56321 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 56321 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 9a 22 d0 e8 ba bd ec c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: c0 e3 66 b3 9f 98 ec 83
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-17030 [1]=17468 [160]=590 [161]=-2112
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.519714 [1]=0.533081 [160]=0.018005 [161]=-0.064453
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 30928, count=18
+[M17_DEBUG] Codec2 frame check: fn=30928 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 30928 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f4 a2 8a ce 94 04 43 d2
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 63 ae 9b f8 05 64 30 e5
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=10878 [1]=-10633 [160]=78 [161]=460
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.331970 [1]=-0.324493 [160]=0.002380 [161]=0.014038
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32976, count=18
+[M17_DEBUG] Codec2 frame check: fn=32976 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 32976 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 49 43 b2 dc 05 32 70
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 13 ae 9b f3 a8 83 a4 59
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=4867 [1]=-4841 [160]=1325 [161]=3439
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.148529 [1]=-0.147736 [160]=0.040436 [161]=0.104950
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 56327, count=18
+[M17_DEBUG] Codec2 frame check: fn=56327 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 56327 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: c0 e5 40 ec a0 d3 84 c5
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 5a cc ae 3e 94 05 41 b4
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-2069 [1]=3534 [160]=4186 [161]=-4254
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.063141 [1]=0.107849 [160]=0.127747 [161]=-0.129822
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 39611, count=18
+[M17_DEBUG] Codec2 frame check: fn=39611 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 39611 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 66 a2 8a ce 7e 04 86 3b
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: da d6 9b f8 31 c7 28 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-4568 [1]=-803 [160]=-2577 [161]=-633
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.139404 [1]=-0.024506 [160]=-0.078644 [161]=-0.019318
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 22474, count=18
+[M17_DEBUG] Codec2 frame check: fn=22474 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 22474 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: ad cc e4 87 e8 d4 91 00
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 86 88 d2 5b 7d 4a 59 23
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-2827 [1]=4098 [160]=-983 [161]=1037
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.086273 [1]=0.125061 [160]=-0.029999 [161]=0.031647
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 57861, count=18
+[M17_DEBUG] Codec2 frame check: fn=57861 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 57861 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 5a e6 5b 9f eb c0 ba fd
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 4d f9 5f 29 7f 98 e1 9c
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=9 [1]=-8 [160]=-614 [161]=-214
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000275 [1]=-0.000244 [160]=-0.018738 [161]=-0.006531
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32769, count=18
+[M17_DEBUG] Codec2 frame check: fn=32769 lastFn=0 consecutive=YES receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 32769 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 67 fc 33 b2 98 bd ed df
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: c0 34 83 41 48 af f7 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=21099 [1]=-20815 [160]=-1865 [161]=782
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.643890 [1]=-0.635223 [160]=-0.056915 [161]=0.023865
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 59335, count=18
+[M17_DEBUG] Codec2 frame check: fn=59335 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 59335 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 45 28 3a 17 93 b3 c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 8b 6e 9b f9 9f 95 94 59
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=86 [1]=157 [160]=-4762 [161]=6423
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002625 [1]=0.004791 [160]=-0.145325 [161]=0.196014
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 22474, count=18
+[M17_DEBUG] Codec2 frame check: fn=22474 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 22474 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 66 1e 94 64 8a b1 c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 88 e3 5f a1 c1 c6 89 48
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=2016 [1]=-2762 [160]=134 [161]=611
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.061523 [1]=-0.084290 [160]=0.004089 [161]=0.018646
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59600, count=18
+[M17_DEBUG] Codec2 frame check: fn=59600 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 59600 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 6d 1a 8a c0 65 a7 c3 e7
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9c 34 6a 51 8d 7e 8c 8e
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-967 [1]=1277 [160]=27 [161]=57
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.029510 [1]=0.038971 [160]=0.000824 [161]=0.001740
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 33737, count=18
+[M17_DEBUG] Codec2 frame check: fn=33737 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 33737 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 5e 8d 9d d9 17 84 91 04
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 85 25 dd 41 85 e8 67 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=19 [1]=-1 [160]=-49 [161]=53
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000580 [1]=-0.000031 [160]=-0.001495 [161]=0.001617
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62337, count=18
+[M17_DEBUG] Codec2 frame check: fn=62337 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 62337 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 8d fe 5b b7 55 a7 ee fc
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 57 bf ef 22 d2 eb 04 8e
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-481 [1]=219 [160]=-2422 [161]=3061
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.014679 [1]=0.006683 [160]=-0.073914 [161]=0.093414
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23224, count=18
+[M17_DEBUG] Codec2 frame check: fn=23224 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 23224 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 12 35 41 4e 50 03 86 2e
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 30 34 6a 8c ab f3 fb 9c
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-7 [1]=-18 [160]=310 [161]=373
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000214 [1]=-0.000549 [160]=0.009460 [161]=0.011383
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26832, count=18
+[M17_DEBUG] Codec2 frame check: fn=26832 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 26832 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 75 11 86 4b 8a f7 88
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: c2 1f ea 06 48 ad aa 6d
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-243 [1]=320 [160]=2736 [161]=8300
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.007416 [1]=0.009766 [160]=0.083496 [161]=0.253296
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18832, count=18
+[M17_DEBUG] Codec2 frame check: fn=18832 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 18832 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 70 8c 6d 04 d5 20 c5
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 4d 25 0a 5b 7d b7 70 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=99 [1]=-148 [160]=-71 [161]=-753
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.003021 [1]=-0.004517 [160]=-0.002167 [161]=-0.022980
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 25135, count=18
+[M17_DEBUG] Codec2 frame check: fn=25135 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 25135 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 71 4b 6c a3 66 5b 14 bf
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 17 e3 81 29 88 82 30 83
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-2819 [1]=3397 [160]=16113 [161]=-15239
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.086029 [1]=0.103668 [160]=0.491730 [161]=-0.465057
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 27000, count=18
+[M17_DEBUG] Codec2 frame check: fn=27000 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 27000 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 4b 24 54 7c 09 95 6a
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 39 88 9b 90 f4 dc b1 f4
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-2351 [1]=-5009 [160]=-3685 [161]=-519
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.071747 [1]=-0.152863 [160]=-0.112457 [161]=-0.015839
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 60088, count=18
+[M17_DEBUG] Codec2 frame check: fn=60088 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 60088 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 73 ca ce 4a 8c 51 19
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: b1 92 9b f8 05 af fb 43
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=76 [1]=-61 [160]=-1506 [161]=3836
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002319 [1]=-0.001862 [160]=-0.045959 [161]=0.117065
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 24290, count=18
+[M17_DEBUG] Codec2 frame check: fn=24290 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 24290 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 26 a2 10 ba 02 33 54 c9
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9e 85 c1 10 f4 dc 84 5d
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-784 [1]=893 [160]=19634 [161]=-16355
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.023926 [1]=0.027252 [160]=0.599182 [161]=-0.499115
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 33131, count=18
+[M17_DEBUG] Codec2 frame check: fn=33131 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 33131 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 7a 8d 90 ed 00 d6 65 67
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9d 9f 81 1d c8 b7 29 59
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-1535 [1]=-1539 [160]=1093 [161]=-1131
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.046844 [1]=-0.046967 [160]=0.033356 [161]=-0.034515
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 60153, count=18
+[M17_DEBUG] Codec2 frame check: fn=60153 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: ✅ Processing frame 60153 immediately (simplified mode)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 57 fe 1d e5 dc 04 9c c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 80 e3 38 be 9f b7 fc 8e
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 raw int16 values: [0]=-72 [1]=208 [160]=3105 [161]=-3908
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.002197 [1]=0.006348 [160]=0.094757 [161]=-0.119263
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[0m[25/08/2025 18:24:31.000] [[32mINFO[0m] Exiting successfully

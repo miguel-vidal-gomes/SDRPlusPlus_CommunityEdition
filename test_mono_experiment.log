@@ -1,0 +1,1094 @@
+2025-08-25 18:27:21.941 sdrpp_ce[85977:484354] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 18:27:22.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+[0m[25/08/2025 18:27:21.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE
+[0m[25/08/2025 18:27:21.000] [[32mINFO[0m] Loading config
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading icons
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading band plans
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading band plans color table
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading modules
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_sdr_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/meteor_demodulator.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspy_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_sink.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/scanner.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/radio.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_server.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_sink.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/m17_decoder.dylib
+[M17_DEBUG] _INIT_() called - starting module initialization
+[M17_DEBUG] _INIT_() - setting config path
+[M17_DEBUG] _INIT_() - loading config
+[M17_DEBUG] _INIT_() - enabling autosave
+[M17_DEBUG] _INIT_() completed successfully
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/frequency_manager.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/recorder.dylib
+[0m[25/08/2025 18:27:22.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/file_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspyhf_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_client.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/iq_exporter.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hermes_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/discord_integration.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rfspace_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Found Rafael Micro R820T tuner
+Plugins/rtl_tcp_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hackrf_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/sdrpp_server_source.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/pager_decoder.dylib
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Airspy Source (airspy_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing AirspyHF+ Source (airspyhf_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Audio Sink (audio_sink)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Audio Source (audio_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Discord Integration (discord_integration)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing File Source (file_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Frequency Manager (frequency_manager)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing HackRF Source (hackrf_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Hermes Source (hermes_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing IQ Exporter (iq_exporter)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing M17 Voice Decoder (m17_decoder)
+[M17_DEBUG] _CREATE_INSTANCE_() called for name: M17 Voice Decoder
+[M17_DEBUG] About to create M17DecoderModule instance
+[M17_DEBUG] M17DecoderModule constructor started for: M17 Voice Decoder
+[M17_DEBUG] Constructor - name set
+[M17_DEBUG] Constructor - basic initialization completed
+[M17_DEBUG] M17DecoderModule constructor completed!
+[M17_DEBUG] M17DecoderModule instance created successfully
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Meteor Demodulator (meteor_demodulator)
+[Resamp] predec: 32, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Network Sink (network_sink)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Network Source (network_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Pager Decoder (pager_decoder)
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing RFspace Source (rfspace_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing RTL-SDR Source (rtl_sdr_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing RTL-TCP Source (rtl_tcp_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Radio (radio)
+[Resamp] predec: 32, interp: 4, decim: 5, inacc: 0.000000%, taps: 380
+[Resamp] predec: 4, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 128, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:27:22.000] [[33mWARN[0m] Demod switch took 288 us
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Recorder (recorder)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Rigctl Client (rigctl_client)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Rigctl Server (rigctl_server)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing SDR++ Server Source (sdrpp_server_source)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Initializing Scanner (scanner)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Scanner: Initializing scanner module 'Scanner'
+[0m[25/08/2025 18:27:22.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 18:27:22.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Scanner: Scanner module 'Scanner' initialized successfully
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading color maps
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/inferno.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/turbo.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/vivid.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/gqrx.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/electric.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/plasma.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/greyscale.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/temper_colors.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/viridis.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/magma.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/smoke.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/websdr.json
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic_green.json
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Menu Select!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Airspy Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for AirspyHF+ Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Audio Sink
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Audio Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Discord Integration
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for File Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Frequency Manager
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for HackRF Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Hermes Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for IQ Exporter
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for M17 Voice Decoder
+[M17_DEBUG] M17DecoderModule postInit() started
+[M17_DEBUG] postInit - loading config
+[M17_DEBUG] postInit - config loaded
+[M17_DEBUG] postInit - creating VFO
+[Resamp] predec: 64, interp: 576, decim: 625, inacc: 0.000000%, taps: 47500
+[M17_DEBUG] postInit - VFO created
+[M17_DEBUG] postInit - initializing DSP chain
+[M17_DEBUG] M17Decoder hier_block init starting...
+[M17_DEBUG] Initializing GFSK demodulator...
+[M17_DEBUG] Initializing doubler...
+[M17_DEBUG] Initializing 4FSK slicer...
+[M17_DEBUG] Initializing frame demux...
+[M17_DEBUG] Initializing LSF FEC...
+[M17_DEBUG] Initializing payload FEC...
+[M17_DEBUG] Initializing LICH decoder...
+[M17_DEBUG] Initializing audio decoder...
+[M17_DEBUG] M17Codec2Decode::init() called
+[M17_DEBUG] Codec2 init: Creating codec2 instance
+[M17_DEBUG] Codec2 init: samples per frame = 160, double = 320
+[M17_DEBUG] Codec2 init: Memory allocated successfully
+[M17_DEBUG] Audio decoder initialized
+[M17_DEBUG] Initializing packet null sink...
+[M17_DEBUG] Packet null sink initialized
+[M17_DEBUG] Setting output pointers...
+[M17_DEBUG] Output pointers set
+[M17_DEBUG] Registering blocks with hier_block...
+[M17_DEBUG] Registering demod...
+[M17_DEBUG] Registering doubler...
+[M17_DEBUG] Registering slice...
+[M17_DEBUG] Registering demux...
+[M17_DEBUG] Registering lsfFEC...
+[M17_DEBUG] Registering payloadFEC...
+[M17_DEBUG] Registering decodeLICH...
+[M17_DEBUG] Registering decodeAudio...
+[M17_DEBUG] Registering ns2...
+[M17_DEBUG] All blocks registered successfully
+[M17_DEBUG] Setting _block_init flag...
+[M17_DEBUG] M17Decoder hier_block init completed successfully
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[M17_DEBUG] postInit - DSP chain initialized
+[M17_DEBUG] postInit - starting DSP components
+[M17_DEBUG] postInit - DSP components started
+[M17_DEBUG] postInit - setting up audio stream
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[Resamp] predec: 8192, interp: 441, decim: 80, inacc: 0.000000%, taps: 33516
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] postInit - audio stream set up
+[M17_DEBUG] postInit - registering menu
+[M17_DEBUG] postInit - menu registered
+[M17_DEBUG] M17DecoderModule postInit() completed successfully!
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Meteor Demodulator
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Network Sink
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Network Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Pager Decoder
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for RFspace Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for RTL-SDR Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for RTL-TCP Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Radio
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Recorder
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Rigctl Client
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Rigctl Server
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for SDR++ Server Source
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Running post-init for Scanner
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] Ready.
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[Resamp] predec: 2, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] New DSP samplerate: 48000.000000 (source samplerate is 48000.000000)
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:27:22.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 18:27:24.000] [[32mINFO[0m] FileSourceModule 'File Source': Start!
+[0m[25/08/2025 18:27:24.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[M17_DEBUG] M17Slice4FSK processing 24 samples (counter: 0)
+[M17_DEBUG] M17FrameDemux processing 48 samples, detect=FALSE (counter: 0)
+[M17_DEBUG] Creating diagram in diagHandler context
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32976, count=18
+[M17_DEBUG] Codec2 frame check: fn=32976 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32976 received, last processed was 0
+[M17_DEBUG] Codec2: ✅ Processing frame 32976 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 2f 2d 9d d9 ba bc 6d a7
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9c 63 34 87 05 e9 58 c3
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=0 [1]=0 [160]=-5401 [161]=4922
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000000 [1]=0.000000 [80]=0.003418 [81]=0.000793
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 46370, count=18
+[M17_DEBUG] Codec2 frame check: fn=46370 lastFn=32976 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 46370 received, last processed was 32976
+[M17_DEBUG] Codec2: ✅ Processing frame 46370 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: c5 d2 8a 0e 4b 89 a6 2c
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 7a d6 9b 28 23 2f f6 ad
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=1406 [1]=-1375 [160]=-369 [161]=-400
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.042908 [1]=-0.041962 [80]=-0.001923 [81]=-0.056458
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=46370 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 14547 received, last processed was 46370
+[M17_DEBUG] Codec2: Skipping very old frame 14547 (too far behind 46370)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47318, count=18
+[M17_DEBUG] Codec2 frame check: fn=47318 lastFn=46370 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 47318 received, last processed was 46370
+[M17_DEBUG] Codec2: ✅ Processing frame 47318 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: bf 20 e5 19 51 a6 0b 34
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: da c5 d3 28 31 1c a7 14
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=439 [1]=2257 [160]=-3370 [161]=-2792
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.013397 [1]=0.068878 [80]=0.042480 [81]=-0.118286
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 56321, count=18
+[M17_DEBUG] Codec2 frame check: fn=56321 lastFn=47318 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 56321 received, last processed was 47318
+[M17_DEBUG] Codec2: ✅ Processing frame 56321 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 9a 22 d0 e8 ba bd ec c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: c0 e3 66 b3 9f 98 ec 83
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=15908 [1]=-17969 [160]=-2257 [161]=2381
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.485474 [1]=-0.548370 [80]=0.129852 [81]=-0.082672
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 30928, count=18
+[M17_DEBUG] Codec2 frame check: fn=30928 lastFn=56321 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 30928 received, last processed was 56321
+[M17_DEBUG] Codec2: Skipping very old frame 30928 (too far behind 56321)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32976, count=18
+[M17_DEBUG] Codec2 frame check: fn=32976 lastFn=56321 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32976 received, last processed was 56321
+[M17_DEBUG] Codec2: Skipping very old frame 32976 (too far behind 56321)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 56327, count=18
+[M17_DEBUG] Codec2 frame check: fn=56327 lastFn=56321 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 56327 received, last processed was 56321
+[M17_DEBUG] Codec2: ✅ Processing frame 56327 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: c0 e5 40 ec a0 d3 84 c5
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 5a cc ae 3e 94 05 41 b4
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=13567 [1]=-13563 [160]=8089 [161]=-8390
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.414032 [1]=-0.413910 [80]=0.153717 [81]=-0.187286
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 39611, count=18
+[M17_DEBUG] Codec2 frame check: fn=39611 lastFn=56327 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 39611 received, last processed was 56327
+[M17_DEBUG] Codec2: Skipping very old frame 39611 (too far behind 56327)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 22474, count=18
+[M17_DEBUG] Codec2 frame check: fn=22474 lastFn=56327 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 22474 received, last processed was 56327
+[M17_DEBUG] Codec2: Skipping very old frame 22474 (too far behind 56327)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 57861, count=18
+[M17_DEBUG] Codec2 frame check: fn=57861 lastFn=56327 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 57861 received, last processed was 56327
+[M17_DEBUG] Codec2: ✅ Processing frame 57861 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 5a e6 5b 9f eb c0 ba fd
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 4d f9 5f 29 7f 98 e1 9c
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=-1992 [1]=-4080 [160]=-899 [161]=1437
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.060791 [1]=-0.124512 [80]=-0.483765 [81]=0.259674
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32769, count=18
+[M17_DEBUG] Codec2 frame check: fn=32769 lastFn=57861 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32769 received, last processed was 57861
+[M17_DEBUG] Codec2: Skipping very old frame 32769 (too far behind 57861)
+[M17_DEBUG] Codec2 decoder got frame 59335, count=18
+[M17_DEBUG] Codec2 frame check: fn=59335 lastFn=57861 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 59335 received, last processed was 57861
+[M17_DEBUG] Codec2: ✅ Processing frame 59335 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: f1 45 28 3a 17 93 b3 c8
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 8b 6e 9b f9 9f 95 94 59
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=7430 [1]=-6680 [160]=6039 [161]=-713
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=0.226746 [1]=-0.203857 [80]=-0.136200 [81]=0.116821
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 22474, count=18
+[M17_DEBUG] Codec2 frame check: fn=22474 lastFn=59335 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 22474 received, last processed was 59335
+[M17_DEBUG] Codec2: Skipping very old frame 22474 (too far behind 59335)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59600, count=18
+[M17_DEBUG] Codec2 frame check: fn=59600 lastFn=59335 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 59600 received, last processed was 59335
+[M17_DEBUG] Codec2: ✅ Processing frame 59600 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 6d 1a 8a c0 65 a7 c3 e7
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 9c 34 6a 51 8d 7e 8c 8e
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=-1875 [1]=1627 [160]=-117 [161]=52
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.057220 [1]=0.049652 [80]=-0.030334 [81]=0.022552
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 33737, count=18
+[M17_DEBUG] Codec2 frame check: fn=33737 lastFn=59600 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 33737 received, last processed was 59600
+[M17_DEBUG] Codec2: Skipping very old frame 33737 (too far behind 59600)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62337, count=18
+[M17_DEBUG] Codec2 frame check: fn=62337 lastFn=59600 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 62337 received, last processed was 59600
+[M17_DEBUG] Codec2: ✅ Processing frame 62337 (in sequence)
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 frame payload 1: [2-9]: 8d fe 5b b7 55 a7 ee fc
+[M17_DEBUG] Codec2 frame payload 2: [10-17]: 57 bf ef 22 d2 eb 04 8e
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 raw int16 values: [0]=-94 [1]=-53 [160]=-1737 [161]=1684
+[M17_DEBUG] Codec2 convert: Mono float conversion successful
+[M17_DEBUG] Codec2 interleave: About to create stereo from mono
+[M17_DEBUG] Codec2 interleave: Mono-to-stereo successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.002869 [1]=-0.001617 [80]=0.085663 [81]=-0.092804
+[M17_DEBUG] Codec2 output: About to swap output buffer (MONO EXPERIMENT)
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 160 MONO audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23224, count=18
+[M17_DEBUG] Codec2 frame check: fn=23224 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23224 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23224 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26832, count=18
+[M17_DEBUG] Codec2 frame check: fn=26832 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 26832 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 26832 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18832, count=18
+[M17_DEBUG] Codec2 frame check: fn=18832 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 18832 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 18832 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 25135, count=18
+[M17_DEBUG] Codec2 frame check: fn=25135 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 25135 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 25135 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 27000, count=18
+[M17_DEBUG] Codec2 frame check: fn=27000 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 27000 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 27000 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 60088, count=18
+[M17_DEBUG] Codec2 frame check: fn=60088 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 60088 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 60088 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 24290, count=18
+[M17_DEBUG] Codec2 frame check: fn=24290 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 24290 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 24290 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 33131, count=18
+[M17_DEBUG] Codec2 frame check: fn=33131 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 33131 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 33131 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 60153, count=18
+[M17_DEBUG] Codec2 frame check: fn=60153 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 60153 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 60153 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23553, count=18
+[M17_DEBUG] Codec2 frame check: fn=23553 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23553 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23553 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 39605, count=18
+[M17_DEBUG] Codec2 frame check: fn=39605 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 39605 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 39605 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 21275 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 21275 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61208, count=18
+[M17_DEBUG] Codec2 frame check: fn=61208 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 61208 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 61208 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18850, count=18
+[M17_DEBUG] Codec2 frame check: fn=18850 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 18850 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 18850 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 44821, count=18
+[M17_DEBUG] Codec2 frame check: fn=44821 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 44821 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 44821 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 25367, count=18
+[M17_DEBUG] Codec2 frame check: fn=25367 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 25367 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 25367 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 29511, count=18
+[M17_DEBUG] Codec2 frame check: fn=29511 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 29511 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 29511 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 58990, count=18
+[M17_DEBUG] Codec2 frame check: fn=58990 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 58990 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 58990 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32874, count=18
+[M17_DEBUG] Codec2 frame check: fn=32874 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32874 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32874 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 33139, count=18
+[M17_DEBUG] Codec2 frame check: fn=33139 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 33139 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 33139 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62230, count=18
+[M17_DEBUG] Codec2 frame check: fn=62230 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 62230 received, last processed was 62337
+[M17_DEBUG] Codec2: ❌ Skipping frame 62230 (too far out of order)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32487, count=18
+[M17_DEBUG] Codec2 frame check: fn=32487 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32487 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32487 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 60012, count=18
+[M17_DEBUG] Codec2 frame check: fn=60012 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 60012 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 60012 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13313, count=18
+[M17_DEBUG] Codec2 frame check: fn=13313 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 13313 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 13313 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13620, count=18
+[M17_DEBUG] Codec2 frame check: fn=13620 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 13620 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 13620 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32780, count=18
+[M17_DEBUG] Codec2 frame check: fn=32780 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32780 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32780 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23736, count=18
+[M17_DEBUG] Codec2 frame check: fn=23736 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23736 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23736 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32976, count=18
+[M17_DEBUG] Codec2 frame check: fn=32976 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32976 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32976 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21409, count=18
+[M17_DEBUG] Codec2 frame check: fn=21409 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 21409 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 21409 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 58518, count=18
+[M17_DEBUG] Codec2 frame check: fn=58518 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 58518 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 58518 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47209, count=18
+[M17_DEBUG] Codec2 frame check: fn=47209 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 47209 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 47209 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 25319, count=18
+[M17_DEBUG] Codec2 frame check: fn=25319 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 25319 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 25319 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32775, count=18
+[M17_DEBUG] Codec2 frame check: fn=32775 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32775 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32775 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 39567, count=18
+[M17_DEBUG] Codec2 frame check: fn=39567 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 39567 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 39567 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23224, count=18
+[M17_DEBUG] Codec2 frame check: fn=23224 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23224 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23224 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Codec2 decoder got frame 39884, count=18
+[M17_DEBUG] Codec2 frame check: fn=39884 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 39884 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 39884 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 20848, count=18
+[M17_DEBUG] Codec2 frame check: fn=20848 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 20848 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 20848 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32872, count=18
+[M17_DEBUG] Codec2 frame check: fn=32872 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32872 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32872 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 21275 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 21275 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 32872, count=18
+[M17_DEBUG] Codec2 frame check: fn=32872 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32872 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32872 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 25089, count=18
+[M17_DEBUG] Codec2 frame check: fn=25089 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 25089 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 25089 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[Resamp] predec: 8192, interp: 441, decim: 80, inacc: 0.000000%, taps: 33516
+[M17_DEBUG] _diagHandler called with 480 samples
+[0m[25/08/2025 18:27:32.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23559, count=18
+[M17_DEBUG] Codec2 frame check: fn=23559 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23559 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23559 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 24169, count=18
+[M17_DEBUG] Codec2 frame check: fn=24169 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 24169 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 24169 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59064, count=18
+[M17_DEBUG] Codec2 frame check: fn=59064 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 59064 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 59064 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 45438, count=18
+[M17_DEBUG] Codec2 frame check: fn=45438 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 45438 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 45438 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 33464, count=18
+[M17_DEBUG] Codec2 frame check: fn=33464 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 33464 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 33464 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 56460, count=18
+[M17_DEBUG] Codec2 frame check: fn=56460 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 56460 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 56460 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23651, count=18
+[M17_DEBUG] Codec2 frame check: fn=23651 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23651 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23651 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 44993, count=18
+[M17_DEBUG] Codec2 frame check: fn=44993 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 44993 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 44993 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 21275 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 21275 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 20850, count=18
+[M17_DEBUG] Codec2 frame check: fn=20850 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 20850 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 20850 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 20492, count=18
+[M17_DEBUG] Codec2 frame check: fn=20492 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 20492 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 20492 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59338, count=18
+[M17_DEBUG] Codec2 frame check: fn=59338 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 59338 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 59338 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 8760, count=18
+[M17_DEBUG] Codec2 frame check: fn=8760 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 8760 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 8760 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 370, count=18
+[M17_DEBUG] Codec2 frame check: fn=370 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 370 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 370 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 41473, count=18
+[M17_DEBUG] Codec2 frame check: fn=41473 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 41473 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 41473 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32872, count=18
+[M17_DEBUG] Codec2 frame check: fn=32872 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32872 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32872 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 35945, count=18
+[M17_DEBUG] Codec2 frame check: fn=35945 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 35945 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 35945 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 30929, count=18
+[M17_DEBUG] Codec2 frame check: fn=30929 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 30929 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 30929 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 33326, count=18
+[M17_DEBUG] Codec2 frame check: fn=33326 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 33326 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 33326 (too far behind 62337)
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32769, count=18
+[M17_DEBUG] Codec2 frame check: fn=32769 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 32769 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 32769 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 44823, count=18
+[M17_DEBUG] Codec2 frame check: fn=44823 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 44823 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 44823 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 24172, count=18
+[M17_DEBUG] Codec2 frame check: fn=24172 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 24172 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 24172 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23552, count=18
+[M17_DEBUG] Codec2 frame check: fn=23552 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 23552 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 23552 (too far behind 62337)
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 25145, count=18
+[M17_DEBUG] Codec2 frame check: fn=25145 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 25145 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 25145 (too far behind 62337)
+[M17_DEBUG] Codec2 decoder got frame 47800, count=18
+[M17_DEBUG] Codec2 frame check: fn=47800 lastFn=62337 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2: Frame 47800 received, last processed was 62337
+[M17_DEBUG] Codec2: Skipping very old frame 47800 (too far behind 62337)
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[0m[25/08/2025 18:27:36.000] [[32mINFO[0m] Exiting successfully

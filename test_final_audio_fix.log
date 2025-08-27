@@ -1,0 +1,3207 @@
+2025-08-25 17:57:27.102 sdrpp_ce[63542:397331] WARNING: Secure coding is automatically enabled for restorable state! However, not on all supported macOS versions of this application. Opt-in to secure coding explicitly by implementing NSApplicationDelegate.applicationSupportsSecureRestorableState:.
+[0m[25/08/2025 17:57:27.000] [[31mERROR[0m] Glfw Error 65548: Cocoa: Regular windows do not have icons on macOS
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] SDR++ Community Edition v1.2.3-CE
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading config
+[0m[25/08/2025 17:57:27.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading icons
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading band plans
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading band plans color table
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading modules
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_sdr_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/meteor_demodulator.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspy_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_sink.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/scanner.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/radio.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_server.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_sink.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/m17_decoder.dylib
+[M17_DEBUG] _INIT_() called - starting module initialization
+[M17_DEBUG] _INIT_() - setting config path
+[M17_DEBUG] _INIT_() - loading config
+[M17_DEBUG] _INIT_() - enabling autosave
+[M17_DEBUG] _INIT_() completed successfully
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/frequency_manager.dylib
+[0m[25/08/2025 17:57:27.000] [[33mWARN[0m] ConfigManager locked, waiting...
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/recorder.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/file_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/network_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/audio_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/airspyhf_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rigctl_client.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/iq_exporter.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hermes_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/discord_integration.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rfspace_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /UFound Rafael Micro R820T tuner
+sers/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/rtl_tcp_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/hackrf_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/sdrpp_server_source.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Plugins/pager_decoder.dylib
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Airspy Source (airspy_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing AirspyHF+ Source (airspyhf_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Audio Sink (audio_sink)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Audio Source (audio_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Discord Integration (discord_integration)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing File Source (file_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Frequency Manager (frequency_manager)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing HackRF Source (hackrf_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Hermes Source (hermes_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing IQ Exporter (iq_exporter)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing M17 Voice Decoder (m17_decoder)
+[M17_DEBUG] _CREATE_INSTANCE_() called for name: M17 Voice Decoder
+[M17_DEBUG] About to create M17DecoderModule instance
+[M17_DEBUG] M17DecoderModule constructor started for: M17 Voice Decoder
+[M17_DEBUG] Constructor - name set
+[M17_DEBUG] Constructor - basic initialization completed
+[M17_DEBUG] M17DecoderModule constructor completed!
+[M17_DEBUG] M17DecoderModule instance created successfully
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Meteor Demodulator (meteor_demodulator)
+[Resamp] predec: 32, interp: 3, decim: 5, inacc: 0.000000%, taps: 380
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Network Sink (network_sink)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Network Source (network_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Pager Decoder (pager_decoder)
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 256, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing RFspace Source (rfspace_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing RTL-SDR Source (rtl_sdr_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing RTL-TCP Source (rtl_tcp_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Radio (radio)
+[Resamp] predec: 32, interp: 4, decim: 5, inacc: 0.000000%, taps: 380
+[Resamp] predec: 4, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 128, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:57:27.000] [[33mWARN[0m] Demod switch took 387 us
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Recorder (recorder)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Rigctl Client (rigctl_client)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Rigctl Server (rigctl_server)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing SDR++ Server Source (sdrpp_server_source)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Initializing Scanner (scanner)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Scanner: Initializing scanner module 'Scanner'
+[0m[25/08/2025 17:57:27.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:57:27.000] [[36mDEBUG[0m] Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex=6, passbandRatio=100.000000
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Scanner: Scanner module 'Scanner' initialized successfully
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading color maps
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/inferno.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/turbo.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/vivid.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/gqrx.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/electric.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/plasma.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/greyscale.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/temper_colors.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/viridis.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/magma.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/smoke.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/websdr.json
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Loading /Users/miguelgomes/PycharmProjects/SDRPlusPlus/SDR++CE.app/Contents/Resources/../Resources/colormaps/classic_green.json
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Menu Select!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] New DSP samplerate: 1000000.000000 (source samplerate is 1000000.000000)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 100000000.000000!
+[Resamp] predec: 16, interp: 96, decim: 125, inacc: 0.000000%, taps: 9500
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Airspy Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for AirspyHF+ Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Audio Sink
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Audio Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Discord Integration
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for File Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Frequency Manager
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for HackRF Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Hermes Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for IQ Exporter
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for M17 Voice Decoder
+[M17_DEBUG] M17DecoderModule postInit() started
+[M17_DEBUG] postInit - loading config
+[M17_DEBUG] postInit - config loaded
+[M17_DEBUG] postInit - creating VFO
+[Resamp] predec: 64, interp: 576, decim: 625, inacc: 0.000000%, taps: 47500
+[M17_DEBUG] postInit - VFO created
+[M17_DEBUG] postInit - initializing DSP chain
+[M17_DEBUG] M17Decoder hier_block init starting...
+[M17_DEBUG] Initializing GFSK demodulator...
+[M17_DEBUG] Initializing doubler...
+[M17_DEBUG] Initializing 4FSK slicer...
+[M17_DEBUG] Initializing frame demux...
+[M17_DEBUG] Initializing LSF FEC...
+[M17_DEBUG] Initializing payload FEC...
+[M17_DEBUG] Initializing LICH decoder...
+[M17_DEBUG] Initializing audio decoder...
+[M17_DEBUG] M17Codec2Decode::init() called
+[M17_DEBUG] Codec2 init: Creating codec2 instance
+[M17_DEBUG] Codec2 init: samples per frame = 160, double = 320
+[M17_DEBUG] Codec2 init: Memory allocated successfully
+[M17_DEBUG] Audio decoder initialized
+[M17_DEBUG] Initializing packet null sink...
+[M17_DEBUG] Packet null sink initialized
+[M17_DEBUG] Setting output pointers...
+[M17_DEBUG] Output pointers set
+[M17_DEBUG] Registering blocks with hier_block...
+[M17_DEBUG] Registering demod...
+[M17_DEBUG] Registering doubler...
+[M17_DEBUG] Registering slice...
+[M17_DEBUG] Registering demux...
+[M17_DEBUG] Registering lsfFEC...
+[M17_DEBUG] Registering payloadFEC...
+[M17_DEBUG] Registering decodeLICH...
+[M17_DEBUG] Registering decodeAudio...
+[M17_DEBUG] Registering ns2...
+[M17_DEBUG] All blocks registered successfully
+[M17_DEBUG] Setting _block_init flag...
+[M17_DEBUG] M17Decoder hier_block init completed successfully
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[M17_DEBUG] postInit - DSP chain initialized
+[M17_DEBUG] postInit - starting DSP components
+[M17_DEBUG] postInit - DSP components started
+[M17_DEBUG] postInit - setting up audio stream
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] postInit - audio stream set up
+[M17_DEBUG] postInit - registering menu
+[M17_DEBUG] postInit - menu registered
+[M17_DEBUG] M17DecoderModule postInit() completed successfully!
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Meteor Demodulator
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Network Sink
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Network Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Pager Decoder
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for RFspace Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for RTL-SDR Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for RTL-TCP Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Radio
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Recorder
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Rigctl Client
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Rigctl Server
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for SDR++ Server Source
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Running post-init for Scanner
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] Ready.
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[Resamp] predec: 8192, interp: 10, decim: 3, inacc: 0.000000%, taps: 760
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] New DSP samplerate: 14400.000000 (source samplerate is 14400.000000)
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 0.000000!
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:57:27.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[0m[25/08/2025 17:57:29.000] [[32mINFO[0m] FileSourceModule 'File Source': Start!
+[0m[25/08/2025 17:57:29.000] [[32mINFO[0m] FileSourceModule 'File Source': Tune: 7200.000000!
+[M17_DEBUG] M17Slice4FSK processing 25 samples (counter: 0)
+[M17_DEBUG] M17FrameDemux processing 50 samples, detect=FALSE (counter: 0)
+[M17_DEBUG] Creating diagram in diagHandler context
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 32441, count=18
+[M17_DEBUG] Codec2 frame check: fn=32441 lastFn=0 consecutive=NO receiving=NO
+[M17_DEBUG] Codec2 decoder: ✅ FORCED receiving mode (bypassed consecutive check)
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000000 [1]=0.000000 [160]=-0.044708 [161]=0.020264
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 58559, count=18
+[M17_DEBUG] Codec2 frame check: fn=58559 lastFn=32441 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.217041 [1]=-0.116913 [160]=-0.148132 [161]=0.218903
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=58559 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.029205 [1]=-0.033173 [160]=-0.012939 [161]=0.013123
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.450226 [1]=-0.448303 [160]=-0.587524 [161]=0.698456
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.005981 [1]=0.014130 [160]=0.002472 [161]=-0.001862
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.022888 [1]=0.019623 [160]=0.031555 [161]=-0.035522
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.025452 [1]=0.024261 [160]=-0.004730 [161]=0.002838
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61258, count=18
+[M17_DEBUG] Codec2 frame check: fn=61258 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.004944 [1]=-0.008942 [160]=-0.633240 [161]=0.567169
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 46823, count=18
+[M17_DEBUG] Codec2 frame check: fn=46823 lastFn=61258 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.042389 [1]=0.141663 [160]=-0.014893 [161]=0.019043
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=46823 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.347748 [1]=0.300323 [160]=-0.010193 [161]=0.010559
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.228607 [1]=0.020233 [160]=-0.000549 [161]=0.000763
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.065643 [1]=-0.083466 [160]=0.356598 [161]=-0.354340
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.015991 [1]=-0.027985 [160]=-0.132874 [161]=-0.073853
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001862 [1]=-0.002563 [160]=0.014679 [161]=-0.013947
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.007446 [1]=0.006409 [160]=-0.009094 [161]=-0.009369
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 44867, count=18
+[M17_DEBUG] Codec2 frame check: fn=44867 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001953 [1]=-0.002136 [160]=-0.017395 [161]=0.008453
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=44867 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000122 [1]=-0.001831 [160]=0.010681 [161]=-0.016907
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.029053 [1]=0.038116 [160]=-0.053009 [161]=0.059143
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.085754 [1]=0.045380 [160]=0.464539 [161]=-0.513275
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.655701 [1]=0.758484 [160]=-0.010773 [161]=0.027740
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.068726 [1]=0.210358 [160]=0.001770 [161]=-0.003967
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.169952 [1]=0.221252 [160]=-0.270111 [161]=0.437439
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000824 [1]=0.000000 [160]=0.001953 [161]=-0.002075
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.016052 [1]=0.020966 [160]=-0.116455 [161]=-0.101227
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.006744 [1]=-0.003479 [160]=0.002350 [161]=-0.004547
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002106 [1]=-0.001770 [160]=-0.027802 [161]=0.033051
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.006195 [1]=-0.034943 [160]=-0.006622 [161]=-0.004791
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.290985 [1]=-0.228271 [160]=0.040741 [161]=-0.031860
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.076660 [1]=-0.027100 [160]=0.005493 [161]=-0.006927
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.002960 [1]=-0.248627 [160]=-0.001343 [161]=0.000702
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.031342 [1]=0.064026 [160]=-0.136810 [161]=0.149841
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.020905 [1]=0.025726 [160]=-0.030792 [161]=0.042419
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001068 [1]=-0.000549 [160]=-0.018555 [161]=0.014832
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.006073 [1]=0.003906 [160]=-0.004242 [161]=-0.006653
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000397 [1]=0.000275 [160]=-0.020355 [161]=0.008972
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000488 [1]=0.001831 [160]=0.236938 [161]=-0.221039
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.006866 [1]=0.040710 [160]=0.020508 [161]=0.032257
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[Resamp] predec: 8192, interp: 6, decim: 1, inacc: 0.000000%, taps: 456
+[M17_DEBUG] _diagHandler called with 480 samples
+[0m[25/08/2025 17:57:36.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.030914 [1]=0.008698 [160]=-0.049805 [161]=0.043518
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.053162 [1]=-0.150635 [160]=0.166626 [161]=-0.378784
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.524323 [1]=0.595917 [160]=-0.055695 [161]=0.040405
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.090881 [1]=-0.089081 [160]=0.004242 [161]=-0.002991
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.626953 [1]=-0.519958 [160]=0.041473 [161]=0.154724
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001526 [1]=-0.002533 [160]=-0.001404 [161]=0.001831
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.023224 [1]=0.024506 [160]=0.106384 [161]=0.004822
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.017853 [1]=-0.017578 [160]=-0.006378 [161]=0.009949
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000671 [1]=0.000427 [160]=-0.016052 [161]=0.004608
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.031281 [1]=0.012604 [160]=0.001831 [161]=-0.003326
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.002777 [1]=-0.047211 [160]=0.001984 [161]=-0.017670
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.143402 [1]=-0.348206 [160]=0.000946 [161]=-0.001404
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.258240 [1]=0.046478 [160]=-0.014008 [161]=0.012817
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.063782 [1]=0.075714 [160]=0.299561 [161]=-0.308044
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.071686 [1]=-0.015747 [160]=-0.066223 [161]=-0.175781
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[Resamp] predec: 8192, interp: 441, decim: 80, inacc: 0.000000%, taps: 33516
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002258 [1]=0.001526 [160]=-0.007751 [161]=0.012665
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.008606 [1]=-0.010040 [160]=0.007874 [161]=0.009308
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000885 [1]=-0.001312 [160]=-0.013885 [161]=0.017365
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.003845 [1]=0.000854 [160]=-0.106689 [161]=0.088348
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.017883 [1]=-0.017883 [160]=0.052673 [161]=0.019196
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.011047 [1]=-0.025543 [160]=-0.050354 [161]=0.044495
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[0m[25/08/2025 17:57:39.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.113129 [1]=-0.021820 [160]=0.582886 [161]=-0.572083
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.494507 [1]=-0.556488 [160]=-0.090668 [161]=0.095764
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.297302 [1]=0.311188 [160]=-0.004242 [161]=0.002197
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.357819 [1]=-0.331909 [160]=-0.740570 [161]=0.762421
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001495 [1]=-0.001160 [160]=-0.002747 [161]=0.002808
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.031433 [1]=0.028595 [160]=0.044617 [161]=0.011627
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000000 [1]=0.003021 [160]=-0.002441 [161]=-0.003693
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001953 [1]=-0.001892 [160]=-0.005188 [161]=-0.007660
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.044220 [1]=0.011414 [160]=-0.004944 [161]=-0.001007
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.075470 [1]=-0.033783 [160]=-0.044708 [161]=0.047241
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.214722 [1]=-0.229675 [160]=0.004578 [161]=-0.002625
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.040680 [1]=0.253571 [160]=0.019684 [161]=-0.017609
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.098480 [1]=0.036346 [160]=-0.204651 [161]=0.210449
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.022766 [1]=-0.046997 [160]=-0.051300 [161]=0.024567
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000519 [1]=-0.000366 [160]=-0.003143 [161]=-0.003418
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.003693 [1]=0.001770 [160]=-0.009766 [161]=-0.009552
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000916 [1]=-0.000183 [160]=0.003265 [161]=0.013031
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.003754 [1]=0.005554 [160]=-0.014496 [161]=-0.034088
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001617 [1]=0.010864 [160]=0.042816 [161]=0.052338
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.022827 [1]=-0.015381 [160]=0.080933 [161]=-0.076813
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.105865 [1]=0.054718 [160]=-0.259003 [161]=0.409058
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.150940 [1]=0.144867 [160]=-0.104279 [161]=0.102539
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.140869 [1]=-0.153839 [160]=0.006195 [161]=0.005768
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.008575 [1]=0.026428 [160]=-0.282257 [161]=0.168640
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000580 [1]=0.000610 [160]=0.000153 [161]=0.000610
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.017731 [1]=0.013733 [160]=-0.078735 [161]=0.035278
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.007660 [1]=-0.007355 [160]=0.006226 [161]=0.000092
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000885 [1]=-0.000275 [160]=0.017151 [161]=-0.011353
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.048401 [1]=-0.038544 [160]=-0.002258 [161]=-0.000946
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.066406 [1]=0.040741 [160]=0.035706 [161]=-0.023285
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[Resamp] predec: 8192, interp: 4, decim: 1, inacc: 0.000000%, taps: 304
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[0m[25/08/2025 17:57:45.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.099884 [1]=-0.225372 [160]=0.002655 [161]=-0.003326
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.097565 [1]=0.008118 [160]=-0.016144 [161]=0.014587
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.064728 [1]=-0.005676 [160]=-0.056671 [161]=0.034546
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.017426 [1]=-0.002930 [160]=0.077179 [161]=0.146637
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000275 [1]=0.000763 [160]=0.014343 [161]=-0.017639
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.013550 [1]=0.012604 [160]=0.009125 [161]=0.007904
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001160 [1]=-0.001526 [160]=0.020142 [161]=-0.006470
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001190 [1]=-0.001831 [160]=-0.319305 [161]=0.335602
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.013092 [1]=-0.037354 [160]=-0.037933 [161]=-0.059509
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001617 [1]=0.013611 [160]=-0.067627 [161]=0.055786
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.057373 [1]=0.073944 [160]=0.032654 [161]=-0.206055
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.343536 [1]=-0.236694 [160]=-0.110809 [161]=0.102783
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.032318 [1]=-0.011536 [160]=0.020020 [161]=-0.016815
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.141205 [1]=0.137878 [160]=-0.571808 [161]=0.364838
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000824 [1]=-0.000946 [160]=0.001129 [161]=-0.000824
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.026764 [1]=-0.028717 [160]=-0.059967 [161]=0.046326
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.009338 [1]=0.012238 [160]=-0.010925 [161]=0.008759
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001007 [1]=0.001495 [160]=-0.004730 [161]=0.022247
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.032867 [1]=0.051208 [160]=-0.000824 [161]=0.000336
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.170135 [1]=0.233032 [160]=0.016205 [161]=-0.028290
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.135376 [1]=-0.075775 [160]=0.001740 [161]=-0.002411
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[Resamp] predec: 8192, interp: 441, decim: 80, inacc: 0.000000%, taps: 33516
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.085876 [1]=0.177948 [160]=0.010284 [161]=-0.010193
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.003510 [1]=-0.050385 [160]=-0.350708 [161]=0.351196
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.031128 [1]=0.025757 [160]=0.016449 [161]=0.016479
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000946 [1]=-0.002014 [160]=0.008850 [161]=-0.011475
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000854 [1]=-0.003601 [160]=-0.006958 [161]=-0.004700
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.001862 [1]=-0.001068 [160]=0.012939 [161]=-0.018585
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[0m[25/08/2025 17:57:49.000] [[32mINFO[0m] RtAudio stream open
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.005585 [1]=0.006073 [160]=-0.101318 [161]=0.111877
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.021240 [1]=0.030304 [160]=-0.034363 [161]=-0.055237
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.007904 [1]=0.023376 [160]=-0.046600 [161]=0.042358
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.048676 [1]=0.090881 [160]=0.145416 [161]=-0.330017
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.264771 [1]=0.102081 [160]=-0.014526 [161]=-0.003113
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.172516 [1]=-0.175629 [160]=0.018219 [161]=-0.019836
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.344055 [1]=0.367279 [160]=0.316345 [161]=-0.447418
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001129 [1]=0.001801 [160]=0.002014 [161]=-0.002441
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.049530 [1]=-0.049530 [160]=0.022400 [161]=-0.089417
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 26567, count=18
+[M17_DEBUG] Codec2 frame check: fn=26567 lastFn=40554 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.002472 [1]=0.001740 [160]=0.003387 [161]=-0.003540
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 18433, count=18
+[M17_DEBUG] Codec2 frame check: fn=18433 lastFn=26567 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.001495 [1]=0.000946 [160]=-0.008545 [161]=0.008911
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 61299, count=18
+[M17_DEBUG] Codec2 frame check: fn=61299 lastFn=18433 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002869 [1]=-0.039276 [160]=0.000885 [161]=0.000732
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 59820, count=18
+[M17_DEBUG] Codec2 frame check: fn=59820 lastFn=61299 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.048065 [1]=0.110748 [160]=-0.049469 [161]=0.046753
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 62467, count=18
+[M17_DEBUG] Codec2 frame check: fn=62467 lastFn=59820 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.252563 [1]=-0.279358 [160]=0.003998 [161]=-0.004059
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21388, count=18
+[M17_DEBUG] Codec2 frame check: fn=21388 lastFn=62467 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.125214 [1]=-0.081238 [160]=0.003113 [161]=-0.001678
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Codec2 decoder got frame 27536, count=18
+[M17_DEBUG] Codec2 frame check: fn=27536 lastFn=21388 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.082428 [1]=-0.074432 [160]=-0.066040 [161]=0.081360
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 34533, count=18
+[M17_DEBUG] Codec2 frame check: fn=34533 lastFn=27536 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.004578 [1]=-0.041107 [160]=-0.055481 [161]=-0.144897
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47049, count=18
+[M17_DEBUG] Codec2 frame check: fn=47049 lastFn=34533 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.003052 [1]=-0.000763 [160]=-0.000641 [161]=0.008240
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 21275, count=18
+[M17_DEBUG] Codec2 frame check: fn=21275 lastFn=47049 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.010529 [1]=-0.011017 [160]=0.003357 [161]=0.000824
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 13729, count=18
+[M17_DEBUG] Codec2 frame check: fn=13729 lastFn=21275 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.000122 [1]=0.000763 [160]=-0.005188 [161]=-0.011169
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14544, count=18
+[M17_DEBUG] Codec2 frame check: fn=14544 lastFn=13729 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.002777 [1]=-0.001099 [160]=-0.216248 [161]=0.186096
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 14442, count=18
+[M17_DEBUG] Codec2 frame check: fn=14442 lastFn=14544 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.003510 [1]=-0.030853 [160]=-0.090057 [161]=-0.014984
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14547, count=18
+[M17_DEBUG] Codec2 frame check: fn=14547 lastFn=14442 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000000 [1]=0.005920 [160]=-0.008087 [161]=0.007324
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 31800, count=18
+[M17_DEBUG] Codec2 frame check: fn=31800 lastFn=14547 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.119934 [1]=-0.017639 [160]=-0.128540 [161]=-0.080322
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found LSF sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 47312, count=18
+[M17_DEBUG] Codec2 frame check: fn=47312 lastFn=31800 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.913483 [1]=0.858612 [160]=-0.106567 [161]=0.103943
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 14754, count=18
+[M17_DEBUG] Codec2 frame check: fn=14754 lastFn=47312 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.077454 [1]=-0.081207 [160]=0.029480 [161]=-0.033447
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] Codec2 decoder got frame 59763, count=18
+[M17_DEBUG] Codec2 frame check: fn=59763 lastFn=14754 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.366882 [1]=0.321228 [160]=0.250275 [161]=-0.439911
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 23497, count=18
+[M17_DEBUG] Codec2 frame check: fn=23497 lastFn=59763 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=0.000854 [1]=-0.000397 [160]=-0.000854 [161]=0.001404
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Found packet sync frame!
+[M17_DEBUG] Found stream sync frame!
+[M17_DEBUG] _diagHandler called with 480 samples
+[M17_DEBUG] Codec2 decoder got frame 40554, count=18
+[M17_DEBUG] Codec2 frame check: fn=40554 lastFn=23497 consecutive=NO receiving=YES
+[M17_DEBUG] Codec2 decoder: Would stop receiving (timeout) - BYPASSED for testing
+[M17_DEBUG] Codec2: ✅ Processing audio - receiving state active
+[M17_DEBUG] Codec2 decode: About to decode first frame
+[M17_DEBUG] Codec2 decode: First frame decoded successfully
+[M17_DEBUG] Codec2 decode: Second frame decoded successfully
+[M17_DEBUG] Codec2 decoded audio: 320 samples per frame
+[M17_DEBUG] Codec2 convert: About to convert int16 to float
+[M17_DEBUG] Codec2 convert: Float conversion successful
+[M17_DEBUG] Codec2 interleave: About to interleave to stereo
+[M17_DEBUG] Codec2 interleave: Stereo interleaving successful
+[M17_DEBUG] Codec2 audio values: [0]=-0.016998 [1]=-0.017181 [160]=0.124390 [161]=0.063477
+[M17_DEBUG] Codec2 output: About to swap output buffer
+[M17_DEBUG] Codec2 output: ✅ SUCCESS! Sent 320 audio samples to output stream
+[0m[25/08/2025 17:57:54.000] [[32mINFO[0m] Exiting successfully
