@@ -11,7 +11,10 @@ on:
 env:
     # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
     BUILD_TYPE: Release
-    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    GH_TOKEN: ${{ github.token }}
+    # Version information
+    VERSION_BASE: "1.2.3"
+    VERSION_SUFFIX: "CE"
 
 permissions:
     contents: write
@@ -24,6 +27,42 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+        
+        - name: Compute nightly build version
+          shell: bash
+          run: |
+            # Determine version string based on branch/tag and build number
+            DATE_UTC=$(date -u +%Y-%m-%d)
+            SHORT_SHA=${GITHUB_SHA::7}
+            
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get nightly+date+sha suffix
+              VERSION_STR="1.2.3-CE-nightly+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+              BUILD_VERSION="${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix with date and SHA
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="1.2.3-CE-pr.${PR_NUM}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix with date and SHA
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="1.2.3-CE-branch.${BRANCH}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            echo "Setting build version to: $BUILD_VERSION"
+            
+            # Update make_macos_bundle.sh
+            sed -i "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
         
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
@@ -87,6 +126,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCOPY_MSVC_REDISTRIBUTABLES=ON "$Env:GITHUB_WORKSPACE" "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
@@ -103,6 +144,11 @@ jobs:
         - name: Create Archive
           working-directory: ${{runner.workspace}}
           run: 7z a sdrpp_windows_x64.zip sdrpp_windows_x64/*
+          
+        - name: Verify version is embedded (Windows)
+          shell: bash
+          run: |
+            strings ${{runner.workspace}}/sdrpp_windows_x64/sdrpp_ce.exe | grep -F "$BUILD_VERSION" || echo "WARNING: Version string not found in binary"
 
         - name: Save Archive
           uses: actions/upload-artifact@v4
@@ -115,6 +161,45 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+        
+        - name: Compute nightly build version
+          shell: bash
+          run: |
+            # Determine version string based on branch/tag and build number
+            DATE_UTC=$(date -u +%Y-%m-%d)
+            SHORT_SHA=${GITHUB_SHA::7}
+            
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get nightly+date+sha suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+              BUILD_VERSION="${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix with date and SHA
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix with date and SHA
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            echo "Setting build version to: $BUILD_VERSION"
+            
+            # Update make_macos_bundle.sh
+            sed -i '' "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
         
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
@@ -155,6 +240,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 $GITHUB_WORKSPACE -DOPT_BUILD_PLUTOSDR_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_AUDIO_SINK=ON -DOPT_BUILD_PORTAUDIO_SINK=OFF -DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_AUDIO_SOURCE=OFF -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
@@ -183,6 +270,45 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+            fetch-tags: true
+        
+        - name: Compute nightly build version
+          shell: bash
+          run: |
+            # Determine version string based on branch/tag and build number
+            DATE_UTC=$(date -u +%Y-%m-%d)
+            SHORT_SHA=${GITHUB_SHA::7}
+            
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get nightly+date+sha suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+              BUILD_VERSION="${VERSION_STR}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix with date and SHA
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix with date and SHA
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}+${DATE_UTC}+${SHORT_SHA}"
+              BUILD_VERSION="v${VERSION_STR}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "BUILD_VERSION=$BUILD_VERSION" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            echo "Setting build version to: $BUILD_VERSION"
+            
+            # Update make_macos_bundle.sh
+            sed -i '' "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
         
         - name: Create Build Environment
           run: cmake -E make_directory ${{runner.workspace}}/build
@@ -223,6 +349,8 @@ jobs:
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
           run: cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 $GITHUB_WORKSPACE -DOPT_BUILD_PLUTOSDR_SOURCE=ON -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_AUDIO_SINK=ON -DOPT_BUILD_PORTAUDIO_SINK=OFF -DOPT_BUILD_NEW_PORTAUDIO_SINK=OFF -DOPT_BUILD_M17_DECODER=OFF -DOPT_BUILD_PERSEUS_SOURCE=OFF -DOPT_BUILD_AUDIO_SOURCE=OFF -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON -DUSE_BUNDLE_DEFAULTS=ON -DCMAKE_BUILD_TYPE=Release
+          env:
+            BUILD_VERSION: ${{ env.BUILD_VERSION }}
 
         - name: Build
           working-directory: ${{runner.workspace}}/build
@@ -256,7 +384,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_bullseye && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -278,7 +406,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_bullseye && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -300,7 +428,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_bookworm && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -322,7 +450,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_bookworm && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -344,7 +472,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_trixie && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -366,7 +494,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_trixie && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -388,7 +516,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_sid && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -410,7 +538,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/debian_sid && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -432,7 +560,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_focal && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -454,7 +582,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_focal && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -476,7 +604,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_jammy && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -498,7 +626,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_jammy && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -520,7 +648,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_noble && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -542,7 +670,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_noble && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -564,7 +692,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_oracular && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -586,7 +714,7 @@ jobs:
           run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_oracular && docker build . --tag sdrpp_build
 
         - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
+          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" --env BUILD_VERSION="${{ env.BUILD_VERSION }}" sdrpp_build /root/do_build.sh
 
         - name: Recover Deb Archive
           working-directory: ${{runner.workspace}}
@@ -603,6 +731,38 @@ jobs:
 
         steps:
         - uses: actions/checkout@v4
+        
+        - name: Update Version Information
+          run: |
+            # Determine version string based on branch/tag and build number
+            if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+              # Master branch builds get -nightly suffix
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-nightly"
+            elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              # Tag builds get the tag name
+              VERSION_STR="${GITHUB_REF#refs/tags/}"
+            elif [[ "$GITHUB_REF" == refs/pull/* ]]; then
+              # PR builds get -pr.NUMBER suffix
+              PR_NUM=${GITHUB_REF#refs/pull/}
+              PR_NUM=${PR_NUM%/merge}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-pr.${PR_NUM}"
+            else
+              # Other branches get -branch.BRANCHNAME suffix
+              BRANCH=${GITHUB_REF#refs/heads/}
+              VERSION_STR="${VERSION_BASE}-${VERSION_SUFFIX}-branch.${BRANCH}"
+            fi
+            
+            echo "VERSION_STR=$VERSION_STR" >> $GITHUB_ENV
+            echo "Setting version to: $VERSION_STR"
+            
+            # Update version.h
+            sed -i "s/^#define VERSION_STR.*/#define VERSION_STR \"$VERSION_STR\"/" core/src/version.h
+            
+            # Update make_macos_bundle.sh
+            sed -i "s/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce [^ ]* sdrp/bundle_create_plist sdrppce \"SDR++CE Community Edition\" org.sdrppce.sdrppce $VERSION_STR sdrp/" make_macos_bundle.sh
+            
+            # Update Android version
+            sed -i "s/versionName \".*\"/versionName \"$VERSION_STR\"/" android/app/build.gradle
 
         - name: Fetch container
           working-directory: ${{runner.workspace}}
@@ -678,52 +838,55 @@ jobs:
             mv sdrpp_ubuntu_oracular_aarch64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_oracular_aarch64.deb &&
             mv sdrpp_android/sdrpp.apk sdrpp_all/sdrpp.apk
 
+      
         - uses: actions/upload-artifact@v4
           with:
             name: sdrpp_all
-            path: sdrpp_all/
+            path: sdrpp_all/*
 
-    update_nightly_release:
-        needs: [create_full_archive]
-        runs-on: ubuntu-latest
+    
+    update_nightly_release:            # ← now under jobs:
+        needs: create_full_archive
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        runs-on: ubuntu-latest
+        permissions:
+          contents: write
+        steps:                            # ← steps:
+          - name: Checkout (needed for git tag/push)
+            uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
 
-        steps:
-        - name: Download All Builds
-          uses: actions/download-artifact@v4
+          - name: Point origin to tokened URL
+            env:
+              GITHUB_TOKEN: ${{ github.token }}
+            run: |
+              git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 
-        - name: Create Nightly Release (if needed)
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            # Check if nightly release exists, create if not
-            if ! gh release view nightly -R ${{github.repository}} >/dev/null 2>&1; then
-              echo "Creating nightly release..."
-              gh release create nightly \
-                --title "Nightly Build" \
-                --notes "**Automated nightly builds of SDR++CE Community Edition**
+          - name: Ensure nightly tag & release
+            shell: bash
+            env:
+              GH_TOKEN: ${{ github.token }}
+              GITHUB_TOKEN: ${{ github.token }}
+            run: |
+              set -euo pipefail
+              git config --global user.name "github-actions[bot]"
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git tag -fa nightly "$GITHUB_SHA" -m "nightly $(date -u +%FT%TZ)"
+              git push -f origin refs/tags/nightly
+              gh release view nightly >/dev/null 2>&1 || \
+                gh release create nightly -t "SDR++ CE Nightly" -n "Auto-updated nightly build assets" --target "$GITHUB_SHA"
 
-            These builds are automatically updated with the latest changes from the master branch. They include all platforms and are built fresh with each commit.
+          - name: Download consolidated artifact
+            uses: actions/download-artifact@v4
+            with:
+              name: sdrpp_all
+              path: sdrpp_all
 
-            **⚠️ Note:** Nightly builds may contain experimental features and should be used for testing purposes.
-
-            **📦 Available Builds:**
-            - Windows x64 package
-            - macOS Intel & ARM app bundles  
-            - Linux packages (Ubuntu, Debian)
-            - Android APK
-
-            **🔄 Last Updated:** This release is automatically updated with each commit to master." \
-                --prerelease \
-                -R ${{github.repository}}
-            else
-              echo "Nightly release already exists"
-            fi
-
-        - name: Update Nightly
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: gh release upload nightly sdrpp_all/* -R ${{github.repository}} --clobber
+          - name: Upload assets to nightly (clobber to overwrite)
+            env:
+              GH_TOKEN: ${{ github.token }}
+            run: gh release upload nightly sdrpp_all/* --clobber
 
     check_spelling:
         runs-on: ubuntu-latest
