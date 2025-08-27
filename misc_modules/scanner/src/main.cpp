@@ -2435,7 +2435,7 @@ private:
         }
         
         flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
-                  binHz, sampleRate, fftSize);
+                  binWidthHz(sampleRate, fftSize), sampleRate, fftSize);
         
         // Calculate the bin index for the center frequency using DC-centered mapping
         int centerBinInt = absHzToDcBin(freq);
@@ -2444,8 +2444,7 @@ private:
         int widthBins = (int)round(width / binHz);
         int halfWidth = widthBins / 2;
         
-        // Calculate guard and reference band sizes in bins
-        int guardBins = hzToBins(scannerGuardHz);
+        // Calculate reference band sizes in bins
         int refBins = hzToBins(scannerRefHz);
         
         // Define the signal region of interest (ROI)
@@ -2467,22 +2466,33 @@ private:
         const int N = fftSize;
         auto clamp = [&](int x){ return std::min(std::max(x, 0), N-1); };
         
-        // Left band: end just before guard zone
+        // Inputs (already mapped to bins via absHzToDcBin())
+        assert(lowSignalBin >= 0 && lowSignalBin < N);
+        assert(highSignalBin >= 0 && highSignalBin < N);
+        
+        // Sizes in bins
+        const int guardBins = hzToBins(scannerGuardHz, sampleRate, fftSize);
+        const int refWidthBins = std::max(1, hzToBins(scannerRefHz, sampleRate, fftSize));
+        
+        // Left ref band: directly before the guard zone on left side of ROI
         const int leftEnd = clamp(lowSignalBin - guardBins - 1);
-        const int leftStart = clamp(leftEnd - (refBins - 1));
+        const int leftStart = clamp(leftEnd - (refWidthBins - 1));
         
-        // Right band: start just after guard zone
+        // Right ref band: directly after the guard zone on right side of ROI
         const int rightStart = clamp(highSignalBin + guardBins + 1);
-        const int rightEnd = clamp(rightStart + (refBins - 1));
+        const int rightEnd = clamp(rightStart + (refWidthBins - 1));
         
-        // Find maximum power in signal region
+        // Find maximum power in signal region (peak in ROI in dB)
         float maxSignal = -INFINITY;
         int maxBin = centerBinInt;
+        int kMax = centerBinInt;  // Will hold the bin index of the maximum
+        
         for (int i = lowSignalBin; i <= highSignalBin; i++) {
             if (i < 0 || i >= dataWidth) continue;
             if (std::isfinite(data[i]) && data[i] > maxSignal) {
                 maxSignal = data[i];
                 maxBin = i;
+                kMax = i;
             }
         }
         
@@ -2492,15 +2502,22 @@ private:
             maxSignal = -100.0f;
         }
         
+        // Get signal in dB
+        const float signalDb = maxSignal;
+        
+        // Guardrails to prevent regressions
+        assert(std::isfinite(signalDb));
+        assert(roiStartBin <= roiEndBin); // We don't support wraparound ROIs
+        
         // Debug the maxSignal value
-        flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", maxSignal, maxBin);
+        flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", signalDb, kMax);
         
         // Define reference regions using vector of ranges for better handling
         std::vector<std::pair<int, int>> refRanges;
         
         // Add reference regions on both sides of the ROI, outside guard bands
-        refRanges.emplace_back(leftStart, leftEnd);
-        refRanges.emplace_back(rightStart, rightEnd);
+        if (leftStart <= leftEnd) refRanges.emplace_back(leftStart, leftEnd);
+        if (rightStart <= rightEnd) refRanges.emplace_back(rightStart, rightEnd);
         
         // Safety asserts for reference ranges
         for (const auto& [a, b] : refRanges) {
@@ -2509,11 +2526,10 @@ private:
             assert(a <= b);  // Range order
         }
         
-        // Collect finite dB values from reference regions
+        // Collect finite values from PSD-in-dB
         std::vector<float> refValues;
-        refValues.reserve(N);
+        refValues.reserve(refWidthBins * 2);
         for (auto [a, b] : refRanges) {
-            if (a > b) continue;                 // nothing here, skip
             for (int i = a; i <= b; ++i) {
                 float v = data[i];
                 if (std::isfinite(v)) refValues.push_back(v);
@@ -2522,7 +2538,7 @@ private:
         
         // If no reference values, use fallback approach
         if (refValues.empty()) {
-            flog::warn("Scanner: CFAR: empty reference set; using fallback approach");
+            flog::warn("Scanner: CFAR: empty reference set; skip frame");
             
             // Fallback: use whole spectrum minus ROI
             for (int i = 0; i < dataWidth; i++) {
@@ -2544,19 +2560,21 @@ private:
         float noiseFloor = -80.0f; // Default if something goes wrong
         
         // Get stats from reference values
-        auto [minIt, maxIt] = std::minmax_element(refValues.begin(), refValues.end());
+        auto [mnIt, mxIt] = std::minmax_element(refValues.begin(), refValues.end());
+        const float noiseDb = refValues.empty() ? -80.0f : 
+                             (refValues.size() % 2 == 0) ? 
+                             (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f :
+                             refValues[refValues.size()/2];
         
-        // Calculate median
-        std::sort(refValues.begin(), refValues.end());
-        if (refValues.size() % 2 == 0) {
-            noiseFloor = (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f;
-        } else {
-            noiseFloor = refValues[refValues.size()/2];
-        }
+        noiseFloor = noiseDb;
+        
+        // Guardrails to prevent regressions
+        assert(std::isfinite(noiseDb));
+        assert(refValues.size() > 0);
         
         // Log noise floor stats with proper format
         flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
-                  noiseFloor, *minIt, *maxIt, static_cast<int>(refValues.size()));
+                  noiseDb, *mnIt, *mxIt, static_cast<int>(refValues.size()));
         
         // Store noise floor for caller
         noiseFloorDb = noiseFloor;
@@ -2588,20 +2606,21 @@ private:
             noiseFloor = -120.0f;  // Set to a reasonable default
         }
         
-        // Calculate threshold and margin
-        float thresholdDb = noiseFloor + scannerThresholdDb;
-        float marginDb = maxSignal - thresholdDb;
-        bool detected = (marginDb >= 0.0f && maxSignal > -90.0f); // Ensure signal is above threshold and reasonable
+        // CFAR threshold (in dB)
+        const float kDb = scannerThresholdDb;
+        const float thresholdDb = noiseFloor + kDb;
+        const float marginDb = signalDb - thresholdDb;
+        bool detected = (marginDb >= 0.0f && signalDb > -90.0f); // Ensure signal is above threshold and reasonable
         
         // Log CFAR detection with margin
         flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
-                  freq / 1e6, maxSignal, noiseFloor, thresholdDb, marginDb);
+                  freq / 1e6, signalDb, noiseFloor, thresholdDb, marginDb);
         
         // Use the debugRanges helper directly in the log statement
         
         // Add more detailed debug info with correct format specifiers
         flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, binHz, lowSignalBin, highSignalBin, debugRanges(refRanges));
+                  fftSize, binWidthHz(sampleRate, fftSize), lowSignalBin, highSignalBin, debugRanges(refRanges));
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
@@ -2888,6 +2907,15 @@ private:
         return std::max(1, static_cast<int>(std::round(hz / binHz)));
     }
     
+    // Units
+    inline double binWidthHz(int sampleRate, int fftSize) {
+        return double(sampleRate) / double(fftSize);
+    }
+    
+    inline int hzToBins(double hz, int sampleRate, int fftSize) {
+        return std::max(0, int(std::llround(hz / binWidthHz(sampleRate, fftSize))));
+    }
+    
     // Gets the current bin width in Hz
     double getBinWidthHz() {
         return scannerPSD ? scannerPSD->getBinWidthHz() : 0.0;
@@ -2923,6 +2951,8 @@ private:
         double centered = (double(k) + deltaBins) - 0.5 * double(fftSize);
         return centerHz + centered * getBinWidthHz();
     }
+    
+    // Debug: pretty-print ranges is defined below
     
     // Helper to handle wraparound ranges
     void pushRange(std::vector<std::pair<int, int>>& ranges, int start, int end, int fftSize) {
