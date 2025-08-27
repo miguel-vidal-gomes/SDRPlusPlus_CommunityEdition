@@ -41,6 +41,7 @@ public:
 
     std::vector<std::string> getSourceNames();
     std::string getSelectedName();
+    bool isStarted();
 
     Event<std::string> onSourceRegistered;
     Event<std::string> onSourceUnregister;
@@ -56,4 +57,5 @@ private:
     double ifFreq = 0.0;
     TuningMode tuneMode = TuningMode::NORMAL;
     dsp::stream<dsp::complex_t> nullSource;
+    bool started = false;
 };

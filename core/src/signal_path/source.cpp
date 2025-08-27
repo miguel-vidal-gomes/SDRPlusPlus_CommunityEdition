@@ -43,6 +43,10 @@ std::string SourceManager::getSelectedName() {
     return selectedName;
 }
 
+bool SourceManager::isStarted() {
+    return started;
+}
+
 void SourceManager::selectSource(std::string name) {
     if (sources.find(name) == sources.end()) {
         flog::error("Tried to select non existent source: {0}", name);
@@ -71,17 +75,15 @@ void SourceManager::showSelectedMenu() {
 }
 
 void SourceManager::start() {
-    if (selectedHandler == NULL) {
-        return;
-    }
+    if (!selectedHandler) { return; }
     selectedHandler->startHandler(selectedHandler->ctx);
+    started = true;
 }
 
 void SourceManager::stop() {
-    if (selectedHandler == NULL) {
-        return;
-    }
+    if (!selectedHandler) { return; }
     selectedHandler->stopHandler(selectedHandler->ctx);
+    started = false;
 }
 
 void SourceManager::tune(double freq) {
