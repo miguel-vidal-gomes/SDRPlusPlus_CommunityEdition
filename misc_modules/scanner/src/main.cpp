@@ -12,6 +12,7 @@
 #include <cstring>  // For memcpy
 #include <set>      // For std::set in profile diagnostics
 #include "scanner_log.h" // Custom logging macros
+#include "ScannerPSD.hpp" // Dedicated FFT processing for scanner accuracy
 
 // Windows MSVC compatibility 
 #ifdef _WIN32
@@ -767,6 +768,163 @@ private:
             ImGui::PopStyleColor(); // Safe: matches the PushStyleColor above
         }
         ImGui::EndTable();
+        
+        // Add FFT Settings section
+        if (ImGui::CollapsingHeader("Scanner FFT Settings")) {
+            float menuWidth = ImGui::GetContentRegionAvail().x;
+            
+            // Enable dedicated FFT checkbox
+            ImGui::LeftLabel("Use Dedicated FFT");
+            if (ImGui::Checkbox(("##scanner_dedicated_fft_" + _this->name).c_str(), &_this->useDedicatedFFT)) {
+                _this->saveConfig();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Use dedicated FFT processing for scanner\n"
+                                 "Makes scanner accuracy independent from UI FFT size\n"
+                                 "Recommended for best detection accuracy");
+            }
+            
+            // Only show FFT options if dedicated FFT is enabled
+            if (_this->useDedicatedFFT) {
+                // FFT Size selection dropdown
+                const char* fftSizes[] = { "16K", "32K", "65K", "131K", "262K", "524K", "1048K" };
+                int fftSizeValues[] = { 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
+                int currentSizeIdx = 5; // Default to 524K
+                
+                // Find current size in the list
+                for (int i = 0; i < IM_ARRAYSIZE(fftSizeValues); i++) {
+                    if (_this->scannerFFTSize == fftSizeValues[i]) {
+                        currentSizeIdx = i;
+                        break;
+                    }
+                }
+                
+                ImGui::LeftLabel("FFT Size");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::Combo(("##scanner_fft_size_" + _this->name).c_str(), &currentSizeIdx, fftSizes, IM_ARRAYSIZE(fftSizes))) {
+                    _this->scannerFFTSize = fftSizeValues[currentSizeIdx];
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("FFT size for scanner signal processing\n"
+                                     "Larger sizes provide better frequency resolution\n"
+                                     "Default: 524K (recommended for best accuracy)");
+                }
+                
+                // Bin width display (calculated from FFT size)
+                double binWidthHz = _this->getBinWidthHz();
+                ImGui::Text("Frequency resolution: %.3f Hz/bin", binWidthHz);
+                
+                // Window function selection
+                const char* windowTypes[] = { "Rectangular", "Blackman", "Blackman-Harris 7", "Hamming", "Hann" };
+                int currentWindowIdx = static_cast<int>(_this->scannerWindowType);
+                
+                ImGui::LeftLabel("Window Function");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::Combo(("##scanner_window_" + _this->name).c_str(), &currentWindowIdx, windowTypes, IM_ARRAYSIZE(windowTypes))) {
+                    _this->scannerWindowType = static_cast<scanner::WindowType>(currentWindowIdx);
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Window function for FFT\n"
+                                     "Blackman-Harris 7 has best dynamic range\n"
+                                     "Rectangular has best frequency resolution but poor dynamic range");
+                }
+                
+                // FFT Overlap slider
+                ImGui::LeftLabel("Overlap %");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##scanner_overlap_" + _this->name).c_str(), &_this->scannerOverlap, 0.0f, 0.9f, "%.1f")) {
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("FFT overlap percentage\n"
+                                     "Higher values improve time resolution\n"
+                                     "Default: 0.5 (50%% overlap)");
+                }
+                
+                // Averaging time
+                ImGui::LeftLabel("Averaging (ms)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##scanner_avg_time_" + _this->name).c_str(), &_this->scannerAvgTimeMs, 10.0f, 1000.0f, "%.0f ms")) {
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Time constant for spectrum averaging\n"
+                                     "Lower values respond faster to signals\n"
+                                     "Higher values better for weak signals\n"
+                                     "Default: 200ms");
+                }
+                
+                // CFAR settings section
+                ImGui::Separator();
+                ImGui::Text("CFAR Detection Settings");
+                
+                // Threshold in dB
+                ImGui::LeftLabel("Threshold (dB)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##scanner_threshold_db_" + _this->name).c_str(), &_this->scannerThresholdDb, 1.0f, 20.0f, "%.1f dB")) {
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Signal detection threshold above noise floor\n"
+                                     "Higher values require stronger signals\n"
+                                     "Default: 8 dB");
+                }
+                
+                // Guard band width
+                ImGui::LeftLabel("Guard Band (Hz)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::InputFloat(("##scanner_guard_hz_" + _this->name).c_str(), &_this->scannerGuardHz, 100.0f, 1000.0f, "%.0f")) {
+                    _this->scannerGuardHz = std::max(100.0f, _this->scannerGuardHz);
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Width of guard band around signal\n"
+                                     "Ignored when calculating noise floor\n"
+                                     "Default: 2000 Hz");
+                }
+                
+                // Reference band width
+                ImGui::LeftLabel("Reference (Hz)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::InputFloat(("##scanner_ref_hz_" + _this->name).c_str(), &_this->scannerRefHz, 1000.0f, 5000.0f, "%.0f")) {
+                    _this->scannerRefHz = std::max(1000.0f, _this->scannerRefHz);
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Width of reference band for noise floor\n"
+                                     "Used to calculate local noise floor\n"
+                                     "Default: 15000 Hz");
+                }
+                
+                // Minimum signal width
+                ImGui::LeftLabel("Min Width (Hz)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::InputFloat(("##scanner_min_width_hz_" + _this->name).c_str(), &_this->scannerMinWidthHz, 500.0f, 5000.0f, "%.0f")) {
+                    _this->scannerMinWidthHz = std::max(500.0f, _this->scannerMinWidthHz);
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Minimum width of a valid signal\n"
+                                     "Helps filter out noise spikes\n"
+                                     "Default: 8000 Hz");
+                }
+                
+                // Merge distance
+                ImGui::LeftLabel("Merge Width (Hz)");
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::InputFloat(("##scanner_merge_hz_" + _this->name).c_str(), &_this->scannerMergeHz, 100.0f, 1000.0f, "%.0f")) {
+                    _this->scannerMergeHz = std::max(100.0f, _this->scannerMergeHz);
+                    _this->saveConfig();
+                }
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Distance to merge adjacent signals\n"
+                                     "Treats nearby signals as one\n"
+                                     "Default: 2000 Hz");
+                }
+            }
+        }
 
         if (!_this->running) {
             // Check if radio source is running
@@ -846,6 +1004,62 @@ private:
         
         flog::info("Scanner: Starting scanner from {:.3f} MHz", current / 1e6);
         
+        // Initialize dedicated PSD/FFT engine if enabled
+        if (useDedicatedFFT) {
+            try {
+                // Create PSD engine
+                scannerPSD = std::make_unique<scanner::ScannerPSD>();
+                
+                // Get current sample rate from the IQ frontend
+                int sampleRate = sigpath::iqFrontEnd.getSampleRate();
+                flog::info("Scanner: Initializing dedicated FFT at {} Hz sample rate", sampleRate);
+                
+                // Initialize the PSD engine
+                scannerPSD->init(scannerFFTSize, sampleRate, scannerWindowType, scannerOverlap, scannerAvgTimeMs);
+                
+                // Create an IQ stream for the scanner
+                iqStream = new dsp::stream<dsp::complex_t>();
+                
+                // Bind the IQ stream to the frontend
+                sigpath::iqFrontEnd.bindIQStream(iqStream);
+                if (!iqStream) {
+                    flog::error("Scanner: Failed to bind IQ stream");
+                    scannerPSD.reset();
+                } else {
+                    // Set up IQ stream handler using a handler sink
+                    auto handler = new dsp::sink::Handler<dsp::complex_t>();
+                    handler->init(iqStream, 
+                        [](dsp::complex_t* data, int count, void* ctx) {
+                            ScannerModule* _this = (ScannerModule*)ctx;
+                            if (!_this || !_this->scannerPSD || !_this->running || !_this->useDedicatedFFT) return;
+                            
+                            // Feed samples to the scanner PSD
+                            _this->scannerPSD->feedSamples(reinterpret_cast<const std::complex<float>*>(data), count);
+                        }, 
+                        this
+                    );
+                    
+                    // Start the handler
+                    handler->start();
+                    iqStreamId = 1; // Just a flag to indicate we've set up the handler
+                    flog::info("Scanner: Bound to IQ stream (bin width: {:.3f} Hz)", scannerPSD->getBinWidthHz());
+                }
+            }
+            catch (const std::exception& e) {
+                flog::error("Scanner: Exception initializing PSD engine: {}", e.what());
+                scannerPSD.reset();
+                if (iqStream) {
+                    if (iqStreamId) {
+                        // The handler will be deleted when the stream is deleted
+                        iqStreamId = 0;
+                    }
+                    sigpath::iqFrontEnd.unbindIQStream(iqStream);
+                    delete iqStream;
+                    iqStream = nullptr;
+                }
+            }
+        }
+        
         running = true;
         
         // Apply gain setting for the initial scanning range
@@ -881,6 +1095,18 @@ private:
         if (workerThread.joinable()) {
             workerThread.join();
         }
+        
+        // Clean up dedicated FFT resources
+        if (iqStream) {
+            if (iqStreamId) {
+                // The handler will be deleted when the stream is deleted
+                iqStreamId = 0;
+            }
+            sigpath::iqFrontEnd.unbindIQStream(iqStream);
+            delete iqStream;
+            iqStream = nullptr;
+        }
+        scannerPSD.reset();
     }
 
     void reset() {
@@ -920,6 +1146,18 @@ private:
         config.conf["squelchDeltaAuto"] = squelchDeltaAuto;
         config.conf["unlockHighSpeed"] = unlockHighSpeed;
         config.conf["tuningTimeAuto"] = tuningTimeAuto;
+        
+        // Save dedicated FFT settings
+        config.conf["useDedicatedFFT"] = useDedicatedFFT;
+        config.conf["scannerFFTSize"] = scannerFFTSize;
+        config.conf["scannerOverlap"] = scannerOverlap;
+        config.conf["scannerWindowType"] = static_cast<int>(scannerWindowType);
+        config.conf["scannerAvgTimeMs"] = scannerAvgTimeMs;
+        config.conf["scannerGuardHz"] = scannerGuardHz;
+        config.conf["scannerRefHz"] = scannerRefHz;
+        config.conf["scannerMinWidthHz"] = scannerMinWidthHz;
+        config.conf["scannerMergeHz"] = scannerMergeHz;
+        config.conf["scannerThresholdDb"] = scannerThresholdDb;
         
         // Save frequency ranges
         json rangesArray = json::array();
@@ -962,6 +1200,19 @@ private:
         squelchDeltaAuto = config.conf.value("squelchDeltaAuto", false);
         unlockHighSpeed = config.conf.value("unlockHighSpeed", false);
         tuningTimeAuto = config.conf.value("tuningTimeAuto", false);
+        
+        // Load dedicated FFT settings
+        useDedicatedFFT = config.conf.value("useDedicatedFFT", true);
+        scannerFFTSize = config.conf.value("scannerFFTSize", 524288);
+        scannerOverlap = config.conf.value("scannerOverlap", 0.5f);
+        scannerWindowType = static_cast<scanner::WindowType>(config.conf.value("scannerWindowType", 
+                                                           static_cast<int>(scanner::WindowType::BLACKMAN_HARRIS_7)));
+        scannerAvgTimeMs = config.conf.value("scannerAvgTimeMs", 200.0f);
+        scannerGuardHz = config.conf.value("scannerGuardHz", 2000.0f);
+        scannerRefHz = config.conf.value("scannerRefHz", 15000.0f);
+        scannerMinWidthHz = config.conf.value("scannerMinWidthHz", 8000.0f);
+        scannerMergeHz = config.conf.value("scannerMergeHz", 2000.0f);
+        scannerThresholdDb = config.conf.value("scannerThresholdDb", 8.0f);
         
         // Initialize time points
         lastNoiseUpdate = std::chrono::high_resolution_clock::now();
@@ -1126,29 +1377,39 @@ private:
                     continue;
                 }
 
-                // PERFORMANCE FIX: Minimize FFT lock time by copying data immediately
+                // Initialize variables for FFT processing
                 int dataWidth = 0;
+                float* data = nullptr;
                 static std::vector<float> fftDataCopy; // Reusable buffer to avoid allocations
                 
-                // Acquire FFT data and copy it immediately to minimize lock time
-                {
-                float* data = gui::waterfall.acquireLatestFFT(dataWidth);
-                if (!data) { 
-                        continue; // No FFT data available, try again
-                }
-                if (dataWidth <= 0) {
-                    gui::waterfall.releaseLatestFFT();
-                        continue; // Invalid data width
-                    }
+                // Choose between dedicated scanner FFT and waterfall FFT
+                if (useDedicatedFFT && scannerPSD) {
+                    // Using our dedicated FFT processor - no need to copy data
+                    SCAN_DEBUG("Scanner: Using dedicated FFT processing");
+                } else {
+                    // Fallback to UI FFT - acquire and copy data immediately to minimize lock time
+                    SCAN_DEBUG("Scanner: Using waterfall FFT (fallback mode)");
                     
-                    // Resize buffer if needed and copy data (minimize lock time)
-                    fftDataCopy.resize(dataWidth);
-                    memcpy(fftDataCopy.data(), data, dataWidth * sizeof(float));
-                    gui::waterfall.releaseLatestFFT(); // CRITICAL: Release lock immediately
+                    // Acquire FFT data and copy it immediately to minimize lock time
+                    {
+                        data = gui::waterfall.acquireLatestFFT(dataWidth);
+                        if (!data) { 
+                            continue; // No FFT data available, try again
+                        }
+                        if (dataWidth <= 0) {
+                            gui::waterfall.releaseLatestFFT();
+                            continue; // Invalid data width
+                        }
+                        
+                        // Resize buffer if needed and copy data (minimize lock time)
+                        fftDataCopy.resize(dataWidth);
+                        memcpy(fftDataCopy.data(), data, dataWidth * sizeof(float));
+                        gui::waterfall.releaseLatestFFT(); // CRITICAL: Release lock immediately
+                        
+                        // Now work with local copy, FFT mutex is free for UI thread
+                        data = fftDataCopy.data();
+                    }
                 }
-                
-                // Now work with local copy, FFT mutex is free for UI thread
-                float* data = fftDataCopy.data();
 
                 // Get gather waterfall data
                 double wfCenter = gui::waterfall.getViewOffset() + gui::waterfall.getCenterFrequency();
@@ -1178,34 +1439,57 @@ private:
                     }
                 }
 
-                if (receiving) {
+                                if (receiving) {
                     SCAN_DEBUG("Scanner: Receiving signal...");
                 
-                    float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
-                    if (maxLevel >= level) {
-                        // Update noise floor when signal is present
-                        if (squelchDeltaAuto) {
-                            updateNoiseFloor(maxLevel - 15.0f); // Estimate noise floor as 15dB below signal
-                        }
-                        
-                        // Apply squelch delta when receiving strong signal
-                        if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
-                            applySquelchDelta();
-                        }
-                        
-                        lastSignalTime = now;
-                    }
-                    else {
-                        auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
-                        if (timeSinceLastSignal.count() > lingerTime) {
-                            // Restore original squelch level when we leave receiving state
-                            if (squelchDeltaActive) {
-                                restoreSquelchLevel();
+                    // Check for signal using either dedicated FFT or waterfall FFT
+                    float maxLevel;
+                    float noiseFloorLevel = 0.0f;
+                    
+                    if (useDedicatedFFT && scannerPSD) {
+                        // Use CFAR detector with dedicated FFT
+                        maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
+                        if (maxLevel >= noiseFloorLevel + scannerThresholdDb) {
+                            // Update noise floor when signal is present (only for auto mode)
+                            if (squelchDeltaAuto) {
+                                updateNoiseFloor(noiseFloorLevel);
                             }
                             
-                            receiving = false;
-                            SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
+                            // Apply squelch delta when receiving strong signal
+                            if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
+                                applySquelchDelta();
+                            }
+                            
+                            lastSignalTime = now;
                         }
+                    } else {
+                        // Fallback to waterfall FFT
+                        maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
+                        if (maxLevel >= level) {
+                            // Legacy noise floor estimation
+                            if (squelchDeltaAuto) {
+                                updateNoiseFloor(maxLevel - 15.0f); // Estimate noise floor as 15dB below signal
+                            }
+                            
+                            // Apply squelch delta when receiving strong signal
+                            if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
+                                applySquelchDelta();
+                            }
+                            
+                            lastSignalTime = now;
+                        }
+                    }
+                    
+                    // Check if signal is lost
+                    auto timeSinceLastSignal = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalTime);
+                    if (timeSinceLastSignal.count() > lingerTime) {
+                        // Restore original squelch level when we leave receiving state
+                        if (squelchDeltaActive) {
+                            restoreSquelchLevel();
+                        }
+                        
+                        receiving = false;
+                        SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
                     }
                 }
                 else {
@@ -1216,13 +1500,33 @@ private:
                     // ADAPTIVE SIGNAL SEARCH: Different behavior for single freq vs band scanning
                     if (useFrequencyManager && currentEntryIsSingleFreq) {
                         // SINGLE FREQUENCY: Only check signal at exact current frequency (no scanning)
-                        float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
-                        if (maxLevel >= level) {
+                        float maxLevel;
+                        float noiseFloorLevel = 0.0f;
+                        bool signalDetected = false;
+                        
+                        if (useDedicatedFFT && scannerPSD) {
+                            // Use CFAR detector with dedicated FFT for single frequency
+                            maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
+                            signalDetected = (maxLevel >= noiseFloorLevel + scannerThresholdDb);
+                        } else {
+                            // Fallback to waterfall FFT for single frequency
+                            maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
+                            signalDetected = (maxLevel >= level);
+                        }
+                        
+                        if (signalDetected) {
                             receiving = true;
                             lastSignalTime = now;
-                            flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
                             
-                            // TUNING PROFILE APPLICATION: Apply profile when signal found (CRITICAL FIX)
+                            if (useDedicatedFFT && scannerPSD) {
+                                flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f}, noise: {:.1f})", 
+                                          current / 1e6, maxLevel, noiseFloorLevel);
+                            } else {
+                                flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", 
+                                          current / 1e6, maxLevel);
+                            }
+                            
+                            // TUNING PROFILE APPLICATION: Apply profile when signal found
                             if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
                                 const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
                                 if (profile) {
@@ -1236,21 +1540,46 @@ private:
                             
                             continue; // Signal found, stay on this frequency
                         }
+                        
                         // No signal at exact frequency - continue to frequency stepping
-                        SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", current / 1e6, maxLevel, level);
+                        if (useDedicatedFFT && scannerPSD) {
+                            SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f}, noise: {:.1f}, threshold: {:.1f})", 
+                                      current / 1e6, maxLevel, noiseFloorLevel, noiseFloorLevel + scannerThresholdDb);
+                        } else {
+                            SCAN_DEBUG("Scanner: No signal at single frequency {:.6f} MHz (level: {:.1f} < {:.1f})", 
+                                      current / 1e6, maxLevel, level);
+                        }
                     } else {
                         // BAND SCANNING: Search for signals across range using interval stepping
-                        if (findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
-                            continue; // Signal found using band scanning
-                    }
-                    
-                    // Search for signal in the inverse scan direction if direction isn't enforced
-                    if (!reverseLock) {
-                            if (findSignal(!scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
-                                continue; // Signal found using reverse band scanning
+                        bool found = false;
+                        
+                        if (useDedicatedFFT && scannerPSD) {
+                            // Use CFAR detector with dedicated FFT for band scanning
+                            found = findSignalCFAR(scanUp, bottomLimit, topLimit);
+                        } else {
+                            // Fallback to waterfall FFT for band scanning
+                            found = findSignal(scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth);
                         }
-                    }
-                    else { reverseLock = false; }
+                        
+                        if (found) {
+                            continue; // Signal found using band scanning
+                        }
+                    
+                        // Search for signal in the inverse scan direction if direction isn't enforced
+                        if (!reverseLock) {
+                            if (useDedicatedFFT && scannerPSD) {
+                                // Use CFAR detector with dedicated FFT for reverse band scanning
+                                if (findSignalCFAR(!scanUp, bottomLimit, topLimit)) {
+                                    continue; // Signal found using reverse band scanning
+                                }
+                            } else {
+                                // Fallback to waterfall FFT for reverse band scanning
+                                if (findSignal(!scanUp, bottomLimit, topLimit, wfStart, wfEnd, wfWidth, effectiveVfoWidth, data, dataWidth)) {
+                                    continue; // Signal found using reverse band scanning
+                                }
+                            }
+                        }
+                        else { reverseLock = false; }
                     }
                     
 
@@ -1357,6 +1686,86 @@ private:
         }
         
         flog::info("Scanner: Worker thread ended");
+    }
+
+    // Find signals using dedicated scanner FFT with CFAR detection
+    bool findSignalCFAR(bool scanDir, double& bottomLimit, double& topLimit, float* noiseFloorDb = nullptr) {
+        if (!scannerPSD) return false;
+        
+        // Get current range bounds
+        double currentStart, currentStop;
+        if (!getCurrentScanBounds(currentStart, currentStop)) {
+            return false; // No valid range
+        }
+        
+        bool found = false;
+        double freq = current;
+        int maxIterations = 1000; // Prevent infinite loops
+        int iterations = 0;
+        
+        // Calculate bin width for stepping
+        double binHz = scannerPSD->getBinWidthHz();
+        if (binHz <= 0) return false;
+        
+        // Use configured parameters (now in Hz units)
+        int minWidthBins = hzToBins(scannerMinWidthHz);
+        int mergeBins = hzToBins(scannerMergeHz);
+        
+        for (freq += scanDir ? interval : -interval;
+             scanDir ? (freq <= currentStop) : (freq >= currentStart);
+             freq += scanDir ? interval : -interval) {
+            
+            iterations++;
+            if (iterations > maxIterations) {
+                flog::warn("Scanner: Max iterations reached, forcing frequency wrap");
+                break;
+            }
+
+            // Check if frequency is blacklisted
+            if (isFrequencyBlacklisted(freq)) {
+                continue;
+            }
+            
+            // Update search range
+            if (freq < bottomLimit) { bottomLimit = freq; }
+            if (freq > topLimit) { topLimit = freq; }
+            
+            // Calculate signal level using CFAR method
+            float localNoiseFloor = 0.0f;
+            float signalLevel = getMaxLevelCFAR(freq, scannerMinWidthHz, localNoiseFloor);
+            
+            // Pass the noise floor back to the caller if requested
+            if (noiseFloorDb) *noiseFloorDb = localNoiseFloor;
+            
+            // Signal detected if level exceeds threshold above noise floor
+            if (signalLevel >= localNoiseFloor + scannerThresholdDb) {
+                // Found a signal - tune to it and switch to receiving state
+                current = freq;
+                receiving = true;
+                tuning = true;
+                lastSignalTime = std::chrono::high_resolution_clock::now();
+                lastTuneTime = lastSignalTime;
+                
+                // CRITICAL: Tune VFO immediately to detected frequency
+                tuner::normalTuning(gui::waterfall.selectedVFO, current);
+                
+                flog::info("Scanner: CFAR found signal at {:.6f} MHz, level: {:.1f} dB, noise floor: {:.1f} dB",
+                          freq / 1e6, signalLevel, localNoiseFloor);
+                
+                // Apply tuning profile if available
+                if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
+                    const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+                    if (profile) {
+                        applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "CFAR");
+                    }
+                }
+                
+                found = true;
+                break;
+            }
+        }
+        
+        return found;
     }
 
     bool findSignal(bool scanDir, double& bottomLimit, double& topLimit, double wfStart, double wfEnd, double wfWidth, double vfoWidth, float* data, int dataWidth) {
@@ -1954,6 +2363,100 @@ private:
         return max;
     }
     
+    // CFAR-style peak detection with dedicated scanner FFT
+    float getMaxLevelCFAR(double freq, double width, float& noiseFloorDb) {
+        if (!scannerPSD) return -INFINITY;
+        
+        // Get the scanner PSD data
+        int dataWidth = 0;
+        const float* data = scannerPSD->acquireLatestPSD(dataWidth);
+        if (!data || dataWidth <= 0) {
+            if (data) scannerPSD->releaseLatestPSD();
+            return -INFINITY;
+        }
+        
+        // Calculate bin width and center bin
+        double binHz = scannerPSD->getBinWidthHz();
+        double centerBin = freq / binHz;
+        int centerBinInt = (int)round(centerBin);
+        
+        // Calculate width in bins
+        int widthBins = (int)round(width / binHz);
+        int halfWidth = widthBins / 2;
+        
+        // Calculate guard and reference band sizes in bins
+        int guardBins = hzToBins(scannerGuardHz);
+        int refBins = hzToBins(scannerRefHz);
+        
+        // Define the signal region of interest (ROI)
+        int lowSignalBin = std::max(0, centerBinInt - halfWidth);
+        int highSignalBin = std::min(dataWidth - 1, centerBinInt + halfWidth);
+        
+        // Define reference regions (on both sides, outside guard band)
+        int lowRefStart = std::max(0, lowSignalBin - guardBins - refBins);
+        int lowRefEnd = std::max(0, lowSignalBin - guardBins - 1);
+        int highRefStart = std::min(dataWidth - 1, highSignalBin + guardBins + 1);
+        int highRefEnd = std::min(dataWidth - 1, highSignalBin + guardBins + refBins);
+        
+        // Find maximum power in signal region
+        float maxSignal = -INFINITY;
+        int maxBin = centerBinInt;
+        for (int i = lowSignalBin; i <= highSignalBin; i++) {
+            if (i < 0 || i >= dataWidth) continue;
+            if (data[i] > maxSignal) {
+                maxSignal = data[i];
+                maxBin = i;
+            }
+        }
+        
+        // Calculate noise floor using reference regions
+        // Use a robust method (median or trimmed mean)
+        std::vector<float> refValues;
+        refValues.reserve((lowRefEnd - lowRefStart + 1) + (highRefEnd - highRefStart + 1));
+        
+        // Collect low reference region values
+        for (int i = lowRefStart; i <= lowRefEnd; i++) {
+            if (i >= 0 && i < dataWidth) refValues.push_back(data[i]);
+        }
+        
+        // Collect high reference region values
+        for (int i = highRefStart; i <= highRefEnd; i++) {
+            if (i >= 0 && i < dataWidth) refValues.push_back(data[i]);
+        }
+        
+        // Calculate noise floor (median for robustness against outliers)
+        float noiseFloor = -80.0f; // Default if no reference values
+        if (!refValues.empty()) {
+            std::sort(refValues.begin(), refValues.end());
+            if (refValues.size() % 2 == 0) {
+                noiseFloor = (refValues[refValues.size()/2 - 1] + refValues[refValues.size()/2]) / 2.0f;
+            } else {
+                noiseFloor = refValues[refValues.size()/2];
+            }
+        }
+        
+        // Store noise floor for caller
+        noiseFloorDb = noiseFloor;
+        
+        // Sub-bin interpolation for accurate peak location
+        if (maxBin > 0 && maxBin < dataWidth - 1) {
+            // Create vector reference to PSD data for the refineFrequencyHz function
+            std::vector<float> psdSlice(data + maxBin - 1, data + maxBin + 2);
+            
+            // Refine frequency with parabolic interpolation
+            double refinedHz = scanner::ScannerPSD::refineFrequencyHz(psdSlice, 1, binHz);
+            double refinedFreq = (maxBin - 1 + refinedHz / binHz) * binHz;
+            
+            // Log refined peak info at debug level
+            SCAN_DEBUG("Scanner: Peak refined from {:.1f} Hz to {:.1f} Hz (bin {}, correction: {:.2f} bins)",
+                      maxBin * binHz, refinedFreq, maxBin, refinedHz/binHz - 1.0);
+        }
+        
+        scannerPSD->releaseLatestPSD();
+        
+        return maxSignal;
+    }
+    
     // Get current squelch level from radio module
     float getRadioSquelchLevel() {
         if (gui::waterfall.selectedVFO.empty() || 
@@ -2209,6 +2712,38 @@ private:
     static constexpr const char* PASSBAND_FORMATS[] = {"5%%", "10%%", "20%%", "30%%", "50%%", "75%%", "100%%"}; // Safe for ImGui format strings
     static constexpr int PASSBAND_VALUES_COUNT = 7;
     int passbandIndex = 6; // Default to 100% (index 6, recommended starting point)
+    
+    // Dedicated FFT/PSD parameters for scanner accuracy
+    std::unique_ptr<scanner::ScannerPSD> scannerPSD;
+    bool useDedicatedFFT = true;
+    int scannerFFTSize = 524288; // Default to optimal size (524288)
+    float scannerOverlap = 0.5f; // Default to 50% overlap
+    scanner::WindowType scannerWindowType = scanner::WindowType::BLACKMAN_HARRIS_7;
+    float scannerAvgTimeMs = 200.0f; // Default to 200ms averaging time
+    float scannerGuardHz = 2000.0f; // 2 kHz guard band
+    float scannerRefHz = 15000.0f;  // 15 kHz reference band
+    float scannerMinWidthHz = 8000.0f; // 8 kHz minimum signal width
+    float scannerMergeHz = 2000.0f; // 2 kHz merge distance
+    float scannerThresholdDb = 8.0f; // 8 dB threshold over noise floor
+    
+    // Signal IQ tap for dedicated FFT
+    dsp::stream<dsp::complex_t>* iqStream = nullptr;
+    uint32_t iqStreamId = 0;
+    
+    // Converts Hz to equivalent number of FFT bins
+    int hzToBins(double hz) {
+        if (!scannerPSD) return 0;
+        double binHz = scannerPSD->getBinWidthHz();
+        if (binHz <= 0.0) return 0;
+        return std::max(1, static_cast<int>(std::round(hz / binHz)));
+    }
+    
+    // Gets the current bin width in Hz
+    double getBinWidthHz() {
+        return scannerPSD ? scannerPSD->getBinWidthHz() : 0.0;
+    }
+    
+    // IQ stream handler is now implemented as a lambda in the start() method
     
 
 };

@@ -1,0 +1,352 @@
+#include "ScannerPSD.hpp"
+#include <core.h>
+#include <gui/gui.h>
+#include <signal_path/signal_path.h>
+
+namespace scanner {
+
+// Constructor moved to header with initializers
+
+ScannerPSD::~ScannerPSD() {
+    reset();
+}
+
+void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float overlap, float avgTimeMs) {
+    std::lock_guard<std::mutex> lck(m_mutex);
+    
+    // Store parameters
+    m_fftSize = fftSize;
+    m_sampleRate = sampleRate;
+    m_windowType = windowType;
+    m_overlap = std::clamp(overlap, 0.0f, 0.99f); // Clamp overlap to valid range
+    m_avgTimeMs = avgTimeMs;
+    
+    // Calculate hop size based on overlap
+    m_hopSize = static_cast<int>(m_fftSize * (1.0f - m_overlap));
+    if (m_hopSize < 1) m_hopSize = 1;
+    
+    // Create FFT engine using FFTW
+    m_fftwIn = (fftwf_complex*)fftwf_malloc(m_fftSize * sizeof(fftwf_complex));
+    m_fftwOut = (fftwf_complex*)fftwf_malloc(m_fftSize * sizeof(fftwf_complex));
+    m_fftwPlan = fftwf_plan_dft_1d(m_fftSize, m_fftwIn, m_fftwOut, FFTW_FORWARD, FFTW_ESTIMATE);
+    
+    // Allocate buffers
+    m_fftIn.resize(m_fftSize);
+    m_fftOut.resize(m_fftSize);
+    m_window.resize(m_fftSize);
+    m_powerSpectrum.resize(m_fftSize);
+    m_avgPowerSpectrum.resize(m_fftSize);
+    m_sampleBuffer.resize(m_fftSize * 2); // Extra room for overlap
+    
+    // Generate window function
+    generateWindow();
+    
+    // Calculate smoothing parameter
+    calculateAlpha();
+    
+    // Reset buffers
+    std::fill(m_powerSpectrum.begin(), m_powerSpectrum.end(), -100.0f);
+    std::fill(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end(), -100.0f);
+    m_bufferOffset = 0;
+    
+    m_initialized = true;
+}
+
+void ScannerPSD::reset() {
+    std::lock_guard<std::mutex> lck(m_mutex);
+    
+    if (!m_initialized) return;
+    
+    if (m_fftwPlan) {
+        fftwf_destroy_plan(m_fftwPlan);
+        m_fftwPlan = nullptr;
+    }
+    if (m_fftwIn) {
+        fftwf_free(m_fftwIn);
+        m_fftwIn = nullptr;
+    }
+    if (m_fftwOut) {
+        fftwf_free(m_fftwOut);
+        m_fftwOut = nullptr;
+    }
+    m_fftIn.clear();
+    m_fftOut.clear();
+    m_window.clear();
+    m_powerSpectrum.clear();
+    m_avgPowerSpectrum.clear();
+    m_sampleBuffer.clear();
+    m_bufferOffset = 0;
+    
+    m_initialized = false;
+}
+
+bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
+    if (!m_initialized || m_processing) return false;
+    
+    bool newFrameReady = false;
+    
+    {
+        std::lock_guard<std::mutex> lck(m_mutex);
+        
+        // Copy samples into buffer
+        if (count + m_bufferOffset > m_sampleBuffer.size()) {
+            // Buffer overflow - resize to accommodate
+            m_sampleBuffer.resize(count + m_bufferOffset);
+        }
+        
+        std::memcpy(&m_sampleBuffer[m_bufferOffset], samples, count * sizeof(std::complex<float>));
+        m_bufferOffset += count;
+        
+        // Check if we have enough samples for FFT
+        if (m_bufferOffset >= m_fftSize) {
+            // Process a frame
+            process();
+            
+            // Shift buffer by hop size
+            int remaining = m_bufferOffset - m_hopSize;
+            if (remaining > 0) {
+                std::memmove(&m_sampleBuffer[0], &m_sampleBuffer[m_hopSize], 
+                            remaining * sizeof(std::complex<float>));
+            }
+            m_bufferOffset = remaining;
+            
+            newFrameReady = true;
+        }
+    }
+    
+    return newFrameReady;
+}
+
+bool ScannerPSD::process() {
+    if (!m_initialized || m_bufferOffset < m_fftSize) return false;
+    
+    m_processing = true;
+    
+    // Apply window and copy to FFT input buffer
+    for (int i = 0; i < m_fftSize; i++) {
+        m_fftIn[i] = m_sampleBuffer[i] * m_window[i];
+    }
+    
+    // Copy input data to FFTW input buffer
+    for (int i = 0; i < m_fftSize; i++) {
+        m_fftwIn[i][0] = m_fftIn[i].real();
+        m_fftwIn[i][1] = m_fftIn[i].imag();
+    }
+    
+    // Execute FFTW
+    fftwf_execute(m_fftwPlan);
+    
+    // Copy FFTW output to our output buffer
+    for (int i = 0; i < m_fftSize; i++) {
+        m_fftOut[i] = std::complex<float>(m_fftwOut[i][0], m_fftwOut[i][1]);
+    }
+    
+    // Calculate power spectrum (shifted to center DC)
+    for (int i = 0; i < m_fftSize; i++) {
+        int binIdx = (i + m_fftSize/2) % m_fftSize;
+        
+        float power = std::norm(m_fftOut[i]); // |z|²
+        
+        // Convert to dB with normalization and floor
+        constexpr float minPower = 1e-10f;
+        constexpr float refPower = 1.0f;
+        float powerDb = 10.0f * log10f(std::max(power, minPower) / refPower);
+        
+        // Store shifted result
+        m_powerSpectrum[binIdx] = powerDb;
+    }
+    
+    // Apply time-domain averaging (EMA)
+    for (int i = 0; i < m_fftSize; i++) {
+        m_avgPowerSpectrum[i] = (1.0f - m_alpha) * m_avgPowerSpectrum[i] + m_alpha * m_powerSpectrum[i];
+    }
+    
+    m_processing = false;
+    return true;
+}
+
+const std::vector<float>& ScannerPSD::getPowerSpectrum() const {
+    return m_avgPowerSpectrum;
+}
+
+const float* ScannerPSD::acquireLatestPSD(int& width) {
+    m_mutex.lock();
+    if (!m_initialized) {
+        m_mutex.unlock();
+        width = 0;
+        return nullptr;
+    }
+    
+    width = m_fftSize;
+    return m_avgPowerSpectrum.data();
+}
+
+void ScannerPSD::releaseLatestPSD() {
+    m_mutex.unlock();
+}
+
+double ScannerPSD::refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz) {
+    // Ensure we have valid indices for parabolic interpolation
+    if (binIndex <= 0 || binIndex >= PdB.size() - 1) {
+        return binIndex * binWidthHz;
+    }
+    
+    float L = PdB[binIndex-1];
+    float C = PdB[binIndex];
+    float R = PdB[binIndex+1];
+    
+    // Parabolic interpolation formula
+    double num = 0.5 * (static_cast<double>(L) - static_cast<double>(R));
+    double den = (static_cast<double>(L) - 2.0*static_cast<double>(C) + static_cast<double>(R));
+    if (den < 1e-6) den = 1e-6;  // Avoid division by small values
+    double deltaBins = num / den;
+    // Clamp to range [-0.5, 0.5]
+    if (deltaBins < -0.5) deltaBins = -0.5;
+    if (deltaBins > 0.5) deltaBins = 0.5;
+    
+    // Return frequency with sub-bin precision
+    return (binIndex + deltaBins) * binWidthHz;
+}
+
+void ScannerPSD::setFftSize(int size) {
+    if (m_fftSize == size) return;
+    
+    // Reinitialize with new FFT size
+    init(size, m_sampleRate, m_windowType, m_overlap, m_avgTimeMs);
+}
+
+void ScannerPSD::setOverlap(float overlap) {
+    if (std::abs(m_overlap - overlap) < 0.001f) return;
+    
+    // Update overlap and recalculate hop size
+    std::lock_guard<std::mutex> lck(m_mutex);
+    m_overlap = std::clamp(overlap, 0.0f, 0.99f);
+    m_hopSize = static_cast<int>(m_fftSize * (1.0f - m_overlap));
+    if (m_hopSize < 1) m_hopSize = 1;
+}
+
+void ScannerPSD::setWindow(WindowType type) {
+    if (m_windowType == type) return;
+    
+    // Update window type and regenerate window
+    std::lock_guard<std::mutex> lck(m_mutex);
+    m_windowType = type;
+    generateWindow();
+}
+
+void ScannerPSD::setAverageTimeMs(float ms) {
+    if (std::abs(m_avgTimeMs - ms) < 0.001f) return;
+    
+    // Update averaging time and recalculate alpha
+    std::lock_guard<std::mutex> lck(m_mutex);
+    m_avgTimeMs = ms;
+    calculateAlpha();
+}
+
+void ScannerPSD::setSampleRate(int rate) {
+    if (m_sampleRate == rate) return;
+    
+    // Update sample rate and recalculate alpha
+    std::lock_guard<std::mutex> lck(m_mutex);
+    m_sampleRate = rate;
+    calculateAlpha();
+}
+
+double ScannerPSD::getBinWidthHz() const {
+    if (m_sampleRate <= 0 || m_fftSize <= 0) return 0.0;
+    return static_cast<double>(m_sampleRate) / static_cast<double>(m_fftSize);
+}
+
+void ScannerPSD::generateWindow() {
+    if (m_window.size() != m_fftSize) {
+        m_window.resize(m_fftSize);
+    }
+    
+    switch (m_windowType) {
+        case WindowType::RECTANGULAR:
+            // Rectangular window (no windowing)
+            std::fill(m_window.begin(), m_window.end(), 1.0f);
+            break;
+            
+        case WindowType::BLACKMAN:
+            // Blackman window
+            for (int i = 0; i < m_fftSize; i++) {
+                double ratio = (double)i / (double)(m_fftSize - 1);
+                m_window[i] = 0.42 - 0.5 * cos(2.0 * M_PI * ratio) + 0.08 * cos(4.0 * M_PI * ratio);
+            }
+            break;
+            
+        case WindowType::BLACKMAN_HARRIS_7:
+            // 7-term Blackman-Harris window (better dynamic range)
+            for (int i = 0; i < m_fftSize; i++) {
+                double ratio = (double)i / (double)(m_fftSize - 1);
+                m_window[i] = 0.27105140069342f -
+                             0.43329793923448f * cos(2.0 * M_PI * ratio) +
+                             0.21812299954311f * cos(4.0 * M_PI * ratio) -
+                             0.06592544638803f * cos(6.0 * M_PI * ratio) +
+                             0.01081174209837f * cos(8.0 * M_PI * ratio) -
+                             0.00077658482522f * cos(10.0 * M_PI * ratio) +
+                             0.00001388721735f * cos(12.0 * M_PI * ratio);
+            }
+            break;
+            
+        case WindowType::HAMMING:
+            // Hamming window
+            for (int i = 0; i < m_fftSize; i++) {
+                double ratio = (double)i / (double)(m_fftSize - 1);
+                m_window[i] = 0.54 - 0.46 * cos(2.0 * M_PI * ratio);
+            }
+            break;
+            
+        case WindowType::HANN:
+            // Hann window
+            for (int i = 0; i < m_fftSize; i++) {
+                double ratio = (double)i / (double)(m_fftSize - 1);
+                m_window[i] = 0.5 * (1.0 - cos(2.0 * M_PI * ratio));
+            }
+            break;
+            
+        default:
+            // Default to Blackman-Harris
+            for (int i = 0; i < m_fftSize; i++) {
+                double ratio = (double)i / (double)(m_fftSize - 1);
+                m_window[i] = 0.42 - 0.5 * cos(2.0 * M_PI * ratio) + 0.08 * cos(4.0 * M_PI * ratio);
+            }
+            break;
+    }
+    
+    // Normalize window for proper scaling
+    double sum = 0.0;
+    for (int i = 0; i < m_fftSize; i++) {
+        sum += m_window[i];
+    }
+    
+    if (sum > 0.0) {
+        double normFactor = m_fftSize / sum;
+        for (int i = 0; i < m_fftSize; i++) {
+            m_window[i] *= normFactor;
+        }
+    }
+}
+
+void ScannerPSD::calculateAlpha() {
+    if (m_sampleRate <= 0 || m_fftSize <= 0 || m_hopSize <= 0) {
+        m_alpha = 0.1f; // Default value if we don't have valid parameters
+        return;
+    }
+    
+    // Calculate frames per second based on sample rate, FFT size, and overlap
+    double framesPerSec = static_cast<double>(m_sampleRate) / static_cast<double>(m_hopSize);
+    
+    // Convert time constant from ms to seconds
+    double timeConstantSec = m_avgTimeMs / 1000.0;
+    
+    // Calculate alpha for EMA filter: alpha = 1 - exp(-1/(framesPerSec * timeConstant))
+    m_alpha = 1.0 - exp(-1.0 / (framesPerSec * timeConstantSec));
+    
+    // Clamp to reasonable values
+    m_alpha = std::clamp(m_alpha, 0.01, 1.0);
+}
+
+} // namespace scanner
+
