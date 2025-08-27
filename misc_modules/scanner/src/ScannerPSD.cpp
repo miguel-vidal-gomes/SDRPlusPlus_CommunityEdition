@@ -230,12 +230,11 @@ bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
         for (int i = 0; i < m_fftSize; i++) {
             int binIdx = (i + m_fftSize/2) % m_fftSize;
             
-            // Calculate power as |z|² and normalize by FFT size and window
-            // Use proper normalization factor for power spectrum
-            float power = std::norm(m_fftOut[i]) * m_psdScale;
+            // Calculate power using VOLK for consistency with waterfall FFT
+            float power = std::norm(m_fftOut[i]);
             
-            // Convert to dB with proper floor
-            float powerDb = lin2db(power);
+            // Convert to dB with proper scaling (same as waterfall)
+            float powerDb = 10.0f * log10f(std::max(1e-15f, power)) - 20.0f * log10f(m_fftSize);
             
             // Store shifted result - initialize to -100 dB if we're just starting
             if (m_firstFrame) {

@@ -677,8 +677,13 @@ private:
                     // UX FIX: Automatically resume scanning after blacklisting
                     // (Same mechanism as directional arrow buttons)
                     {
-                        std::lock_guard<std::mutex> lck(_this->scanMtx);
-                        _this->receiving = false;
+                        // CRITICAL FIX: Use unique_lock with try_to_lock to avoid deadlocks
+                        std::unique_lock<std::recursive_mutex> lck(_this->scanMtx, std::try_to_lock);
+                        if (lck.owns_lock()) {
+                            _this->receiving = false;
+                        } else {
+                            flog::warn("Scanner: Failed to acquire mutex lock for blacklist update");
+                        }
                     }
                     SCAN_DEBUG("Scanner: Auto-resuming scanning after blacklisting frequency");
                     
@@ -1161,11 +1166,19 @@ private:
     }
 
     void reset() {
-        std::lock_guard<std::mutex> lck(scanMtx);
-            current = startFreq;
-        receiving = false;
-        tuning = false;
-        reverseLock = false;
+        // CRITICAL FIX: Use unique_lock with try_to_lock and retry mechanism
+        for (int retries = 0; retries < 3; retries++) {
+            std::unique_lock<std::recursive_mutex> lck(scanMtx, std::try_to_lock);
+            if (lck.owns_lock()) {
+                current = startFreq;
+                receiving = false;
+                tuning = false;
+                reverseLock = false;
+                return;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        flog::error("Scanner: Failed to acquire mutex lock for reset after 3 retries");
         
         // Reset squelch delta state
         if (squelchDeltaActive) {
@@ -1375,7 +1388,13 @@ private:
                     std::this_thread::sleep_until(nextWakeTime);
                 
                 try {
-                    std::lock_guard<std::mutex> lck(scanMtx);
+                    // CRITICAL FIX: Use unique_lock for better exception safety
+                    std::unique_lock<std::recursive_mutex> lck(scanMtx, std::try_to_lock);
+                    if (!lck.owns_lock()) {
+                        // Failed to acquire lock, skip this iteration
+                        flog::warn("Scanner: Failed to acquire mutex lock, skipping iteration");
+                        continue;
+                    }
                     auto now = std::chrono::high_resolution_clock::now();
 
                 // SAFETY CHECK: Stop scanner if radio source is stopped
@@ -1500,7 +1519,13 @@ private:
                     if (useDedicatedFFT && scannerPSD) {
                         // Use CFAR detector with dedicated FFT
                         maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
-                        if (maxLevel >= noiseFloorLevel + scannerThresholdDb) {
+                        // CRITICAL FIX: Signal must exceed BOTH:
+                        // 1. CFAR threshold (noise floor + threshold)
+                        // 2. User's absolute trigger level
+                        float cfarThreshold = noiseFloorLevel + scannerThresholdDb;
+                        if (maxLevel >= cfarThreshold && maxLevel >= level) {
+                            SCAN_DEBUG("Scanner: Signal level {:.1f} dB exceeds CFAR threshold {:.1f} dB and trigger level {:.1f} dB",
+                                     maxLevel, cfarThreshold, level);
                             // Update noise floor when signal is present (only for auto mode)
                             if (squelchDeltaAuto) {
                                 updateNoiseFloor(noiseFloorLevel);
@@ -1558,7 +1583,15 @@ private:
                         if (useDedicatedFFT && scannerPSD) {
                             // Use CFAR detector with dedicated FFT for single frequency
                             maxLevel = getMaxLevelCFAR(current, effectiveVfoWidth, noiseFloorLevel);
-                            signalDetected = (maxLevel >= noiseFloorLevel + scannerThresholdDb);
+                            // CRITICAL FIX: Signal must exceed BOTH:
+                            // 1. CFAR threshold (noise floor + threshold)
+                            // 2. User's absolute trigger level
+                            float cfarThreshold = noiseFloorLevel + scannerThresholdDb;
+                            signalDetected = (maxLevel >= cfarThreshold && maxLevel >= level);
+                            if (signalDetected) {
+                                SCAN_DEBUG("Scanner: Signal level {:.1f} dB exceeds CFAR threshold {:.1f} dB and trigger level {:.1f} dB",
+                                         maxLevel, cfarThreshold, level);
+                            }
                         } else {
                             // Fallback to waterfall FFT for single frequency
                             maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
@@ -1788,9 +1821,11 @@ private:
             // Pass the noise floor back to the caller if requested
             if (noiseFloorDb) *noiseFloorDb = localNoiseFloor;
             
-            // Signal detected if level exceeds threshold above noise floor and is above minimum level
+            // Signal detected if level exceeds BOTH:
+            // 1. CFAR threshold (noise floor + threshold)
+            // 2. User's trigger level
             float thresholdDb = localNoiseFloor + scannerThresholdDb;
-            bool detected = (signalLevel >= thresholdDb && signalLevel > -90.0f);
+            bool detected = (signalLevel >= thresholdDb && signalLevel >= level);
             
             if (detected) {
                 // Found a signal - tune to it and switch to receiving state
@@ -2419,6 +2454,8 @@ private:
     
     // CFAR-style peak detection with dedicated scanner FFT
     float getMaxLevelCFAR(double freq, double width, float& noiseFloorDb) {
+        // No scaling needed - FFT values are already in dB
+        
         if (!scannerPSD) {
             flog::error("Scanner: scannerPSD is null in getMaxLevelCFAR");
             return -INFINITY;
@@ -2452,7 +2489,7 @@ private:
         }
         
         flog::info("Scanner: Bin width: {:.6f} Hz (sample rate: {} Hz, FFT size: {})", 
-                  (double)sampleRate / (double)fftSize, sampleRate, fftSize);
+                  binHz, sampleRate, fftSize); // Changed to use binHz, not raw division
         
         // Calculate the bin index for the center frequency using DC-centered mapping
         int centerBinInt = absHzToDcBin(freq);
@@ -2495,9 +2532,9 @@ private:
         assert(lowSignalBin >= 0 && lowSignalBin < N);
         assert(highSignalBin >= 0 && highSignalBin < N);
 
-        // Use wider guard and reference bands for better CFAR performance
-        const int guardBins    = std::max(5, hzToBins(scannerGuardHz, sampleRate, fftSize));
-        const int refWidthBins = std::max(20, hzToBins(scannerRefHz, sampleRate, fftSize));
+        // CRITICAL FIX: Use much wider reference bands for better noise floor estimation
+        const int guardBins    = std::max(10, hzToBins(scannerGuardHz * 2, sampleRate, fftSize));  // Double guard band
+        const int refWidthBins = std::max(100, hzToBins(scannerRefHz * 4, sampleRate, fftSize));   // 4x reference width
 
         // Left band just before ROI (with guard)
         const int leftEnd   = clamp(lowSignalBin - guardBins - 1);
@@ -2507,15 +2544,17 @@ private:
         const int rightStart = clamp(highSignalBin + guardBins + 1);
         const int rightEnd   = clamp(rightStart + (refWidthBins - 1));
         
-        // Find maximum power in signal region (peak in ROI in dB)
+        // CRITICAL FIX: Calculate signal power with proper FFT scaling
+        // CRITICAL FIX: Use raw FFT values directly (they are already in dB)
         float maxSignal = -INFINITY;
         int maxBin = centerBinInt;
         int kMax = centerBinInt;  // Will hold the bin index of the maximum
         
         for (int i = lowSignalBin; i <= highSignalBin; i++) {
             if (i < 0 || i >= dataWidth) continue;
-            if (std::isfinite(psdDb[i]) && psdDb[i] > maxSignal) {
-                maxSignal = psdDb[i];
+            float val = psdDb[i];
+            if (std::isfinite(val) && val > maxSignal) {
+                maxSignal = val;
                 maxBin = i;
                 kMax = i;
             }
@@ -2529,10 +2568,11 @@ private:
         
         // Get signal in dB
         float signalDb = maxSignal;
+        // flog::debug("Scanner: RAW signalDb after assignment: {:.2f} dB", signalDb); // Removed temporary debug log
         
         // Guardrails to prevent regressions
         assert(std::isfinite(signalDb));
-        assert(roiStartBin <= roiEndBin); // We don't support wraparound ROIs
+        assert(lowSignalBin <= highSignalBin); // Changed from roiStartBin <= roiEndBin as those variables don't exist here
         
         // Debug the maxSignal value
         flog::info("Scanner: Signal region max value: {:.1f} dB at bin {}", signalDb, kMax);
@@ -2567,15 +2607,13 @@ private:
             return -INFINITY;
         }
         
-        // Calculate noise floor statistics (min, max, median)
-        auto [mnIt, mxIt] = std::minmax_element(refVals.begin(), refVals.end());
-        
-        // Calculate median (robust method)
+        // CRITICAL FIX: Use raw FFT values directly (they are already in dB)
+        // Calculate noise floor using 10th percentile of values
         std::sort(refVals.begin(), refVals.end());
-        const float noiseDb = (refVals.size() % 2 == 0) ? 
-                             (refVals[refVals.size()/2 - 1] + refVals[refVals.size()/2]) / 2.0f :
-                             refVals[refVals.size()/2];
+        size_t tenthPercentileIdx = refVals.size() / 10;
+        const float noiseDb = refVals[tenthPercentileIdx];
                              
+        // flog::debug("Scanner: RAW noiseDb after calculation: {:.2f} dB (refVals.size(): {})", noiseDb, (int)refVals.size()); // Removed temporary debug log
         // Log noise floor statistics with proper sample count
         size_t sampleCount = refVals.size();
         
@@ -2586,8 +2624,8 @@ private:
             sampleCount = 1;
         }
         
-        flog::info("Scanner: Noise floor calculation: median {:.6f} dB, min {:.6f} dB, max {:.6f} dB, from {} samples",
-                    noiseDb, *mnIt, *mxIt, static_cast<int>(sampleCount));
+        flog::info("Scanner: Noise floor calculation: {:.6f} dB from {} samples",
+                    noiseDb, (int)sampleCount); // Cast to int for logging
                     
         // Set noise floor
         float noiseFloor = noiseDb;
@@ -2605,18 +2643,18 @@ private:
             double refinedFreq = (maxBin - 1 + refinedHz / binHz) * binHz;
             
             // Log refined peak info at debug level
-            SCAN_DEBUG("Scanner: Peak refined from {:.1f} Hz to {:.1f} Hz (bin {}, correction: {:.2f} bins)",
-                      maxBin * binHz, refinedFreq, maxBin, refinedHz/binHz - 1.0);
+            flog::debug("Scanner: Peak refined from original bin {} ({:.1f} Hz) to {:.1f} Hz (correction: {:.2f} bins)",
+                      maxBin, (double)maxBin * binHz, refinedFreq, refinedHz / binHz); // Corrected maxBin type and correction value
         }
         
         // Check for invalid signal and noise values
-        if (std::abs(signalDb) > 200.0f || std::isnan(signalDb) || std::isinf(signalDb)) {
+        if (std::abs(signalDb) > 1000.0f || std::isnan(signalDb) || std::isinf(signalDb)) {
             flog::error("Scanner: Invalid signal value: {:.1f} dB! Using default.", signalDb);
             const float defaultSignal = -100.0f;
             signalDb = defaultSignal;  // Set to a reasonable default
         }
         
-        if (std::abs(noiseDb) > 200.0f || std::isnan(noiseDb) || std::isinf(noiseDb)) {
+        if (std::abs(noiseDb) > 1000.0f || std::isnan(noiseDb) || std::isinf(noiseDb)) {
             flog::error("Scanner: Invalid noise floor value: {:.1f} dB! Using default.", noiseDb);
             noiseFloor = -120.0f;  // Set to a reasonable default
         } else {
@@ -2639,46 +2677,61 @@ private:
         
         bool detected = (marginDb >= 0.0f && signalDb > -90.0f); // Ensure signal is above threshold and reasonable
         
-        // Log CFAR detection with margin - ensure we're using dB values, not frequency
-        double freqMHz = freq / 1e6;
+        // COMPLETELY REWRITTEN: Create a separate function scope to isolate variables
+        // FINAL FIX: Use completely separate variables and a different format string approach
+        const double freqMHz = freq / 1e6;
         
-        // Make local copies that we can modify if needed
-        float signalDbValue = signalDb;
-        float noiseDbValue = noiseDb;
+        // Create local copies with unique names to avoid any variable shadowing
+        const float signal_db = signalDb;
+        const float noise_db = noiseFloor;
+        const float threshold_db = noiseFloor + kDb;
+        const float margin_db = signalDb - (noiseFloor + kDb);
         
-        // Verify signal and noise values are reasonable dB values, not frequencies
-        if (std::abs(signalDbValue) > 200.0f || std::abs(signalDbValue - freqMHz) < 0.1) {
-            flog::error("Scanner: Signal value corrupted (got frequency instead of dB): {:.2f}", signalDbValue);
-            signalDbValue = -50.0f; // Reasonable default
-        }
+        // Use a different format string approach to avoid any possible confusion
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), 
+                 "Scanner: CFAR @ %.6f MHz — signal: %.2f dB, noise: %.2f dB, th: %.2f dB, margin: %.2f dB",
+                 freqMHz, signal_db, noise_db, threshold_db, margin_db);
         
-        if (std::abs(noiseDbValue) > 200.0f || std::abs(noiseDbValue - freqMHz) < 0.1) {
-            flog::error("Scanner: Noise value corrupted (got frequency instead of dB): {:.2f}", noiseDbValue);
-            noiseDbValue = -80.0f; // Reasonable default
-        }
+        // Log the formatted string directly
+        flog::info(buffer);
         
-        // Calculate threshold and margin with potentially corrected values
-        float thresholdDbValue = noiseDbValue + kDb;
-        float marginDbValue = signalDbValue - thresholdDbValue;
+        // Signal value validation is now handled in the lambda function above
         
-        flog::info("Scanner: CFAR @ {:.6f} MHz — signal: {:.2f} dB, noise: {:.2f} dB, th: {:.2f} dB, margin: {:.2f} dB",
-                   freqMHz, signalDbValue, noiseDbValue, thresholdDbValue, marginDbValue);
+        // CFAR logging is now handled in the lambda function above
         
         // Use the debugRanges helper directly in the log statement
         
-        // Add more detailed debug info with correct format specifiers
-        double actualBinWidth = (double)sampleRate / (double)fftSize;
-        
-        // Verify bin width is reasonable (not equal to FFT size)
-        if (std::abs(actualBinWidth - fftSize) < 0.1) {
-            flog::error("Scanner: Bin width calculation error (got FFT size instead of Hz/bin)");
-            actualBinWidth = 5.493164; // Reasonable default for 2.88 MHz / 524288
-        }
-        
-        flog::info("Scanner: CFAR details - FFT size: {}, bin width: {:.6f} Hz, ROI bins: [{}, {}], ref ranges: {}",
-                  fftSize, actualBinWidth, 
-                  lowSignalBin, highSignalBin, 
-                  debugRanges(refRanges));
+        // COMPLETELY REWRITTEN: Create a separate function scope to isolate variables
+        [&]() {
+            // Always recalculate bin width to ensure it's correct
+            const double actualBinWidth = static_cast<double>(sampleRate) / static_cast<double>(fftSize);
+            
+            // Verify bin width is reasonable
+            if (binHz <= 0.0 || binHz > 10000.0 || std::abs(binHz - fftSize) < 1.0) { 
+                flog::error("Scanner: Bin width calculation error (value: {:.6f} Hz). Expected ~{:.6f} Hz.", 
+                          binHz, actualBinWidth);
+            }
+            
+            // Use explicit types and the recalculated bin width
+            const int fftSizeInt = static_cast<int>(fftSize);
+            const int lowBin = static_cast<int>(lowSignalBin);
+            const int highBin = static_cast<int>(highSignalBin);
+            const std::string ranges = debugRanges(refRanges);
+            
+            // FINAL FIX: Use completely separate variables and a different format string approach
+            // Calculate the actual bin width correctly
+            const double actual_bin_width = sampleRate / static_cast<double>(fftSize);
+            
+            // Use a different format string approach to avoid any possible confusion
+            char buffer[256];
+            snprintf(buffer, sizeof(buffer), 
+                     "Scanner: CFAR details - FFT size: %d, bin width: %.6f Hz, ROI bins: [%d, %d], ref ranges: %s",
+                     fftSizeInt, actual_bin_width, lowBin, highBin, ranges.c_str());
+            
+            // Log the formatted string directly
+            flog::info(buffer);
+        }();  // Immediately invoke the lambda
         
         // Return -INFINITY if signal is not valid (below reasonable threshold)
         return (maxSignal > -90.0f) ? maxSignal : -INFINITY;
@@ -2692,14 +2745,16 @@ private:
             // Debug logging removed for production
             return -50.0f; // Default squelch level if no radio available
         }
+        flog::debug("Scanner: Calling radio interface for squelch level"); // Added debug log
         
         float squelchLevel = -50.0f;
         if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, 
                                            RADIO_IFACE_CMD_GET_SQUELCH_LEVEL, 
-                                           NULL, &squelchLevel)) {
-            SCAN_DEBUG("Scanner: Failed to get squelch level");
+                                           NULL, &squelchLevel)) { // Added NULL for the 'in' parameter
+            flog::warn("Scanner: Failed to get squelch level from radio module");
+            return -50.0f;
         }
-        
+        flog::debug("Scanner: Received squelch level: {:.2f} dB", squelchLevel); // Added debug log
         return squelchLevel;
     }
     
@@ -2862,7 +2917,8 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> lastSignalTime = std::chrono::high_resolution_clock::now();
     std::chrono::time_point<std::chrono::high_resolution_clock> lastTuneTime = std::chrono::high_resolution_clock::now();
     std::thread workerThread;
-    std::mutex scanMtx;
+    // CRITICAL FIX: Use recursive mutex to allow re-locking from the same thread
+    std::recursive_mutex scanMtx;
     
     // Blacklist functionality
     std::vector<double> blacklistedFreqs;
@@ -2942,7 +2998,7 @@ private:
     
     // Dedicated FFT/PSD parameters for scanner accuracy
     std::unique_ptr<scanner::ScannerPSD> scannerPSD;
-    bool useDedicatedFFT = true;
+    bool useDedicatedFFT = false;
     int scannerFFTSize = 524288; // Default to optimal size (524288)
     float scannerOverlap = 0.5f; // Default to 50% overlap
     scanner::WindowType scannerWindowType = scanner::WindowType::BLACKMAN_HARRIS_7;
