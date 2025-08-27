@@ -46,9 +46,20 @@ void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float 
     m_fftIn.resize(m_fftSize);
     m_fftOut.resize(m_fftSize);
     m_window.resize(m_fftSize);
-    m_powerSpectrum.resize(m_fftSize);
-    m_avgPowerSpectrum.resize(m_fftSize);
-    m_sampleBuffer.resize(m_fftSize * 2); // Extra room for overlap
+    
+    // Initialize ring buffer (4x FFT size to ensure space for overlap)
+    m_sampleBuffer.resize(m_fftSize * 4);
+    m_writePos.store(0, std::memory_order_relaxed);
+    m_readPos.store(0, std::memory_order_relaxed);
+    m_samplesAvailable.store(0, std::memory_order_relaxed);
+    
+    // Initialize frame buffer
+    m_frameBuffer.resize(m_fftSize);
+    
+    // Initialize triple buffer
+    for (auto& buf : m_psdBuffers) {
+        buf.resize(m_fftSize, -200.0f);
+    }
     
     // Generate window function
     generateWindow();
@@ -56,13 +67,9 @@ void ScannerPSD::init(int fftSize, int sampleRate, WindowType windowType, float 
     // Calculate smoothing parameter
     calculateAlpha();
     
-    // Reset buffers - initialize to a very low but finite value
-    std::fill(m_powerSpectrum.begin(), m_powerSpectrum.end(), -200.0f);
-    std::fill(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end(), -200.0f);
-    m_bufferOffset = 0;
-    
     m_initialized = true;
     m_firstFrame = true; // Mark as first frame for proper initialization
+    m_processing.store(false, std::memory_order_release);
 }
 
 void ScannerPSD::reset() {
@@ -85,91 +92,123 @@ void ScannerPSD::reset() {
     m_fftIn.clear();
     m_fftOut.clear();
     m_window.clear();
-    m_powerSpectrum.clear();
-    m_avgPowerSpectrum.clear();
     m_sampleBuffer.clear();
-    m_bufferOffset = 0;
+    m_frameBuffer.clear();
+    for (auto& buf : m_psdBuffers) {
+        buf.clear();
+    }
+    m_writePos.store(0, std::memory_order_relaxed);
+    m_readPos.store(0, std::memory_order_relaxed);
+    m_samplesAvailable.store(0, std::memory_order_relaxed);
+    m_processing.store(false, std::memory_order_release);
     
     m_initialized = false;
 }
 
+void ScannerPSD::writeToRingBuffer(const std::complex<float>* data, size_t count) {
+    size_t bufSize = m_sampleBuffer.size();
+    size_t writePos = m_writePos.load(std::memory_order_relaxed);
+    
+    // First part: write until end of buffer or count
+    size_t firstPart = std::min(count, bufSize - writePos);
+    std::memcpy(&m_sampleBuffer[writePos], data, firstPart * sizeof(std::complex<float>));
+    
+    // Second part: wrap around if needed
+    if (firstPart < count) {
+        std::memcpy(&m_sampleBuffer[0], data + firstPart, 
+                   (count - firstPart) * sizeof(std::complex<float>));
+    }
+    
+    // Update write position
+    m_writePos.store((writePos + count) % bufSize, std::memory_order_release);
+    m_samplesAvailable.fetch_add(count, std::memory_order_release);
+}
+
+bool ScannerPSD::readFromRingBuffer(std::vector<std::complex<float>>& frame, size_t count) {
+    if (m_samplesAvailable.load(std::memory_order_acquire) < count) {
+        return false;
+    }
+    
+    size_t bufSize = m_sampleBuffer.size();
+    size_t readPos = m_readPos.load(std::memory_order_relaxed);
+    
+    frame.resize(count);
+    
+    // First part: read until end of buffer or count
+    size_t firstPart = std::min(count, bufSize - readPos);
+    std::memcpy(frame.data(), &m_sampleBuffer[readPos], 
+                firstPart * sizeof(std::complex<float>));
+    
+    // Second part: wrap around if needed
+    if (firstPart < count) {
+        std::memcpy(frame.data() + firstPart, &m_sampleBuffer[0],
+                   (count - firstPart) * sizeof(std::complex<float>));
+    }
+    
+    // Update read position
+    m_readPos.store((readPos + count) % bufSize, std::memory_order_release);
+    m_samplesAvailable.fetch_sub(count, std::memory_order_release);
+    
+    return true;
+}
+
 bool ScannerPSD::feedSamples(const std::complex<float>* samples, int count) {
-    if (!m_initialized) {
-        flog::error("Scanner: Cannot feed samples - not initialized");
+    if (!m_initialized || !samples || count <= 0) {
         return false;
     }
     
-    if (!samples || count <= 0) {
-        flog::error("Scanner: Invalid samples pointer or count: {}", count);
-        return false;
-    }
-    
-    // Debug logging for sample feeding
+    // Debug logging (rate-limited)
     static int sampleCounter = 0;
     sampleCounter += count;
     static int lastLoggedCount = 0;
-    if (sampleCounter - lastLoggedCount > 100000) {  // Log every ~100k samples
+    if (sampleCounter - lastLoggedCount > 100000) {
         flog::info("Scanner: Fed {} samples to ScannerPSD (total: {})", count, sampleCounter);
         lastLoggedCount = sampleCounter;
     }
     
     bool newFrameReady = false;
     
-    // Lock only during buffer manipulation
-    {
-        std::lock_guard<std::mutex> lck(m_mutex);
-        
-        // Copy samples to buffer
-        int remainingSpace = m_sampleBuffer.size() - m_bufferOffset;
-        int copyCount = std::min(count, remainingSpace);
-        
-        std::memcpy(&m_sampleBuffer[m_bufferOffset], samples, copyCount * sizeof(std::complex<float>));
-        m_bufferOffset += copyCount;
-    }
+    // Write new samples to ring buffer (no lock needed)
+    writeToRingBuffer(samples, count);
     
-    // Process all available frames without holding the lock
-    for (;;) {
-        std::vector<std::complex<float>> frame;
-        
-        // Lock only to check/extract a frame
-        {
-            std::lock_guard<std::mutex> lck(m_mutex);
-            
-            // If we don't have enough samples for a frame, break
-            if (m_bufferOffset < m_fftSize) break;
-            
-            // Copy one frame's worth of samples
-            frame.assign(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_fftSize);
-            
-            // Advance buffer by hop size
-            int remaining = m_bufferOffset - m_hopSize;
-            if (remaining > 0) {
-                std::memmove(&m_sampleBuffer[0], &m_sampleBuffer[m_hopSize],
-                            remaining * sizeof(m_sampleBuffer[0]));
-            }
-            m_bufferOffset = remaining;
+    // Process frames while we have enough samples
+    while (m_samplesAvailable.load(std::memory_order_acquire) >= m_fftSize) {
+        // Extract frame from ring buffer (no lock needed)
+        if (!readFromRingBuffer(m_frameBuffer, m_fftSize)) {
+            break;
         }
         
-        // Process the frame without holding the lock
-        processFrame(frame);
+        // Process the frame (this updates the power spectrum)
+        processFrame(m_frameBuffer);
         newFrameReady = true;
+        
+        // Advance by hop size (discard samples we don't need)
+        size_t skipCount = m_fftSize - m_hopSize;
+        if (skipCount > 0) {
+            m_readPos.fetch_add(skipCount, std::memory_order_release);
+            m_samplesAvailable.fetch_sub(skipCount, std::memory_order_release);
+        }
     }
     
     return newFrameReady;
 }
 
 bool ScannerPSD::process() {
-    if (!m_initialized || m_bufferOffset < m_fftSize) {
-        flog::error("Scanner: Cannot process FFT - initialized: {}, buffer offset: {} (need {})",
-                           m_initialized ? "true" : "false", m_bufferOffset, m_fftSize);
+    if (!m_initialized || m_samplesAvailable.load(std::memory_order_acquire) < m_fftSize) {
+        flog::error("Scanner: Cannot process FFT - initialized: {}, samples available: {} (need {})",
+                           m_initialized ? "true" : "false", 
+                           static_cast<int>(m_samplesAvailable.load(std::memory_order_relaxed)),
+                           m_fftSize);
         return false;
     }
     
-    // Create a local copy of the buffer to process
-    std::vector<std::complex<float>> frame(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_fftSize);
+    // Extract frame from ring buffer
+    if (!readFromRingBuffer(m_frameBuffer, m_fftSize)) {
+        return false;
+    }
     
     // Process the frame
-    return processFrame(frame);
+    return processFrame(m_frameBuffer);
 }
 
 bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
@@ -222,155 +261,122 @@ bool ScannerPSD::processFrame(const std::vector<std::complex<float>>& frame) {
         m_fftOut[i] = std::complex<float>(m_fftwOut[i][0], m_fftwOut[i][1]);
     }
     
-    // Calculate and update power spectrum with mutex protection
-    {
-        std::lock_guard<std::mutex> lck(m_mutex);
-        
-        // Calculate power spectrum (shifted to center DC)
-        for (int i = 0; i < m_fftSize; i++) {
-            int binIdx = (i + m_fftSize/2) % m_fftSize;
-            
-            // Calculate power using VOLK for consistency with waterfall FFT
-            float power = std::norm(m_fftOut[i]);
-            
-            // Convert to dB with proper scaling (same as waterfall)
-            float powerDb = 10.0f * log10f(std::max(1e-15f, power)) - 20.0f * log10f(m_fftSize);
-            
-            // Store shifted result - initialize to -100 dB if we're just starting
-            if (m_firstFrame) {
-                m_avgPowerSpectrum[binIdx] = powerDb;
-            } else {
-                // Apply exponential moving average
-                m_avgPowerSpectrum[binIdx] = (1.0f - m_alpha) * m_avgPowerSpectrum[binIdx] + m_alpha * powerDb;
-            }
-            
-            // Store in power spectrum
-            m_powerSpectrum[binIdx] = powerDb;
-            
-            // Debug output for first few bins and center bin
-            if (i == 0 || i == m_fftSize/4 || i == m_fftSize/2 || i == 3*m_fftSize/4 || i == m_fftSize-1) {
-                static int debugCounter = 0;
-                if (++debugCounter % 100 == 0) {  // Limit debug output
-                    flog::debug("Scanner: FFT bin {} (shifted to {}): power={:.6e}, powerDb={:.2f} dB", 
-                              i, binIdx, power, powerDb);
-                }
-            }
+    // Get current write buffer index
+    int writeIdx = m_writeBuffer.load(std::memory_order_acquire);
+    int processIdx = m_processBuffer.load(std::memory_order_acquire);
+    
+    // Ensure all buffers are properly sized
+    for (auto& buf : m_psdBuffers) {
+        if (buf.size() != m_fftSize) {
+            buf.resize(m_fftSize, -200.0f);
         }
-        
-        // Debug power spectrum values
-        static int debugCounter = 0;
-        if (++debugCounter % 10 == 0) {  // Log every 10 FFTs
-            float minVal = -100.0f, maxVal = -100.0f;
-            if (!m_avgPowerSpectrum.empty()) {
-                minVal = *std::min_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
-                maxVal = *std::max_element(m_avgPowerSpectrum.begin(), m_avgPowerSpectrum.end());
-            }
-            flog::info("Scanner: Power spectrum range [{:.1f}, {:.1f}] dB", minVal, maxVal);
-        }
-        
-        m_firstFrame = false;
     }
+    
+    // Calculate power spectrum (shifted to center DC)
+    for (int i = 0; i < m_fftSize; i++) {
+        int binIdx = (i + m_fftSize/2) % m_fftSize;
+        
+        // Calculate power using VOLK for consistency with waterfall FFT
+        float power = std::norm(m_fftOut[i]);
+        
+        // Convert to dB with proper scaling (same as waterfall)
+        float powerDb = 10.0f * log10f(std::max(1e-15f, power)) - 20.0f * log10f(m_fftSize);
+        
+        // Store shifted result in write buffer
+        m_psdBuffers[writeIdx][binIdx] = powerDb;
+    }
+    
+    // Apply EMA smoothing
+    if (m_firstFrame) {
+        std::copy(m_psdBuffers[writeIdx].begin(), 
+                 m_psdBuffers[writeIdx].end(), 
+                 m_psdBuffers[processIdx].begin());
+        m_firstFrame = false;
+    } else {
+        for (int i = 0; i < m_fftSize; i++) {
+            m_psdBuffers[processIdx][i] = m_alpha * m_psdBuffers[writeIdx][i] + 
+                                        (1.0f - m_alpha) * m_psdBuffers[processIdx][i];
+        }
+    }
+    
+    // Rate-limited logging of spectrum range
+    static auto lastLogTime = std::chrono::steady_clock::now();
+    static int logCounter = 0;
+    ++logCounter;
+    
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime).count() >= 1) {
+        float minVal = -100.0f, maxVal = -100.0f;
+        if (!m_psdBuffers[processIdx].empty()) {
+            minVal = *std::min_element(m_psdBuffers[processIdx].begin(), m_psdBuffers[processIdx].end());
+            maxVal = *std::max_element(m_psdBuffers[processIdx].begin(), m_psdBuffers[processIdx].end());
+        }
+        flog::info("Scanner: Processed {} FFTs, power range [{:.1f}, {:.1f}] dB", 
+                  logCounter, minVal, maxVal);
+        logCounter = 0;
+        lastLogTime = now;
+    }
+    
+    // Atomic buffer rotation (no mutex needed)
+    int readIdx = m_readBuffer.load(std::memory_order_acquire);
+    
+    // Rotate buffers: write -> process -> read -> write
+    m_writeBuffer.store((writeIdx + 1) % 3, std::memory_order_release);
+    m_processBuffer.store((processIdx + 1) % 3, std::memory_order_release);
+    m_readBuffer.store((readIdx + 1) % 3, std::memory_order_release);
     
     return true;
 }
 
-const std::vector<float>& ScannerPSD::getPowerSpectrum() const {
-    return m_powerSpectrum;
-}
-
 const float* ScannerPSD::acquireLatestPSD(int& width) {
-    // Use try_lock to avoid deadlocks
-    if (!m_mutex.try_lock()) {
-        flog::warn("Scanner: acquireLatestPSD mutex is already locked, skipping");
-        width = 0;
-        return nullptr;
+    // DEPRECATED - Use copyLatestPSD() or getLatestPSDSnapshot() instead
+    static bool warned = false;
+    if (!warned) {
+        flog::warn("Scanner: acquireLatestPSD is deprecated, use copyLatestPSD or getLatestPSDSnapshot instead");
+        warned = true;
     }
     
     if (!m_initialized) {
-        flog::error("Scanner: acquireLatestPSD called but PSD not initialized");
-        m_mutex.unlock();
         width = 0;
         return nullptr;
     }
     
-    // Check if we have any data yet
-    static int callCount = 0;
-    if (++callCount % 10 == 0) {
-        // Find actual min/max values in the spectrum (not FFT size)
-        auto [mnIt, mxIt] = std::minmax_element(
-            m_avgPowerSpectrum.begin(), 
-            m_avgPowerSpectrum.end(),
-            [](float a, float b) { 
-                if (!std::isfinite(a)) return false;
-                if (!std::isfinite(b)) return true;
-                return a < b; 
-            }
-        );
-        
-        // Ensure values are finite
-        float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
-        float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
-        
-        // Verify min/max are not equal to fftSize (common error)
-        if (std::abs(minVal - m_fftSize) < 0.1 || std::abs(maxVal - m_fftSize) < 0.1) {
-            flog::error("Scanner: PSD range calculation error (got FFT size instead of dB values)");
-            minVal = -100.0f;
-            maxVal = -20.0f;
-        }
-        
-        flog::info("Scanner: acquireLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
-                  m_fftSize, minVal, maxVal);
-    }
-    
     width = m_fftSize;
-    return m_avgPowerSpectrum.data();
+    int readIdx = m_readBuffer.load(std::memory_order_acquire);
+    return m_psdBuffers[readIdx].data();
 }
 
 void ScannerPSD::releaseLatestPSD() {
-    // Only unlock if we're the owner of the lock
-    try {
-        m_mutex.unlock();
-    } catch (const std::system_error& e) {
-        flog::error("Scanner: Failed to unlock mutex in releaseLatestPSD: {}", e.what());
+    // DEPRECATED - No-op since we no longer use mutex for PSD access
+    static bool warned = false;
+    if (!warned) {
+        flog::warn("Scanner: releaseLatestPSD is deprecated and no longer needed");
+        warned = true;
     }
 }
 
 bool ScannerPSD::copyLatestPSD(std::vector<float>& out, int& width) const {
-    std::lock_guard<std::mutex> lk(m_mutex);  // short lock, just for copy
-    if (!m_initialized || m_avgPowerSpectrum.empty()) { 
-        width = 0; 
-        return false; 
+    if (!m_initialized) {
+        width = 0;
+        return false;
     }
-    out = m_avgPowerSpectrum; // copy snapshot
+    
+    // Get latest data from read buffer (no locking needed)
+    int readIdx = m_readBuffer.load(std::memory_order_acquire);
+    out = m_psdBuffers[readIdx];
     width = m_fftSize;
     
-    // Log PSD range info occasionally
-    static int callCount = 0;
-    if (++callCount % 10 == 0) {
-        // Find actual min/max values in the spectrum (not FFT size)
-        auto [mnIt, mxIt] = std::minmax_element(
-            m_avgPowerSpectrum.begin(), 
-            m_avgPowerSpectrum.end(),
-            [](float a, float b) { 
-                if (!std::isfinite(a)) return false;
-                if (!std::isfinite(b)) return true;
-                return a < b; 
-            }
-        );
-        
-        // Ensure values are finite
-        float minVal = std::isfinite(*mnIt) ? *mnIt : -100.0f;
-        float maxVal = std::isfinite(*mxIt) ? *mxIt : -20.0f;
-        
-        // Verify min/max are not equal to fftSize (common error)
-        if (std::abs(minVal - m_fftSize) < 0.1 || std::abs(maxVal - m_fftSize) < 0.1) {
-            flog::error("Scanner: PSD range calculation error (got FFT size instead of dB values)");
-            minVal = -100.0f;
-            maxVal = -20.0f;
+    // Rate-limited logging
+    static auto lastLogTime = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastLogTime).count() >= 1) {
+        float minVal = -100.0f, maxVal = -100.0f;
+        if (!out.empty()) {
+            minVal = *std::min_element(out.begin(), out.end());
+            maxVal = *std::max_element(out.begin(), out.end());
         }
-        
-        flog::info("Scanner: copyLatestPSD returning {} bins, range [{:.2f}, {:.2f}] dB", 
-                  m_fftSize, minVal, maxVal);
+        flog::info("Scanner: PSD range [{:.1f}, {:.1f}] dB", minVal, maxVal);
+        lastLogTime = now;
     }
     
     return true;

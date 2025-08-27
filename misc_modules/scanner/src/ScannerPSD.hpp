@@ -43,15 +43,29 @@ public:
     // Process a frame of samples without locking
     bool processFrame(const std::vector<std::complex<float>>& frame);
     
-    // Get current power spectrum frame (dB)
-    const std::vector<float>& getPowerSpectrum() const;
+    // Safe PSD access methods
     
-    // Get access to the latest power spectrum with mutex protection
+    // Copy latest PSD data to provided buffer (thread-safe, no lock held during copy)
+    bool copyLatestPSD(std::vector<float>& out, int& width) const;
+    
+    // Get snapshot of latest PSD data (zero-copy, thread-safe)
+    // Returns pointer valid until next processFrame()
+    bool getLatestPSDSnapshot(const float*& data, int& width) {
+        if (!m_initialized) return false;
+        int readIdx = m_readBuffer.load(std::memory_order_acquire);
+        data = m_psdBuffers[readIdx].data();
+        width = m_fftSize;
+        return true;
+    }
+    
+    // DEPRECATED - Use copyLatestPSD() or getLatestPSDSnapshot() instead
+    // These methods will be removed in a future version
+    const std::vector<float>& getPowerSpectrum() const { 
+        int readIdx = m_readBuffer.load(std::memory_order_acquire);
+        return m_psdBuffers[readIdx];
+    }
     const float* acquireLatestPSD(int& width);
     void releaseLatestPSD();
-    
-    // Copy the latest PSD data (in dB) to the provided vector
-    bool copyLatestPSD(std::vector<float>& out, int& width) const;
     
     // Sub-bin interpolation for accurate peak detection
     static double refineFrequencyHz(const std::vector<float>& PdB, int binIndex, double binWidthHz);
@@ -97,16 +111,25 @@ private:
     fftwf_complex* m_fftwIn;
     fftwf_complex* m_fftwOut;
     
-    // Buffers
+    // Processing buffers (not protected by mutex)
     std::vector<std::complex<float>> m_fftIn;
     std::vector<std::complex<float>> m_fftOut;
     std::vector<float> m_window;
-    std::vector<float> m_powerSpectrum;     // Power in dB
-    std::vector<float> m_avgPowerSpectrum;  // Time-averaged power in dB
     
-    // Input sample buffer
+    // Triple-buffered PSD output
+    std::array<std::vector<float>, 3> m_psdBuffers;  // Triple buffer for PSD data
+    std::atomic<int> m_readBuffer{0};    // Buffer being read by consumers
+    std::atomic<int> m_writeBuffer{1};   // Buffer being written by producer
+    std::atomic<int> m_processBuffer{2}; // Buffer being processed (EMA)
+    
+    // Ring buffer for input samples
     std::vector<std::complex<float>> m_sampleBuffer;
-    int m_bufferOffset = 0;
+    std::atomic<size_t> m_writePos{0};  // Current write position in ring buffer
+    std::atomic<size_t> m_readPos{0};   // Current read position in ring buffer
+    std::atomic<size_t> m_samplesAvailable{0};  // Number of valid samples in buffer
+    
+    // Frame extraction buffer
+    std::vector<std::complex<float>> m_frameBuffer;
     
     // Multi-threading protection
     mutable std::mutex m_mutex;
@@ -115,6 +138,10 @@ private:
     bool m_initialized = false;
     std::atomic<bool> m_processing{false};
     bool m_firstFrame = true;   // Track first frame for proper initialization
+    
+    // Helper methods for ring buffer
+    void writeToRingBuffer(const std::complex<float>* data, size_t count);
+    bool readFromRingBuffer(std::vector<std::complex<float>>& frame, size_t count);
     
     // Generate window function
     void generateWindow();
