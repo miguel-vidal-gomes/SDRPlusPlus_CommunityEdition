@@ -43,7 +43,7 @@ std::string ModuleComManager::getModuleName(std::string name) {
 bool ModuleComManager::callInterface(std::string name, int code, void* in, void* out) {
     std::lock_guard<std::recursive_mutex> lck(mtx);
     if (interfaces.find(name) == interfaces.end()) {
-        flog::error("Tried to call unknown module interface: {0}", name);
+        flog::error("Tried to call unknown module interface: {0} [Caller: scanner]", name);
         return false;
     }
     ModuleComInterface iface = interfaces[name];

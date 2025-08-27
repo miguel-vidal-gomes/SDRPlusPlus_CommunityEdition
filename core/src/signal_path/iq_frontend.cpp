@@ -235,7 +235,13 @@ void IQFrontEnd::setFFTWindow(FFTWindow fftWindow) {
 }
 
 void IQFrontEnd::setScannerFFTSize(int size) {
-    _scannerFftSize = size;
+    // Safety check for reasonable FFT size limits
+    if (size <= 0 || size > 1048576) { // 1M max size as safety limit
+        flog::error("IQFrontEnd: Invalid scanner FFT size {0}, limiting to 8192", size);
+        _scannerFftSize = 8192; // Reset to a safe default
+    } else {
+        _scannerFftSize = size;
+    }
     updateScannerFFTPath();
 }
 
@@ -250,8 +256,12 @@ void IQFrontEnd::setScannerFFTWindow(FFTWindow fftWindow) {
 }
 
 void IQFrontEnd::registerInterface() {
-    // Handle scanner FFT callbacks
-    core::modComManager.registerInterface("iq_frontend", "scanner_fft", 
+    // Handle scanner FFT callbacks - using constant to avoid string mismatches
+    flog::info("Registering IQFrontEnd interface: {0}", iq_interface::kIQFrontendIface);
+    // Register early to make sure it's available when scanner module initializes
+    // IMPORTANT: First parameter is the module name, second parameter is the interface name
+    // The scanner looks for interface name "iq_frontend", so we use that as the interface name (2nd param)
+    bool registered = core::modComManager.registerInterface("scanner_fft", iq_interface::kIQFrontendIface, 
         [](int code, void* in, void* out, void* ctx) {
             IQFrontEnd* _this = (IQFrontEnd*)ctx;
             
@@ -284,6 +294,13 @@ void IQFrontEnd::registerInterface() {
         }, 
         this
     );
+    
+    // Log registration status
+    if (registered) {
+        flog::info("Successfully registered IQFrontEnd interface: {0}", iq_interface::kIQFrontendIface);
+    } else {
+        flog::error("Failed to register IQFrontEnd interface: {0}", iq_interface::kIQFrontendIface);
+    }
 }
 
 void IQFrontEnd::flushInputBuffer() {
@@ -361,23 +378,37 @@ void IQFrontEnd::handler(dsp::complex_t* data, int count, void* ctx) {
 
 void IQFrontEnd::scannerHandler(dsp::complex_t* data, int count, void* ctx) {
     IQFrontEnd* _this = (IQFrontEnd*)ctx;
-
-    // Apply window
-    volk_32fc_32f_multiply_32fc((lv_32fc_t*)_this->scannerFftInBuf, (lv_32fc_t*)data, _this->scannerFftWindowBuf, _this->_scannerNzFFTSize);
-
-    // Execute FFT
-    fftwf_execute(_this->scannerFftwPlan);
-
-    // Aquire buffer
-    float* fftBuf = _this->_acquireScannerFFTBuffer(_this->_scannerFftCtx);
-
-    // Convert the complex output of the FFT to dB amplitude
-    if (fftBuf) {
-        volk_32fc_s32f_power_spectrum_32f(fftBuf, (lv_32fc_t*)_this->scannerFftOutBuf, _this->_scannerFftSize, _this->_scannerFftSize);
+    
+    // Safety checks for null pointers
+    if (!_this || !data || !_this->scannerFftInBuf || !_this->scannerFftWindowBuf || 
+        !_this->scannerFftOutBuf || !_this->scannerFftwPlan ||
+        !_this->_acquireScannerFFTBuffer || !_this->_releaseScannerFFTBuffer) {
+        flog::error("IQFrontEnd: scannerHandler called with null pointers");
+        return;
     }
 
-    // Release buffer
-    _this->_releaseScannerFFTBuffer(_this->_scannerFftCtx);
+    try {
+        // Apply window
+        volk_32fc_32f_multiply_32fc((lv_32fc_t*)_this->scannerFftInBuf, (lv_32fc_t*)data, 
+                                   _this->scannerFftWindowBuf, _this->_scannerNzFFTSize);
+
+        // Execute FFT
+        fftwf_execute(_this->scannerFftwPlan);
+
+        // Acquire buffer
+        float* fftBuf = _this->_acquireScannerFFTBuffer(_this->_scannerFftCtx);
+
+        // Convert the complex output of the FFT to dB amplitude
+        if (fftBuf) {
+            volk_32fc_s32f_power_spectrum_32f(fftBuf, (lv_32fc_t*)_this->scannerFftOutBuf, 
+                                            _this->_scannerFftSize, _this->_scannerFftSize);
+            // Release buffer
+            _this->_releaseScannerFFTBuffer(_this->_scannerFftCtx);
+        }
+    }
+    catch (const std::exception& e) {
+        flog::error("IQFrontEnd: Exception in scannerHandler: {0}", e.what());
+    }
 }
 
 void IQFrontEnd::updateMainFFTPath(bool updateWaterfall) {
@@ -449,9 +480,37 @@ void IQFrontEnd::updateScannerFFTPath(bool updateWaterfall) {
     // Update FFT plan
     fftwf_free(scannerFftInBuf);
     fftwf_free(scannerFftOutBuf);
-    scannerFftInBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
-    scannerFftOutBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
-    scannerFftwPlan = fftwf_plan_dft_1d(_scannerFftSize, scannerFftInBuf, scannerFftOutBuf, FFTW_FORWARD, FFTW_ESTIMATE);
+    
+    // Safety check for memory allocation
+    try {
+        scannerFftInBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+        if (!scannerFftInBuf) {
+            throw std::bad_alloc();
+        }
+        
+        scannerFftOutBuf = (fftwf_complex*)fftwf_malloc(_scannerFftSize * sizeof(fftwf_complex));
+        if (!scannerFftOutBuf) {
+            fftwf_free(scannerFftInBuf);
+            scannerFftInBuf = nullptr;
+            throw std::bad_alloc();
+        }
+        
+        scannerFftwPlan = fftwf_plan_dft_1d(_scannerFftSize, scannerFftInBuf, scannerFftOutBuf, FFTW_FORWARD, FFTW_ESTIMATE);
+        if (!scannerFftwPlan) {
+            fftwf_free(scannerFftInBuf);
+            fftwf_free(scannerFftOutBuf);
+            scannerFftInBuf = nullptr;
+            scannerFftOutBuf = nullptr;
+            flog::error("IQFrontEnd: Failed to create FFT plan for scanner");
+            _scannerFftSize = 8192; // Attempt with smaller size next time
+            return;
+        }
+    }
+    catch (const std::exception& e) {
+        flog::error("IQFrontEnd: Memory allocation failed for scanner FFT buffers of size {0}: {1}", _scannerFftSize, e.what());
+        _scannerFftSize = 8192; // Attempt with smaller size next time
+        return;
+    }
 
     // Clear the rest of the FFT input buffer
     dsp::buffer::clear(scannerFftInBuf, _scannerFftSize - _scannerNzFFTSize, _scannerNzFFTSize);

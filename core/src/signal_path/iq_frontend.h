@@ -1,5 +1,10 @@
 #pragma once
 #include "../dsp/buffer/frame_buffer.h"
+
+// Define interface name as constant to avoid string mismatches
+namespace iq_interface {
+    constexpr char kIQFrontendIface[] = "iq_frontend";
+}
 #include "../dsp/buffer/reshaper.h"
 #include "../dsp/multirate/power_decimator.h"
 #include "../dsp/correction/dc_blocker.h"

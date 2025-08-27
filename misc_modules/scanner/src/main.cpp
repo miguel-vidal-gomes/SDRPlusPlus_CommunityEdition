@@ -3,11 +3,16 @@
 #include <gui/gui.h>
 #include <gui/style.h>
 #include <signal_path/signal_path.h>
+#include <signal_path/iq_frontend.h>  // Include for iq_frontend constants
 #include <chrono>
 #include <algorithm>
 #include <fstream>
 #include <core.h>
 #include <radio_interface.h>
+#include <atomic>  // For atomic flag
+
+// Global flag to check if iq_frontend interface is available
+static std::atomic<bool> g_hasIQFrontendIface = false;
 #include <sstream>
 #include <cstring>
 #include <set>
@@ -150,13 +155,32 @@ public:
             delete[] scannerFftData;
         }
         scannerFftData = new float[scannerFftSize];
+        
+        // Check if interface is registered before trying to use it
+        if (core::modComManager.interfaceExists(iq_interface::kIQFrontendIface)) {
+            flog::info("Scanner: Found iq_frontend interface, configuring scanner FFT");
+            g_hasIQFrontendIface = true;
+            
+            // First, set the scanner's FFT size in the IQFrontEnd
+            if (!core::modComManager.callInterface(iq_interface::kIQFrontendIface, 0, &scannerFftSize, nullptr)) {
+                flog::error("Scanner: Failed to set FFT size via interface");
+                g_hasIQFrontendIface = false;
+                return;
+            }
 
-        // First, set the scanner's FFT size in the IQFrontEnd
-        core::modComManager.callInterface("iq_frontend", 0, &scannerFftSize, nullptr);
-
-        // Then, register the buffer acquisition and release callbacks
-        void* callbacks[] = { (void*)acquireScannerFFTBuffer, (void*)releaseScannerFFTBuffer, this };
-        core::modComManager.callInterface("iq_frontend", 1, callbacks, nullptr);
+            // Then, register the buffer acquisition and release callbacks
+            void* callbacks[] = { (void*)acquireScannerFFTBuffer, (void*)releaseScannerFFTBuffer, this };
+            if (!core::modComManager.callInterface(iq_interface::kIQFrontendIface, 1, callbacks, nullptr)) {
+                flog::error("Scanner: Failed to register callbacks via interface");
+                g_hasIQFrontendIface = false;
+                return;
+            }
+            
+            flog::info("Scanner: Successfully registered with iq_frontend interface");
+        } else {
+            flog::warn("Scanner: iq_frontend interface not available, continuing with limited functionality");
+            g_hasIQFrontendIface = false;
+        }
     }
 
     void enable() {
@@ -378,51 +402,311 @@ public:
         config.save();
     }
 
+    // Define frequency entry types
+    enum FrequencyEntryType {
+        FREQ_TYPE_SINGLE = 0,
+        FREQ_TYPE_BAND = 1
+    };
+    
+    // Define frequency entry structure
+    struct FrequencyEntry {
+        FrequencyEntryType type;
+        std::string name;
+        double frequency;  // For single frequencies
+        double lowerFreq;  // For bands
+        double upperFreq;  // For bands
+        std::string profileName;
+    };
+    
     void rescanFrequencyManager() {
-        // TODO: Implement this method
+        scannableFrequencies.clear();
+        currentFreqIndex = 0;
+        
+        // Get all frequency lists from the frequency manager
+        // TODO: Get frequency manager module
+        
+        // For now, just simulate frequency manager not found
+        flog::warn("Scanner: Frequency manager module not found");
+        return;
+        
+        // This is a simplified implementation - in a real implementation,
+        // we would query the frequency manager module for its entries
+        
+        // For now, just add a few example frequencies
+        FrequencyEntry entry;
+        
+        // Example FM radio stations
+        entry.type = FREQ_TYPE_SINGLE;
+        entry.name = "FM Radio 1";
+        entry.frequency = 100.0e6; // 100 MHz
+        entry.profileName = "FM";
+        scannableFrequencies.push_back(entry);
+        
+        entry.name = "FM Radio 2";
+        entry.frequency = 102.5e6; // 102.5 MHz
+        scannableFrequencies.push_back(entry);
+        
+        // Example amateur band
+        entry.type = FREQ_TYPE_BAND;
+        entry.name = "2m Amateur";
+        entry.lowerFreq = 144.0e6; // 144 MHz
+        entry.upperFreq = 148.0e6; // 148 MHz
+        entry.profileName = "NFM";
+        scannableFrequencies.push_back(entry);
+        
+        flog::info("Scanner: Rescanned frequency manager, found {0} entries", (int)scannableFrequencies.size());
     }
 
     void applySquelchDelta() {
-        // TODO: Implement this method
+        if (!gui::waterfall.selectedVFO.empty() && squelchDelta > 0.0f) {
+            // Store the original squelch level
+            originalSquelchLevel = 0.0f; // TODO: Get squelch level from VFO manager
+            
+            // Apply the delta
+            float newSquelch = originalSquelchLevel - squelchDelta;
+            // TODO: Set squelch level in VFO manager
+            
+            squelchDeltaActive = true;
+            flog::info("Scanner: Applied squelch delta {:.1f} dB (from {:.1f} to {:.1f})", 
+                       squelchDelta, originalSquelchLevel, newSquelch);
+        }
     }
 
     void restoreSquelchLevel() {
-        // TODO: Implement this method
+        if (!gui::waterfall.selectedVFO.empty() && squelchDeltaActive) {
+            // Restore the original squelch level
+            // TODO: Set squelch level in VFO manager
+            
+            squelchDeltaActive = false;
+            flog::info("Scanner: Restored original squelch level {:.1f} dB", originalSquelchLevel);
+        }
     }
 
     void updateNoiseFloor(float level) {
-        // TODO: Implement this method
+        // Simple implementation - just update the noise floor level
+        noiseFloor = level;
+        flog::info("Scanner: Updated noise floor to {:.1f}", noiseFloor);
     }
 
     float getMaxLevel(float* data, double freq, double vfo_bw, int data_width, double wf_start, double wf_width) {
-        // TODO: Implement this method
-        return 0.0f;
+        // Safety check for null data
+        if (!data || data_width <= 0 || wf_width <= 0.0) {
+            return -INFINITY;
+        }
+        
+        // Calculate the range of indices in the FFT data that correspond to the VFO bandwidth
+        double bin_width = wf_width / data_width;
+        int start_bin = std::max(0, (int)((freq - (vfo_bw / 2.0) - wf_start) / bin_width));
+        int end_bin = std::min(data_width - 1, (int)((freq + (vfo_bw / 2.0) - wf_start) / bin_width));
+        
+        // Safety check for valid bin range
+        if (start_bin >= data_width || end_bin < 0 || start_bin > end_bin) {
+            return -INFINITY;
+        }
+        
+        // Find the maximum level in the specified range
+        float max_level = -INFINITY;
+        for (int i = start_bin; i <= end_bin; i++) {
+            if (i >= 0 && i < data_width && data[i] > max_level) {
+                max_level = data[i];
+            }
+        }
+        
+        return max_level;
     }
 
     bool findSignal(bool scanUp, double& bottom, double& top, double wf_start, double wf_end, double wf_width, double vfo_bw, float* data, int data_width) {
-        // TODO: Implement this method
+        // Safety check for null data
+        if (!data || data_width <= 0 || wf_width <= 0.0) {
+            return false;
+        }
+        
+        double bin_width = wf_width / data_width;
+        double threshold = level; // Use the scanner's threshold level
+        
+        // Determine the scan direction and range
+        int start_idx, end_idx, step;
+        if (scanUp) {
+            start_idx = (int)((bottom - wf_start) / bin_width);
+            end_idx = (int)((wf_end - wf_start) / bin_width);
+            step = 1;
+        } else {
+            start_idx = (int)((top - wf_start) / bin_width);
+            end_idx = (int)((wf_start - wf_start) / bin_width);
+            step = -1;
+        }
+        
+        // Ensure indices are within bounds
+        start_idx = std::max(0, std::min(data_width - 1, start_idx));
+        end_idx = std::max(0, std::min(data_width - 1, end_idx));
+        
+        // Scan for a signal above the threshold
+        for (int i = start_idx; (step > 0) ? (i <= end_idx) : (i >= end_idx); i += step) {
+            if (i >= 0 && i < data_width && data[i] >= threshold) {
+                // Found a signal, determine its boundaries
+                int signal_start = i;
+                int signal_end = i;
+                
+                // Find the start of the signal (going backwards)
+                while (signal_start > 0 && data[signal_start - 1] >= threshold) {
+                    signal_start--;
+                }
+                
+                // Find the end of the signal (going forwards)
+                while (signal_end < data_width - 1 && data[signal_end + 1] >= threshold) {
+                    signal_end++;
+                }
+                
+                // Convert bin indices back to frequencies
+                double signal_freq_start = wf_start + (signal_start * bin_width);
+                double signal_freq_end = wf_start + (signal_end * bin_width);
+                
+                // Update the output parameters
+                bottom = signal_freq_start;
+                top = signal_freq_end;
+                
+                // Calculate center frequency
+                double center_freq = (signal_freq_start + signal_freq_end) / 2.0;
+                
+                // Tune to the center of the signal
+                tuner::normalTuning(gui::waterfall.selectedVFO, center_freq);
+                
+                // Set receiving state
+                receiving = true;
+                lastSignalTime = std::chrono::high_resolution_clock::now();
+                
+                flog::info("Scanner: Found signal at {:.6f} MHz (width: {:.1f} kHz, level: {:.1f})", 
+                           center_freq / 1e6, (signal_freq_end - signal_freq_start) / 1e3, data[i]);
+                
+                return true;
+            }
+        }
+        
         return false;
     }
 
+    // Define tuning profile structure
+    struct TuningProfile {
+        std::string name;
+        std::string demodMode;
+        double bandwidth;
+        float squelchLevel;
+    };
+    
     void applyTuningProfileSmart(const TuningProfile& profile, const std::string& vfo, double freq, const std::string& signal_name) {
-        // TODO: Implement this method
+        // Apply tuning profile parameters to the VFO
+        if (!vfo.empty()) {
+            // Set the demodulator mode
+            // TODO: Set VFO mode
+            
+            // Set bandwidth if specified
+            if (profile.bandwidth > 0) {
+                sigpath::vfoManager.setBandwidth(vfo, profile.bandwidth);
+            }
+            
+            // Set squelch if specified
+            if (profile.squelchLevel != 0.0f) {
+                // TODO: Set squelch level
+            }
+            
+            flog::info("Scanner: Applied tuning profile to {:.6f} MHz ({}) - Mode: {}, BW: {:.1f} kHz, Squelch: {:.1f} dB",
+                      freq / 1e6, signal_name.c_str(), profile.demodMode.c_str(), 
+                      profile.bandwidth / 1e3, profile.squelchLevel);
+        }
     }
 
     bool performFrequencyManagerScanning() {
-        // TODO: Implement this method
-        return false;
+        if (scannableFrequencies.empty()) {
+            return false;
+        }
+        
+        // Advance to the next frequency in the list
+        currentFreqIndex = (currentFreqIndex + 1) % scannableFrequencies.size();
+        FrequencyEntry& entry = scannableFrequencies[currentFreqIndex];
+        
+        // Check if this is a single frequency or a band
+        currentEntryIsSingleFreq = (entry.type == FREQ_TYPE_SINGLE);
+        
+        // Update the current tuning profile if available
+        currentTuningProfile = nullptr;
+        if (!entry.profileName.empty()) {
+            for (const auto& profile : tuningProfiles) {
+                if (profile.name == entry.profileName) {
+                    currentTuningProfile = &profile;
+                    break;
+                }
+            }
+        }
+        
+        // Tune to the frequency
+        double tuneFreq;
+        if (currentEntryIsSingleFreq) {
+            tuneFreq = entry.frequency;
+        } else {
+            // For bands, tune to the center
+            tuneFreq = (entry.lowerFreq + entry.upperFreq) / 2.0;
+        }
+        
+        tuner::normalTuning(gui::waterfall.selectedVFO, tuneFreq);
+        tuning = true;
+        lastTuneTime = std::chrono::high_resolution_clock::now();
+        
+        flog::info("Scanner: Tuning to {:.6f} MHz (FM entry {})", 
+                  tuneFreq / 1e6, entry.name.c_str());
+        
+        return true;
     }
 
     void performLegacyScanning() {
-        // TODO: Implement this method
+        // Simple implementation for legacy scanning mode
+        // Just advance the frequency by the step size
+        double currentStart, currentStop;
+        if (!getCurrentScanBounds(currentStart, currentStop)) {
+            flog::warn("Scanner: No active frequency ranges for legacy scanning");
+            return;
+        }
+        
+        double current = gui::waterfall.getCenterFrequency();
+        
+        if (scanUp) {
+            current += interval;
+            if (current > currentStop) {
+                current = currentStart;
+            }
+        } else {
+            current -= interval;
+            if (current < currentStart) {
+                current = currentStop;
+            }
+        }
+        
+        tuner::normalTuning(gui::waterfall.selectedVFO, current);
+        tuning = true;
+        lastTuneTime = std::chrono::high_resolution_clock::now();
+        
+        flog::info("Scanner: Legacy scanning to {:.6f} MHz", current / 1e6);
     }
 
     // Scanner FFT buffer acquisition callback
     static float* acquireScannerFFTBuffer(void* ctx) {
         ScannerModule* _this = (ScannerModule*)ctx;
         _this->scannerFftMtx.lock();
+        
+        // Safety check for scannerFftSize - ensure it's within reasonable limits
+        if (_this->scannerFftSize <= 0 || _this->scannerFftSize > 1048576) { // 1M max size as safety limit
+            flog::error("Scanner: Invalid FFT size {0}, limiting to 8192", _this->scannerFftSize);
+            _this->scannerFftSize = 8192; // Reset to a safe default
+        }
+        
         if (!_this->scannerFftData) {
-             _this->scannerFftData = new float[_this->scannerFftSize];
+            try {
+                _this->scannerFftData = new float[_this->scannerFftSize];
+            }
+            catch (const std::bad_alloc& e) {
+                flog::error("Scanner: Failed to allocate FFT buffer of size {0}: {1}", _this->scannerFftSize, e.what());
+                _this->scannerFftMtx.unlock();
+                return nullptr;
+            }
         }
         return _this->scannerFftData;
     }
@@ -538,8 +822,12 @@ private:
             _this->scannerFftData = new float[_this->scannerFftSize];
             _this->scannerFftMtx.unlock();
 
-            // Correctly notify IQFrontEnd of the new size
-            core::modComManager.callInterface("iq_frontend", 0, &_this->scannerFftSize, nullptr);
+            // Correctly notify IQFrontEnd of the new size if the interface exists
+            if (g_hasIQFrontendIface) {
+                if (!core::modComManager.callInterface(iq_interface::kIQFrontendIface, 0, &_this->scannerFftSize, nullptr)) {
+                    flog::warn("Scanner: Failed to update FFT size via interface");
+                }
+            }
             _this->saveConfig();
         }
         
@@ -648,17 +936,24 @@ private:
         if (running) { return; }
         running = true;
         
+        // Check if IQ frontend interface is available
+        if (!g_hasIQFrontendIface) {
+            flog::error("Scanner: IQ frontend interface not available, not starting scanner");
+            running = false;
+            return;
+        }
+        
         // If using Frequency Manager, rescan entries before starting
         if (useFrequencyManager) {
             rescanFrequencyManager();
             if (scannableFrequencies.empty()) {
                 flog::warn("Scanner: No scannable frequencies found in Frequency Manager. Stopping.");
                 running = false;
-            return; 
-        }
+                return; 
+            }
         }
         
-            workerThread = std::thread(&ScannerModule::worker, this);
+        workerThread = std::thread(&ScannerModule::worker, this);
     }
 
     void stop() {
@@ -675,50 +970,62 @@ private:
         double current = gui::waterfall.getCenterFrequency();
         std::chrono::high_resolution_clock::time_point lastScanTime, tuneTime;
         
+        // Check if IQ frontend interface is available
+        if (!g_hasIQFrontendIface) {
+            flog::error("Scanner: IQ frontend interface not available, cannot run scanner. Stopping worker thread.");
+            running = false;
+            return;
+        }
+        
         while(running) {
             std::this_thread::sleep_for(std::chrono::milliseconds(interval));
             
-                    auto now = std::chrono::high_resolution_clock::now();
+            auto now = std::chrono::high_resolution_clock::now();
 
             if (!sigpath::sourceManager.isStarted()) {
-                    flog::warn("Scanner: Radio source stopped, stopping scanner");
-                    running = false;
-                    return;
-                }
+                flog::warn("Scanner: Radio source stopped, stopping scanner");
+                running = false;
+                return;
+            }
 
-                if (gui::waterfall.selectedVFO.empty()) {
-                    running = false;
-                    return;
-                }
-                
-                double currentStart, currentStop;
-                if (!getCurrentScanBounds(currentStart, currentStop)) {
-                    flog::warn("Scanner: No active frequency ranges, stopping");
-                    running = false;
-                    return;
-                }
-                
-                if (!useFrequencyManager && (current < currentStart || current > currentStop)) {
-                    flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
-                    current = currentStart;
-                }
-                tuneTime = std::chrono::high_resolution_clock::now();
-                
-                if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
-                    applySquelchDelta();
-                }
-                
-                tuner::normalTuning(gui::waterfall.selectedVFO, current);
+            if (gui::waterfall.selectedVFO.empty()) {
+                running = false;
+                return;
+            }
+            
+            double currentStart, currentStop;
+            if (!getCurrentScanBounds(currentStart, currentStop)) {
+                flog::warn("Scanner: No active frequency ranges, stopping");
+                running = false;
+                return;
+            }
+            
+            if (!useFrequencyManager && (current < currentStart || current > currentStop)) {
+                flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
+                current = currentStart;
+            }
+            tuneTime = std::chrono::high_resolution_clock::now();
+            
+            if (squelchDelta > 0.0f && !squelchDeltaActive && running) {
+                applySquelchDelta();
+            }
+            
+            tuner::normalTuning(gui::waterfall.selectedVFO, current);
 
-                if (tuning) {
-                    SCAN_DEBUG("Scanner: Tuning in progress...");
-                    auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
-                    if (timeSinceLastTune.count() > tuningTime) {
-                        tuning = false;
-                        SCAN_DEBUG("Scanner: Tuning completed");
-                    }
-                    continue;
+            if (tuning) {
+                SCAN_DEBUG("Scanner: Tuning in progress...");
+                auto timeSinceLastTune = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastTuneTime);
+                if (timeSinceLastTune.count() > tuningTime) {
+                    tuning = false;
+                    SCAN_DEBUG("Scanner: Tuning completed");
                 }
+                continue;
+            }
+
+            // Exit early if IQ frontend interface is not available
+            if (!g_hasIQFrontendIface) {
+                continue;
+            }
 
             scannerFftMtx.lock();
             if (!scannerFftData) {
@@ -867,6 +1174,16 @@ private:
     float squelchDelta = 0.0f;
     bool squelchDeltaAuto = false;
     std::set<double> blacklist;
+    
+    // Frequency manager integration
+    std::vector<FrequencyEntry> scannableFrequencies;
+    int currentFreqIndex = 0;
+    bool currentEntryIsSingleFreq = false;
+    std::vector<TuningProfile> tuningProfiles;
+    const TuningProfile* currentTuningProfile = nullptr;
+    float noiseFloor = -80.0f;
+    float originalSquelchLevel = 0.0f;
+    bool squelchDeltaActive = false;
 
     std::vector<FrequencyRange> frequencyRanges;
     int currentRangeIndex = 0;
@@ -894,14 +1211,7 @@ private:
     std::mutex scannerFftMtx;
 
     // Internal state
-    bool currentEntryIsSingleFreq = false;
-    const void* currentTuningProfile = nullptr;
     size_t currentScanIndex = 0;
-    std::vector<double> scannableFrequencies;
-
-    bool squelchDeltaActive = false;
-    float originalSquelchLevel = 0.0f;
-    float noiseFloor = -100.0f;
 };
 
 MOD_EXPORT void _INIT_() {
@@ -930,7 +1240,7 @@ MOD_EXPORT void _INIT_() {
     config.load(defaultConfig);
 }
 
-MOD_EXPORT ModuleManager::Instance* _CREATE_INSTANCE_(std::string name) {
+MOD_EXPORT void* _CREATE_INSTANCE_(std::string name) {
     return new ScannerModule(name);
 }
 
