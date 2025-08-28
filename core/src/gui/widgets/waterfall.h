@@ -151,6 +151,9 @@ namespace ImGui {
         float* acquireLatestFFT(int& width);
         void releaseLatestFFT();
 
+        float* acquireRawFFT(int& width);
+        void releaseRawFFT();
+
         bool centerFreqMoved = false;
         bool vfoFreqChanged = false;
         bool bandplanEnabled = false;

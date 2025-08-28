@@ -23,6 +23,7 @@ struct DisabledScope {
 #include <utils/optionlist.h>
 #include "radio_interface.h"
 #include "demod.h"
+#include <gui/widgets/precision_slider.h>
 
 ConfigManager config;
 
@@ -252,13 +253,18 @@ private:
             if (ImGui::Checkbox(("Noise blanker (W.I.P.)##_radio_nb_ena_" + _this->name).c_str(), &_this->nbEnabled)) {
                 _this->setNBEnabled(_this->nbEnabled);
             }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reduces impulse noise and interference\n"
+                                 "Useful for suppressing power line noise, ignition noise\n"
+                                 "Higher values = more aggressive noise blanking");
+            }
             
             // Use RAII guard for NB controls
             {
                 DisabledScope nbGuard(!nb_enabled && module_enabled);
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-                if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
+                if (ImGui::PrecisionSliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.1f dB", ImGuiSliderFlags_AlwaysClamp, ImGui::PRECISION_SLIDER_MODE_HYBRID)) {
                     _this->setNBLevel(_this->nbLevel);
                 }
             }
@@ -269,13 +275,18 @@ private:
         if (ImGui::Checkbox(("Squelch##_radio_sqelch_ena_" + _this->name).c_str(), &_this->squelchEnabled)) {
             _this->setSquelchEnabled(_this->squelchEnabled);
         }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Mutes audio when signal is below threshold (dBFS)\n"
+                             "Prevents listening to noise when no signal is present\n"
+                             "Lower values = more sensitive, higher values = less sensitive");
+        }
         
         // Use RAII guard for squelch controls
         {
             DisabledScope squelchGuard(!squelch_enabled && module_enabled);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::SliderFloat(("##_radio_squelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
+            if (ImGui::PrecisionSliderFloat(("##_radio_squelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.1f dB", ImGuiSliderFlags_AlwaysClamp, ImGui::PRECISION_SLIDER_MODE_HYBRID)) {
                 _this->setUserSquelchLevel(_this->userSquelchLevel);
             }
         }
