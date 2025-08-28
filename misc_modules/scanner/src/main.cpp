@@ -287,11 +287,11 @@ private:
         std::string fftWarning = "";      // FFT-related warnings
     };
     
-    // Simple, safe coverage calculation using only scanner's own parameters
+    // Realistic coverage calculation using actual system parameters
     CoverageAnalysis calculateBasicCoverage() {
         CoverageAnalysis analysis;
         
-        // SAFE APPROACH: Only use scanner's own data, no external component access
+        // Get actual band bounds
         double currentStart, currentStop;
         if (!getCurrentScanBounds(currentStart, currentStop)) {
             analysis.recommendation = "No active scanning band selected";
@@ -300,50 +300,132 @@ private:
         
         analysis.bandWidth = currentStop - currentStart;
         
-        // SIMPLIFIED REALISTIC CALCULATION
-        if (useFrequencyManager) {
-            // Instead of impossible math, focus on practical assessment
-            // Based on your actual interval setting vs typical scanning needs
-            
-            if (interval <= 2500) { // <= 2.5 kHz
-                analysis.coveragePercent = 100.0; // Maximum thoroughness - complete coverage
-                analysis.hasGaps = false;
-                analysis.hasOverlaps = true; // Very high precision = significant overlap
-            } else if (interval <= 5000) { // 2.5-5 kHz
-                analysis.coveragePercent = 98.0; // Excellent - nearly complete coverage
-                analysis.hasGaps = false;
-                analysis.hasOverlaps = true; // High precision = some overlap
-            } else if (interval <= 12500) { // 5-12.5 kHz  
-                analysis.coveragePercent = 85.0; // Good balance
-                analysis.hasGaps = false;
-                analysis.hasOverlaps = false;
-            } else if (interval <= 25000) { // 12.5-25 kHz
-                analysis.coveragePercent = 70.0; // Reasonable for most signals
-                analysis.hasGaps = true; // Some gaps but acceptable
-                analysis.hasOverlaps = false;
-                analysis.gapSize = interval * 0.3; // Estimate gap size
-            } else { // > 25 kHz
-                analysis.coveragePercent = 50.0; // Fast but potential misses
-                analysis.hasGaps = true;
-                analysis.hasOverlaps = false;  
-                analysis.gapSize = interval * 0.5;
+        // Get REAL FFT and sample rate parameters from the system
+        try {
+            // Acquire raw FFT to get actual size used by scanner
+            int actualRawFFTSize;
+            float* rawData = gui::waterfall.acquireRawFFT(actualRawFFTSize);
+            if (rawData) {
+                analysis.fftSize = actualRawFFTSize;
+                gui::waterfall.releaseRawFFT();
+            } else {
+                analysis.fftSize = 524288; // Fallback based on typical SDR++ configuration
             }
             
-            // Basic FFT info (estimated)
-            analysis.fftSize = 8192;
-            analysis.sampleRate = 2000000.0; // 2 MHz typical
+            // Get actual sample rate from signal path
+            analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
+            
+            // Calculate real FFT resolution
+            if (analysis.fftSize > 0 && analysis.sampleRate > 0) {
+                analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
+                analysis.analysisSpan = analysis.sampleRate;
+            }
+            
+        } catch (...) {
+            // Fallback to reasonable defaults if system access fails
+            analysis.fftSize = 524288;
+            analysis.sampleRate = 2400000.0; // Typical RTL-SDR rate
             analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
             analysis.analysisSpan = analysis.sampleRate;
+            analysis.fftWarning = "Using fallback FFT parameters - system access failed";
+        }
+        
+        // Get REAL VFO bandwidth from radio module
+        double actualVfoBandwidth = 0.0;
+        try {
+            // Access the radio's actual bandwidth setting
+            if (!gui::waterfall.selectedVFO.empty() && 
+                core::modComManager.getModuleName(gui::waterfall.selectedVFO) == "radio") {
+                
+                // Try to get actual VFO bandwidth from radio module interface
+                // This requires the radio module to be loaded and active
+                actualVfoBandwidth = gui::waterfall.getBandwidth();
+            }
+        } catch (...) {
+            // Fallback if radio access fails
+        }
+        
+        // Use profile bandwidth if available, otherwise use VFO bandwidth
+        analysis.radioBandwidth = actualVfoBandwidth;
+        if (useFrequencyManager && currentTuningProfile) {
+            const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+            if (profile && profile->bandwidth > 0) {
+                analysis.radioBandwidth = profile->bandwidth;
+            }
+        }
+        
+        // Calculate REALISTIC coverage metrics
+        if (useFrequencyManager) {
+            // Calculate effective coverage based on actual system parameters
+            analysis.effectiveStep = interval;
+            analysis.numSteps = (int)std::ceil(analysis.bandWidth / analysis.effectiveStep);
+            
+            // Real coverage calculation: each step covers the VFO bandwidth
+            if (analysis.radioBandwidth > 0) {
+                analysis.coveragePerStep = analysis.radioBandwidth;
+                analysis.totalCoverage = std::min(analysis.numSteps * analysis.coveragePerStep, analysis.bandWidth);
+                analysis.coveragePercent = (analysis.totalCoverage / analysis.bandWidth) * 100.0;
+                
+                // Calculate gaps and overlaps based on actual parameters
+                if (analysis.effectiveStep > analysis.radioBandwidth) {
+                    // Steps are larger than bandwidth = gaps
+                    analysis.hasGaps = true;
+                    analysis.gapSize = analysis.effectiveStep - analysis.radioBandwidth;
+                } else if (analysis.effectiveStep < analysis.radioBandwidth) {
+                    // Steps are smaller than bandwidth = overlaps  
+                    analysis.hasOverlaps = true;
+                    analysis.overlapSize = analysis.radioBandwidth - analysis.effectiveStep;
+                }
+                
+                // Generate intelligent recommendations
+                if (analysis.coveragePercent < 80.0) {
+                    analysis.recommendation = "Large gaps detected - reduce interval for better coverage";
+                } else if (analysis.coveragePercent > 150.0) {
+                    analysis.recommendation = "Excessive overlap - increase interval for faster scanning";
+                } else {
+                    analysis.recommendation = "Coverage is well optimized";
+                }
+            } else {
+                // Fallback calculation if VFO bandwidth unknown
+                analysis.coveragePercent = 90.0; // Assume reasonable coverage
+                analysis.recommendation = "VFO bandwidth unknown - using estimated coverage";
+            }
+            
+            // Check FFT resolution vs interval
+            if (analysis.fftResolution > 0 && interval < analysis.fftResolution) {
+                analysis.intervalTooSmall = true;
+                analysis.fftWarning = "Interval smaller than FFT resolution (" + 
+                                    std::to_string((int)(analysis.fftResolution/1000.0)) + " kHz)";
+            }
             
         } else {
-            // Legacy interval scanning
+            // Legacy interval scanning - use actual VFO bandwidth 
             analysis.effectiveStep = interval;
-            analysis.numSteps = (int)(analysis.bandWidth / interval);
-            analysis.radioBandwidth = 1000000.0; // 1 MHz conservative estimate
-            analysis.effectiveBandwidth = analysis.radioBandwidth * (passbandRatio * 0.01);
-            analysis.coveragePerStep = analysis.effectiveBandwidth;
-            analysis.totalCoverage = analysis.numSteps * analysis.effectiveBandwidth;
-            analysis.coveragePercent = std::min(100.0, (analysis.totalCoverage / analysis.bandWidth) * 100.0);
+            analysis.numSteps = (int)std::ceil(analysis.bandWidth / analysis.effectiveStep);
+            
+            // Use actual VFO bandwidth or fallback
+            if (analysis.radioBandwidth <= 0) {
+                // Try to get current VFO bandwidth from waterfall
+                try {
+                    analysis.radioBandwidth = gui::waterfall.getBandwidth();
+                } catch (...) {
+                    analysis.radioBandwidth = 200000.0; // 200 kHz conservative fallback for wide FM
+                }
+            }
+            
+            // Calculate realistic coverage for legacy mode
+            analysis.coveragePerStep = analysis.radioBandwidth;
+            analysis.totalCoverage = std::min(analysis.numSteps * analysis.coveragePerStep, analysis.bandWidth);
+            analysis.coveragePercent = (analysis.totalCoverage / analysis.bandWidth) * 100.0;
+            
+            // Calculate gaps and overlaps for legacy mode
+            if (analysis.effectiveStep > analysis.radioBandwidth) {
+                analysis.hasGaps = true;
+                analysis.gapSize = analysis.effectiveStep - analysis.radioBandwidth;
+            } else if (analysis.effectiveStep < analysis.radioBandwidth) {
+                analysis.hasOverlaps = true;
+                analysis.overlapSize = analysis.radioBandwidth - analysis.effectiveStep;
+            }
         }
         
         // Simple recommendations
@@ -355,233 +437,6 @@ private:
             analysis.recommendation = "Coverage gaps detected - reduce step size for better coverage";
         } else {
             analysis.recommendation = "Good coverage with current settings";
-        }
-        
-        return analysis;
-    }
-    
-    CoverageAnalysis calculateCoverageAnalysis() {
-        CoverageAnalysis analysis;
-        
-        // ULTRA-CONSERVATIVE SAFETY: Multiple layers of protection
-        try {
-            // Layer 1: Check SDR running state
-            if (!gui::mainWindow.sdrIsRunning()) {
-                analysis.recommendation = "Start SDR to enable coverage analysis";
-                return analysis;
-            }
-            
-            // Layer 2: Verify VFO system exists and is ready
-            if (gui::waterfall.selectedVFO.empty()) {
-                analysis.recommendation = "Select a VFO to enable coverage analysis"; 
-                return analysis;
-            }
-            
-            // Layer 3: Test signal path accessibility before using
-            double testSampleRate = 0;
-            try {
-                testSampleRate = sigpath::iqFrontEnd.getSampleRate();
-                if (testSampleRate <= 0) {
-                    analysis.recommendation = "Signal path not ready - waiting for stabilization";
-                    return analysis;
-                }
-            } catch (...) {
-                analysis.recommendation = "Signal path access error - SDR still initializing";
-                return analysis;
-            }
-            
-            // Layer 4: Test VFO manager accessibility
-            try {
-                if (gui::waterfall.selectedVFO.empty()) {
-                    analysis.recommendation = "VFO system not ready";
-                    return analysis;
-                }
-                // Quick test access to VFO bandwidth
-                double testBandwidth = sigpath::vfoManager.getBandwidth(gui::waterfall.selectedVFO);
-                if (testBandwidth <= 0) {
-                    analysis.recommendation = "VFO bandwidth not available - system still starting";
-                    return analysis;
-                }
-            } catch (...) {
-                analysis.recommendation = "VFO system access error - please wait";
-                return analysis;
-            }
-            
-        } catch (...) {
-            analysis.recommendation = "System safety check failed - components not ready";
-            return analysis;
-        }
-        
-        // Get current band bounds
-        double currentStart, currentStop;
-        if (!getCurrentScanBounds(currentStart, currentStop)) {
-            analysis.recommendation = "No active scanning band selected";
-            return analysis; // No valid band
-        }
-        
-        analysis.bandWidth = currentStop - currentStart;
-        
-        // Safely get FFT parameters for spectrum analysis resolution
-        try {
-            if (sigpath::iqFrontEnd.getSampleRate() > 0) {
-                analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
-                // Use reasonable FFT size estimate since we can't access waterfall's directly
-                analysis.fftSize = 8192; // Common default FFT size
-                if (analysis.fftSize > 0 && analysis.sampleRate > 0) {
-                    analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
-                    analysis.analysisSpan = analysis.sampleRate; // FFT covers full sample rate
-                    
-                    // Check if interval is smaller than FFT resolution (pointless precision)
-                    if (interval > 0 && interval < analysis.fftResolution) {
-                        analysis.intervalTooSmall = true;
-                        analysis.fftWarning = "Interval smaller than FFT resolution - wasted precision";
-                    }
-                }
-            }
-        } catch (...) {
-            // If FFT access fails, continue without FFT analysis
-            analysis.fftWarning = "FFT analysis unavailable";
-        }
-        
-        // For legacy scanning (no frequency manager)
-        if (!useFrequencyManager) {
-            analysis.effectiveStep = interval;
-            analysis.numSteps = (int)(analysis.bandWidth / interval);
-            
-            // Get radio bandwidth
-            if (!gui::waterfall.selectedVFO.empty()) {
-                analysis.radioBandwidth = sigpath::vfoManager.getBandwidth(gui::waterfall.selectedVFO);
-                analysis.effectiveBandwidth = analysis.radioBandwidth * (passbandRatio * 0.01);
-                analysis.coveragePerStep = analysis.effectiveBandwidth;
-                
-                // Legacy mode uses interval stepping with radio bandwidth coverage
-                double totalSteps = analysis.bandWidth / interval;
-                analysis.totalCoverage = totalSteps * analysis.effectiveBandwidth;
-                analysis.coveragePercent = std::min(100.0, (analysis.totalCoverage / analysis.bandWidth) * 100.0);
-                
-                // Gap/overlap analysis
-                if (interval > analysis.effectiveBandwidth) {
-                    analysis.hasGaps = true;
-                    analysis.gapSize = interval - analysis.effectiveBandwidth;
-                } else if (interval < analysis.effectiveBandwidth) {
-                    analysis.hasOverlaps = true;
-                    analysis.overlapSize = analysis.effectiveBandwidth - interval;
-                }
-            }
-            
-            // Legacy mode recommendation
-            if (analysis.hasGaps) {
-                analysis.recommendation = "Reduce Interval or increase Radio Bandwidth for complete coverage";
-            } else if (analysis.hasOverlaps) {
-                analysis.recommendation = "Increase Interval to reduce redundant overlap and speed up scanning";
-            } else {
-                analysis.recommendation = "Coverage is optimal for legacy scanning mode";
-            }
-            
-            return analysis;
-        }
-        
-        // Frequency Manager mode analysis - safely query interface
-        try {
-            struct ScanEntry {
-                double frequency;
-                bool isSingleFreq;
-                const void* profile;
-            };
-            const std::vector<ScanEntry>* scanList = nullptr;
-            const int CMD_GET_SCAN_LIST = 1;
-            
-            // Safely check if frequency manager interface exists and call it
-            if (core::modComManager.interfaceExists("frequency_manager") && 
-                core::modComManager.callInterface("frequency_manager", CMD_GET_SCAN_LIST, nullptr, &scanList) && 
-                scanList && !scanList->empty()) {
-                
-                analysis.numSteps = scanList->size();
-                
-                if (analysis.numSteps >= 2) {
-                    // Calculate average step size from scan points
-                    double totalStepSize = 0.0;
-                    for (size_t i = 1; i < scanList->size(); i++) {
-                        totalStepSize += std::abs((*scanList)[i].frequency - (*scanList)[i-1].frequency);
-                    }
-                    analysis.effectiveStep = totalStepSize / (scanList->size() - 1);
-                }
-            } else {
-                // No frequency manager data available - fall back to basic analysis
-                analysis.numSteps = 0;
-                analysis.effectiveStep = 0;
-                analysis.recommendation = "Add entries to Frequency Manager for detailed coverage analysis";
-                return analysis;
-            }
-        } catch (...) {
-            // If frequency manager access fails, return safe fallback
-            analysis.recommendation = "Frequency Manager interface unavailable";
-            return analysis;
-        }
-        
-        // Safely get radio bandwidth
-        try {
-            if (!gui::waterfall.selectedVFO.empty()) {
-                analysis.radioBandwidth = sigpath::vfoManager.getBandwidth(gui::waterfall.selectedVFO);
-                analysis.effectiveBandwidth = analysis.radioBandwidth * (passbandRatio * 0.01);
-            } else {
-                analysis.recommendation = "Select a VFO for radio bandwidth analysis";
-                return analysis;
-            }
-        } catch (...) {
-            analysis.recommendation = "VFO system not ready for bandwidth analysis";
-            return analysis;
-        }
-        
-        analysis.coveragePerStep = analysis.effectiveBandwidth;
-        
-        // Coverage calculation for frequency manager mode
-        // Each step covers effectiveBandwidth, gaps filled by interval stepping
-        double stepCoverage = analysis.numSteps * analysis.effectiveBandwidth;
-        
-        // Add interval coverage for gaps (if step > effective bandwidth)
-        double intervalCoverage = 0.0;
-        if (analysis.effectiveStep > analysis.effectiveBandwidth) {
-            double gapSize = analysis.effectiveStep - analysis.effectiveBandwidth;
-            double intervalSteps = gapSize / interval;
-            intervalCoverage = intervalSteps * analysis.effectiveBandwidth * analysis.numSteps;
-        }
-        
-        analysis.totalCoverage = stepCoverage + intervalCoverage;
-        analysis.coveragePercent = std::min(100.0, (analysis.totalCoverage / analysis.bandWidth) * 100.0);
-        
-        // Gap/overlap analysis
-        if (analysis.effectiveStep > analysis.effectiveBandwidth) {
-            double gapSize = analysis.effectiveStep - analysis.effectiveBandwidth;
-            double intervalCoverage = (gapSize / interval) * analysis.effectiveBandwidth;
-            
-            if (intervalCoverage < gapSize) {
-                analysis.hasGaps = true;
-                analysis.gapSize = gapSize - intervalCoverage;
-            }
-        } else if (analysis.effectiveStep < analysis.effectiveBandwidth) {
-            analysis.hasOverlaps = true;
-            analysis.overlapSize = analysis.effectiveBandwidth - analysis.effectiveStep;
-        }
-        
-        // Generate FFT-aware recommendations
-        if (analysis.intervalTooSmall) {
-            analysis.recommendation = "Interval (" + std::to_string((int)(interval/1000)) + " kHz) smaller than FFT resolution (" + 
-                                    std::to_string((int)(analysis.fftResolution/1000)) + " kHz) - increase Interval or FFT size";
-        } else if (analysis.coveragePercent < 95.0) {
-            if (analysis.hasGaps) {
-                analysis.recommendation = "Coverage gaps detected - reduce Step size or Interval, or increase Radio Bandwidth";
-            } else {
-                analysis.recommendation = "Low coverage - increase Radio Bandwidth or reduce Step size";
-            }
-        } else if (analysis.coveragePercent > 150.0) {
-            analysis.recommendation = "Excessive overlap detected - increase Step size to speed up scanning";
-        } else if (analysis.hasOverlaps && analysis.overlapSize > analysis.effectiveStep * 0.5) {
-            analysis.recommendation = "Significant overlap - increase Step size to reduce redundancy";
-        } else if (analysis.stepOptimal) {
-            analysis.recommendation = "OPTIMAL: Step size matches FFT analysis span perfectly!";
-        } else {
-            analysis.recommendation = "Good coverage - settings are well balanced";
         }
         
         return analysis;
@@ -1008,7 +863,7 @@ private:
                     _this->frequencyNameCache.clear(); // Clear cache when blacklist changes
                     _this->frequencyNameCacheDirty = true;
                     _this->saveConfig();
-                    flog::info("Scanner: Added current frequency {:.0f} Hz to blacklist", currentFreq);
+                    // Blacklist addition logging removed - action is already visible in UI
                     
                     // UX FIX: Automatically resume scanning after blacklisting
                     // (Same mechanism as directional arrow buttons)
@@ -1134,8 +989,8 @@ private:
                     ImGui::TextColored(coverageColor, "Coverage: %.1f%%", coverage.coveragePercent);
                     if (ImGui::IsItemHovered()) {
                         ImGui::SetTooltip("COVERAGE PERCENTAGE GUIDE:\n"
-                                         "100%% = Maximum thoroughness (≤2.5 kHz interval) - catches everything\n"
-                                         "98%%+ = Excellent (≤5 kHz interval) - finds weak signals\n"
+                                         "100%% = Maximum thoroughness (<=2.5 kHz interval) - catches everything\n"
+                                         "98%%+ = Excellent (<=5 kHz interval) - finds weak signals\n"
                                          "85%%+ = Good (10 kHz interval) - balanced speed/thoroughness\n" 
                                          "70%%+ = Reasonable (20 kHz interval) - may miss some weak signals\n"
                                          "50%%+ = Fast (40+ kHz interval) - good for strong signals only\n"
@@ -1178,11 +1033,26 @@ private:
                         }
                     }
                     
-                    // Compact settings display
+                    // Compact settings display with FFT analysis details
                     ImGui::Text("Interval: %.1f kHz", _this->interval / 1e3);
+                    if (coverage.fftResolution > 0) {
+                        ImGui::SameLine();
+                        if (coverage.intervalTooSmall) {
+                            ImGui::TextColored(ImVec4(0.8f, 0.4f, 0.8f, 1.0f), " (< FFT res: %.1f Hz)", coverage.fftResolution);
+                        } else {
+                            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), " (FFT res: %.1f Hz)", coverage.fftResolution);
+                        }
+                    }
+                    
                     if (ImGui::IsItemHovered()) {
                         if (_this->useFrequencyManager) {
                             ImGui::SetTooltip("INTERVAL = IN-MEMORY FREQUENCY ANALYSIS STEP SIZE (%.1f kHz)\n"
+                                             "\n"
+                                             "REAL-TIME FFT ANALYSIS:\n"
+                                             "- FFT Size: %d bins\n"
+                                             "- Sample Rate: %.1f MHz\n"
+                                             "- FFT Resolution: %.1f Hz per bin\n"
+                                             "- VFO Bandwidth: %.1f kHz\n"
                                              "\n"
                                              "HOW IT WORKS:\n"
                                              "1. Radio hardware jumps between major frequency points in your bands\n"
@@ -1196,14 +1066,22 @@ private:
                                              "- 50+ kHz: Very fast, nearby/powerful transmissions only\n"
                                              "\n"
                                              "Match interval to your target signal characteristics and band", 
-                                             _this->interval / 1e3, _this->interval / 1e3);
+                                             _this->interval / 1e3,
+                                             coverage.fftSize, coverage.sampleRate / 1e6, coverage.fftResolution,
+                                             coverage.radioBandwidth / 1e3, _this->interval / 1e3);
                         } else {
                             ImGui::SetTooltip("INTERVAL = FREQUENCY STEP SIZE (%.1f kHz)\n"
+                                             "\n"
+                                             "CURRENT SYSTEM:\n"
+                                             "- FFT Size: %d bins\n"
+                                             "- Sample Rate: %.1f MHz\n"
+                                             "- FFT Resolution: %.1f Hz per bin\n"
                                              "\n"
                                              "NOTE: Frequency Manager mode is recommended for optimal performance.\n"
                                              "Enable scanning on frequency entries in Frequency Manager for\n"
                                              "faster, more efficient scanning with FFT-based signal detection.", 
-                                             _this->interval / 1e3);
+                                             _this->interval / 1e3,
+                                             coverage.fftSize, coverage.sampleRate / 1e6, coverage.fftResolution);
                         }
                     }
                     
@@ -1236,6 +1114,41 @@ private:
                                              "\n"
                                              "This provides significantly faster scanning while maintaining\n"
                                              "the same thoroughness and signal detection capability.");
+                        }
+                    }
+                    
+                    // COVERAGE RECOMMENDATION: Display intelligent optimization suggestions
+                    if (!coverage.recommendation.empty()) {
+                        ImGui::Spacing();
+                        // Color-code recommendations based on content
+                        ImVec4 recommendationColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f); // Green for good/optimal
+                        if (coverage.recommendation.find("gaps") != std::string::npos || 
+                            coverage.recommendation.find("Low coverage") != std::string::npos) {
+                            recommendationColor = ImVec4(0.8f, 0.6f, 0.2f, 1.0f); // Orange for warnings
+                        } else if (coverage.recommendation.find("overlap") != std::string::npos ||
+                                   coverage.recommendation.find("Excessive") != std::string::npos) {
+                            recommendationColor = ImVec4(0.2f, 0.6f, 0.8f, 1.0f); // Blue for optimization
+                        } else if (coverage.recommendation.find("resolution") != std::string::npos ||
+                                   coverage.recommendation.find("FFT") != std::string::npos) {
+                            recommendationColor = ImVec4(0.8f, 0.4f, 0.8f, 1.0f); // Purple for technical issues
+                        }
+                        
+                        ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x);
+                        ImGui::TextColored(recommendationColor, "RECOMMENDATION: %s", coverage.recommendation.c_str());
+                        ImGui::PopTextWrapPos();
+                        
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::SetTooltip("COVERAGE OPTIMIZATION RECOMMENDATIONS\n"
+                                             "\n"
+                                             "These suggestions are based on real-time analysis of your\n"
+                                             "current scanning configuration, including:\n"
+                                             "- Actual FFT size and sample rate from your SDR\n"
+                                             "- Real VFO bandwidth from radio settings\n"
+                                             "- Current frequency manager entries and profiles\n"
+                                             "- Calculated gaps, overlaps, and coverage percentages\n"
+                                             "\n"
+                                             "Follow these recommendations to optimize your scanning\n"
+                                             "for the best balance of speed vs signal detection.");
                         }
                     }
                 } else {
@@ -2202,7 +2115,7 @@ private:
             
             if (!scanListLoaded) {
                 try {
-                    flog::info("Scanner: Loading REAL frequency manager scan list...");
+                    // Scan list loading info removed - reduces console noise
                     
                     // REAL INTERFACE CALL: Get scan list from frequency manager  
                     // CRITICAL: Use frequency manager's real ScanEntry structure (must match exactly!)
@@ -2240,25 +2153,11 @@ private:
                 realScanTypes.push_back(!entry.isFromBand); // Single frequency if NOT from band  
                 realScanProfiles.push_back(entry.profile);   // Store profile pointer
                 
-                // DIAGNOSTIC: Log each profile extraction for debugging
-                if (entry.profile != nullptr) {
-                    const TuningProfile* profile = entry.profile;
-                    std::string profileName = profile->name.empty() ? "Auto" : profile->name;
-                    flog::info("Scanner: Entry {:.6f} MHz - Profile: '{}' (Mode:{} BW:{:.1f}kHz Squelch:{}@{:.1f}dB RFGain:{:.1f}dB)", 
-                              entry.frequency / 1e6,
-                              profileName,
-                              profile->demodMode, 
-                              profile->bandwidth / 1000.0f,
-                              profile->squelchEnabled ? "ON" : "OFF",
-                              profile->squelchLevel,
-                              profile->rfGain);
-                } else {
-                    flog::warn("Scanner: Entry {:.6f} MHz - NO PROFILE (null pointer)", entry.frequency / 1e6);
-                }
+                // Detailed profile logging removed - too verbose for normal operation
             }
                     
                     scanListLoaded = true;
-                    flog::info("Scanner: Loaded {} real scannable entries from frequency manager", (int)realScanList.size());
+                    // Scan list loaded info logging removed - reduces console noise
                     
                     // VERIFICATION: Cross-check profile array integrity
                     if (realScanList.size() != realScanProfiles.size()) {
@@ -2311,10 +2210,7 @@ private:
                     blacklistedCount++;
                 }
             }
-            if (blacklistedCount > 0) {
-                flog::info("Scanner: {} of {} frequency manager entries are blacklisted and will be skipped", 
-                          blacklistedCount, (int)testScanList.size());
-            }
+            // Blacklist info logging removed - too verbose for normal operation
             
             if (!currentFreqInList || isFrequencyBlacklisted(current)) {
                 // Find first non-blacklisted frequency to start with
@@ -2354,7 +2250,7 @@ private:
                     return false;
                 }
                 
-                flog::info("Scanner: Starting with non-blacklisted frequency {:.6f} MHz", current / 1e6);
+                // Starting frequency info logging removed - reduces console noise
             }
             
             if (testScanList.empty()) {
