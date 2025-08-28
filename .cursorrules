@@ -255,6 +255,26 @@ IS_MACOS_BUNDLE defined? (requires USE_BUNDLE_DEFAULTS=ON)
 └─ NO:  ~/.config/sdrpp/config.json (Linux-style path)
 ```
 
+## Release Management Process
+
+### ✅ ALWAYS DO: Automatic Release Management
+- When asked to craft a new release or update version numbers, AUTOMATICALLY perform ALL these steps:
+  1. Update version number in BOTH:
+     - `core/src/version.h` (VERSION_STR definition)
+     - `make_macos_bundle.sh` (bundle_create_plist parameter)
+  2. Update credits in BOTH:
+     - `core/src/gui/dialogs/credits.cpp` (welcome/about screen)
+     - `core/src/credits.cpp` (credits list)
+  3. Build and verify:
+     - `cd build && make -j8 sdrpp_core`
+     - `./make_macos_bundle.sh build ./SDR++_[ReleaseTag].app`
+     - Verify version appears correctly in app bundle
+
+### 📋 Adding Contributors:
+- Add special contributors to "Special Contributors" section in welcome screen
+- Include brief description of contribution (e.g., "PeiusMars (Parks-McClellan DSP)")
+- For general contributors, add to appropriate section in core/src/credits.cpp
+
 ## General Project Rules
 - Unit tests are sacred and shouldn't be changed unless specifically authorized
 - Prefer dynamic configuration over hardcoded variables
