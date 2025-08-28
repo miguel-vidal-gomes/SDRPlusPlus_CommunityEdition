@@ -94,6 +94,22 @@ bool ThemeManager::loadTheme(std::string path) {
 
         bool isValid = false;
 
+        // Check if it's a style parameter
+        if (param == "WindowRounding" || param == "ChildRounding" || param == "FrameRounding" || 
+            param == "GrabRounding" || param == "PopupRounding" || param == "ScrollbarRounding" || 
+            param == "TabRounding" || param == "WindowPaddingX" || param == "WindowPaddingY" ||
+            param == "FramePaddingX" || param == "FramePaddingY" || param == "ItemSpacingX" || 
+            param == "ItemSpacingY" || param == "WindowBorderSize" || param == "FrameBorderSize") {
+            // Style parameters should be valid numbers
+            try {
+                std::stof(val);
+                isValid = true;
+            } catch (const std::exception&) {
+                flog::error("Theme {0} contains invalid {1} field. Expected numeric value", path, param);
+                return false;
+            }
+        }
+
         // If param is a color, check that it's a valid RGBA hex value
         if (IMGUI_COL_IDS.find(param) != IMGUI_COL_IDS.end()) {
             if (val[0] != '#' || !std::all_of(val.begin() + 1, val.end(), ::isxdigit) || val.length() != 9) {
@@ -125,12 +141,28 @@ bool ThemeManager::applyTheme(std::string name) {
 
     auto& style = ImGui::GetStyle();
 
-    style.WindowRounding = 0.0f;
-    style.ChildRounding = 0.0f;
-    style.FrameRounding = 0.0f;
-    style.GrabRounding = 0.0f;
-    style.PopupRounding = 0.0f;
-    style.ScrollbarRounding = 0.0f;
+    // Set default modern style values (can be overridden by theme)
+    style.WindowRounding = 6.0f;
+    style.ChildRounding = 4.0f;
+    style.FrameRounding = 4.0f;
+    style.GrabRounding = 3.0f;
+    style.PopupRounding = 4.0f;
+    style.ScrollbarRounding = 9.0f;
+    style.TabRounding = 4.0f;
+    
+    // Modern padding and spacing
+    style.WindowPadding = ImVec2(12.0f, 12.0f);
+    style.FramePadding = ImVec2(8.0f, 4.0f);
+    style.ItemSpacing = ImVec2(8.0f, 6.0f);
+    style.ItemInnerSpacing = ImVec2(6.0f, 4.0f);
+    style.IndentSpacing = 22.0f;
+    
+    // Better borders and separators
+    style.WindowBorderSize = 1.0f;
+    style.ChildBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.FrameBorderSize = 0.0f;
+    style.TabBorderSize = 0.0f;
 
     ImVec4* colors = style.Colors;
     Theme thm = themes[name];
@@ -157,6 +189,23 @@ bool ThemeManager::applyTheme(std::string name) {
             fftHoldColor = ImVec4((float)ret[0] / 255.0f, (float)ret[1] / 255.0f, (float)ret[2] / 255.0f, (float)ret[3] / 255.0f);
             continue;
         }
+
+        // Handle style parameters
+        if (param == "WindowRounding") { style.WindowRounding = std::stof(val); continue; }
+        if (param == "ChildRounding") { style.ChildRounding = std::stof(val); continue; }
+        if (param == "FrameRounding") { style.FrameRounding = std::stof(val); continue; }
+        if (param == "GrabRounding") { style.GrabRounding = std::stof(val); continue; }
+        if (param == "PopupRounding") { style.PopupRounding = std::stof(val); continue; }
+        if (param == "ScrollbarRounding") { style.ScrollbarRounding = std::stof(val); continue; }
+        if (param == "TabRounding") { style.TabRounding = std::stof(val); continue; }
+        if (param == "WindowPaddingX") { style.WindowPadding.x = std::stof(val); continue; }
+        if (param == "WindowPaddingY") { style.WindowPadding.y = std::stof(val); continue; }
+        if (param == "FramePaddingX") { style.FramePadding.x = std::stof(val); continue; }
+        if (param == "FramePaddingY") { style.FramePadding.y = std::stof(val); continue; }
+        if (param == "ItemSpacingX") { style.ItemSpacing.x = std::stof(val); continue; }
+        if (param == "ItemSpacingY") { style.ItemSpacing.y = std::stof(val); continue; }
+        if (param == "WindowBorderSize") { style.WindowBorderSize = std::stof(val); continue; }
+        if (param == "FrameBorderSize") { style.FrameBorderSize = std::stof(val); continue; }
 
         // If param is a color, check that it's a valid RGBA hex value
         if (IMGUI_COL_IDS.find(param) != IMGUI_COL_IDS.end()) {
