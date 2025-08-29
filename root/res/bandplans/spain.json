@@ -1,0 +1,68 @@
+{
+  "name": "Spain",
+  "country_name": "Spain",
+  "country_code": "ES",
+  "author_name": "CNAF (Gobierno de España) – compiled",
+  "author_url": "https://avance.digital.gob.es/espectro/Paginas/cnaf.aspx",
+  "bands": [
+    { "name": "LW-Amateur", "type": "amateur", "start": 135700, "end": 137800 },
+    { "name": "LW-Broadcast", "type": "broadcast", "start": 148500, "end": 283500 },
+    { "name": "630m-Amateur", "type": "amateur", "start": 472000, "end": 479000 },
+    { "name": "MW-Broadcast", "type": "broadcast", "start": 526500, "end": 1606500 },
+    { "name": "160m-Amateur", "type": "amateur", "start": 1810000, "end": 2000000 },
+
+    { "name": "120m-Broadcast", "type": "broadcast", "start": 2300000, "end": 2495000 },
+    { "name": "90m-Broadcast", "type": "broadcast", "start": 3200000, "end": 3400000 },
+    { "name": "80m-Amateur", "type": "amateur", "start": 3500000, "end": 3800000 },
+    { "name": "75m-Broadcast", "type": "broadcast", "start": 3900000, "end": 4000000 },
+    { "name": "60m-Amateur", "type": "amateur", "start": 5351500, "end": 5366500 },
+
+    { "name": "49m-Broadcast", "type": "broadcast", "start": 5900000, "end": 6200000 },
+    { "name": "41m-Broadcast", "type": "broadcast", "start": 7200000, "end": 7450000 },
+    { "name": "40m-Amateur", "type": "amateur", "start": 7000000, "end": 7200000 },
+    { "name": "31m-Broadcast", "type": "broadcast", "start": 9400000, "end": 9900000 },
+    { "name": "30m-Amateur", "type": "amateur", "start": 10100000, "end": 10150000 },
+
+    { "name": "25m-Broadcast", "type": "broadcast", "start": 11600000, "end": 12100000 },
+    { "name": "22m-Broadcast", "type": "broadcast", "start": 13570000, "end": 13870000 },
+    { "name": "20m-Amateur", "type": "amateur", "start": 14000000, "end": 14350000 },
+    { "name": "19m-Broadcast", "type": "broadcast", "start": 15100000, "end": 15800000 },
+    { "name": "16m-Broadcast", "type": "broadcast", "start": 17480000, "end": 17900000 },
+    { "name": "17m-Amateur", "type": "amateur", "start": 18068000, "end": 18168000 },
+    { "name": "15m-Broadcast", "type": "broadcast", "start": 18900000, "end": 19020000 },
+    { "name": "15m-Amateur", "type": "amateur", "start": 21000000, "end": 21450000 },
+    { "name": "13m-Broadcast", "type": "broadcast", "start": 21450000, "end": 21850000 },
+    { "name": "12m-Amateur", "type": "amateur", "start": 24890000, "end": 24990000 },
+    { "name": "11m-Broadcast", "type": "broadcast", "start": 25670000, "end": 26100000 },
+    { "name": "CB", "type": "other", "start": 26965000, "end": 27405000 },
+
+    { "name": "10m-Amateur", "type": "amateur", "start": 28000000, "end": 29700000 },
+
+    { "name": "6m-Amateur", "type": "amateur", "start": 50000000, "end": 52000000 },
+    { "name": "4m-Amateur (secondary)", "type": "amateur", "start": 70150000, "end": 70250000 },
+
+    { "name": "FM-Broadcast", "type": "broadcast", "start": 87500000, "end": 108000000 },
+    { "name": "Air Band VOR/ILS", "type": "aviation", "start": 108000000, "end": 118000000 },
+    { "name": "Air Band Voice", "type": "aviation", "start": 118000000, "end": 136975000 },
+    { "name": "Earth orbiting Satellites", "type": "satellite", "start": 137000000, "end": 138000000 },
+
+    { "name": "2m-Amateur", "type": "amateur", "start": 144000000, "end": 146000000 },
+    { "name": "Marine VHF", "type": "marine", "start": 156000000, "end": 162025000 },
+    { "name": "DAB+ (digital broadcast)", "type": "broadcast", "start": 174000000, "end": 230000000 },
+    { "name": "Air Band Military", "type": "military", "start": 225000000, "end": 400000000 },
+
+    { "name": "TETRA Public Safety (uplink)", "type": "other", "start": 380000000, "end": 385000000 },
+    { "name": "TETRA Public Safety (downlink)", "type": "other", "start": 390000000, "end": 395000000 },
+
+    { "name": "70cm-Amateur", "type": "amateur", "start": 430000000, "end": 440000000 },
+    { "name": "PMR446", "type": "other", "start": 446006250, "end": 446196875 },
+
+    { "name": "DVB-T/T2 (TDT)", "type": "broadcast", "start": 470000000, "end": 694000000 },
+
+    { "name": "ISM / SRD (EU 863–870 MHz)", "type": "other", "start": 863000000, "end": 870000000 },
+
+    { "name": "23cm-Amateur (protect RNSS/Galileo)", "type": "amateur", "start": 1240000000, "end": 1300000000 },
+    { "name": "13cm-Amateur", "type": "amateur", "start": 2400000000, "end": 2450000000 },
+    { "name": "3cm-Amateur", "type": "amateur", "start": 10000000000, "end": 10500000000 }
+  ]
+}

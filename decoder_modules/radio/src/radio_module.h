@@ -1,8 +1,15 @@
 #pragma once
 #include <imgui.h>
 #include <module.h>
-#include <gui/gui.h>
 #include <gui/style.h>
+
+// RAII guard for style disabling to ensure proper pairing of begin/end calls
+struct DisabledScope {
+    bool active;
+    DisabledScope(bool on) : active(on) { if (active) style::beginDisabled(); }
+    ~DisabledScope() { if (active) style::endDisabled(); }
+};
+#include <gui/gui.h>
 #include <signal_path/signal_path.h>
 #include <config.h>
 #include <dsp/chain.h>
@@ -16,6 +23,7 @@
 #include <utils/optionlist.h>
 #include "radio_interface.h"
 #include "demod.h"
+#include <gui/widgets/precision_slider.h>
 
 ConfigManager config;
 
@@ -72,7 +80,7 @@ public:
 
         nb.init(NULL, 500.0 / 24000.0, 10.0);
         fmnr.init(NULL, 32);
-        squelch.init(NULL, MIN_SQUELCH);
+        squelch.init(NULL, effectiveSquelchLevel);
 
         ifChain.addBlock(&nb, false);
         ifChain.addBlock(&squelch, false);
@@ -166,8 +174,15 @@ public:
 private:
     static void menuHandler(void* ctx) {
         RadioModule* _this = (RadioModule*)ctx;
-
-        if (!_this->enabled) { style::beginDisabled(); }
+        
+        // Snapshot state at the beginning to ensure frame consistency
+        const bool module_enabled = _this->enabled;
+        const bool squelch_enabled = _this->squelchEnabled;
+        const bool nb_enabled = _this->nbEnabled;
+        const bool fmifnr_enabled = _this->FMIFNREnabled;
+        
+        // Use RAII guard for the module's enabled state
+        DisabledScope moduleGuard(!module_enabled);
 
         float menuWidth = ImGui::GetContentRegionAvail().x;
         ImGui::BeginGroup();
@@ -238,13 +253,21 @@ private:
             if (ImGui::Checkbox(("Noise blanker (W.I.P.)##_radio_nb_ena_" + _this->name).c_str(), &_this->nbEnabled)) {
                 _this->setNBEnabled(_this->nbEnabled);
             }
-            if (!_this->nbEnabled && _this->enabled) { style::beginDisabled(); }
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-            if (ImGui::SliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.3fdB")) {
-                _this->setNBLevel(_this->nbLevel);
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reduces impulse noise and interference\n"
+                                 "Useful for suppressing power line noise, ignition noise\n"
+                                 "Higher values = more aggressive noise blanking");
             }
-            if (!_this->nbEnabled && _this->enabled) { style::endDisabled(); }
+            
+            // Use RAII guard for NB controls
+            {
+                DisabledScope nbGuard(!nb_enabled && module_enabled);
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::PrecisionSliderFloat(("##_radio_nb_lvl_" + _this->name).c_str(), &_this->nbLevel, _this->MIN_NB, _this->MAX_NB, "%.1f dB", ImGuiSliderFlags_AlwaysClamp, ImGui::PRECISION_SLIDER_MODE_HYBRID)) {
+                    _this->setNBLevel(_this->nbLevel);
+                }
+            }
         }
         
 
@@ -252,34 +275,45 @@ private:
         if (ImGui::Checkbox(("Squelch##_radio_sqelch_ena_" + _this->name).c_str(), &_this->squelchEnabled)) {
             _this->setSquelchEnabled(_this->squelchEnabled);
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::beginDisabled(); }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-        if (ImGui::SliderFloat(("##_radio_sqelch_lvl_" + _this->name).c_str(), &_this->squelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.3fdB")) {
-            _this->setSquelchLevel(_this->squelchLevel);
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Mutes audio when signal is below threshold (dBFS)\n"
+                             "Prevents listening to noise when no signal is present\n"
+                             "Lower values = more sensitive, higher values = less sensitive");
         }
-        if (!_this->squelchEnabled && _this->enabled) { style::endDisabled(); }
+        
+        // Use RAII guard for squelch controls
+        {
+            DisabledScope squelchGuard(!squelch_enabled && module_enabled);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+            if (ImGui::PrecisionSliderFloat(("##_radio_squelch_lvl_" + _this->name).c_str(), &_this->userSquelchLevel, _this->MIN_SQUELCH, _this->MAX_SQUELCH, "%.1f dB", ImGuiSliderFlags_AlwaysClamp, ImGui::PRECISION_SLIDER_MODE_HYBRID)) {
+                _this->setUserSquelchLevel(_this->userSquelchLevel);
+            }
+        }
 
         // FM IF Noise Reduction
         if (_this->FMIFNRAllowed) {
             if (ImGui::Checkbox(("IF Noise Reduction##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->FMIFNREnabled)) {
                 _this->setFMIFNREnabled(_this->FMIFNREnabled);
             }
+            
             if (_this->selectedDemodID == RADIO_DEMOD_NFM) {
-                if (!_this->FMIFNREnabled && _this->enabled) { style::beginDisabled(); }
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
-                if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
-                    _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                // Use RAII guard for FMIFNR controls
+                {
+                    DisabledScope fmifnrGuard(!fmifnr_enabled && module_enabled);
+                    ImGui::SameLine();
+                    ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                    if (ImGui::Combo(("##_radio_fmifnr_ena_" + _this->name).c_str(), &_this->fmIFPresetId, _this->ifnrPresets.txt)) {
+                        _this->setIFNRPreset(_this->ifnrPresets[_this->fmIFPresetId]);
+                    }
                 }
-                if (!_this->FMIFNREnabled && _this->enabled) { style::endDisabled(); }
             }
         }
 
         // Demodulator specific menu
         _this->selectedDemod->showMenu();
-
-        if (!_this->enabled) { style::endDisabled(); }
+        
+        // No manual stack cleanup needed - RAII guards handle everything
     }
 
     demod::Demodulator* instantiateDemod(DemodID id) {
@@ -360,7 +394,8 @@ private:
         maxBandwidth = selectedDemod->getMaxBandwidth();
         bandwidthLocked = selectedDemod->getBandwidthLocked();
         snapInterval = selectedDemod->getDefaultSnapInterval();
-        squelchLevel = MIN_SQUELCH;
+        userSquelchLevel = MIN_SQUELCH;
+        effectiveSquelchLevel = userSquelchLevel;
         deempAllowed = selectedDemod->getDeempAllowed();
         deempId = deempModes.valueId((DeemphasisMode)selectedDemod->getDefaultDeemphasisMode());
         squelchEnabled = false;
@@ -381,7 +416,8 @@ private:
             snapInterval = config.conf[name][selectedDemod->getName()]["snapInterval"];
         }
         if (config.conf[name][selectedDemod->getName()].contains("squelchLevel")) {
-            squelchLevel = config.conf[name][selectedDemod->getName()]["squelchLevel"];
+            userSquelchLevel = config.conf[name][selectedDemod->getName()]["squelchLevel"];
+            effectiveSquelchLevel = userSquelchLevel;
         }
         if (config.conf[name][selectedDemod->getName()].contains("squelchEnabled")) {
             squelchEnabled = config.conf[name][selectedDemod->getName()]["squelchEnabled"];
@@ -434,7 +470,7 @@ private:
         setFMIFNREnabled(FMIFNRAllowed ? FMIFNREnabled : false);
 
         // Configure squelch
-        setSquelchLevel(squelchLevel);
+        setUserSquelchLevel(userSquelchLevel, false);
         setSquelchEnabled(squelchEnabled);
 
         // Configure AF chain
@@ -540,13 +576,44 @@ private:
         config.release(true);
     }
 
+    // Set user squelch level - persisted value from UI
+    void setUserSquelchLevel(float level, bool persist = true) {
+        float oldLevel = userSquelchLevel;
+        userSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
+        
+        // Update effective level and apply to DSP
+        updateEffectiveSquelch();
+        
+        // Only persist user-initiated changes if requested
+        if (persist) {
+            config.acquire();
+            config.conf[name][selectedDemod->getName()]["squelchLevel"] = userSquelchLevel;
+            config.release(true);
+        }
+    }
+    
+    // Set effective squelch level - runtime value with delta applied
+    void setEffectiveSquelchLevel(float level) {
+        // Remove mutex lock for now to prevent potential deadlock
+        effectiveSquelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
+        squelch.setLevel(effectiveSquelchLevel);
+    }
+    
+    // Update effective squelch based on current settings
+    void updateEffectiveSquelch() {
+        // Remove mutex lock for now to prevent potential deadlock
+        // Apply effective level to DSP path without persisting
+        setEffectiveSquelchLevel(userSquelchLevel);
+    }
+    
+    // Legacy method for backward compatibility
     void setSquelchLevel(float level) {
-        squelchLevel = std::clamp<float>(level, MIN_SQUELCH, MAX_SQUELCH);
-        squelch.setLevel(squelchLevel);
-
-        // Save config
+        // Keep user & effective in sync without re-persisting
+        setUserSquelchLevel(level, /*persist=*/false);
+        
+        // Persist directly here instead of in setUserSquelchLevel
         config.acquire();
-        config.conf[name][selectedDemod->getName()]["squelchLevel"] = squelchLevel;
+        config.conf[name][selectedDemod->getName()]["squelchLevel"] = userSquelchLevel;
         config.release(true);
     }
 
@@ -629,11 +696,16 @@ private:
         }
         else if (code == RADIO_IFACE_CMD_GET_SQUELCH_LEVEL && out) {
             float* _out = (float*)out;
-            *_out = _this->squelchLevel;
+            *_out = _this->userSquelchLevel;
+        }
+        else if (code == RADIO_IFACE_CMD_GET_EFFECTIVE_SQUELCH_LEVEL && out) {
+            float* _out = (float*)out;
+            *_out = _this->effectiveSquelchLevel;
         }
         else if (code == RADIO_IFACE_CMD_SET_SQUELCH_LEVEL && in && _this->enabled) {
             float* _in = (float*)in;
-            _this->setSquelchLevel(*_in);
+            // Debug logging removed for production
+            _this->setUserSquelchLevel(*_in);
         }
         else {
             return;
@@ -680,7 +752,8 @@ private:
     bool postProcEnabled;
 
     bool squelchEnabled = false;
-    float squelchLevel;
+    float userSquelchLevel = -50.0f;   // User-set squelch level (persisted)
+    float effectiveSquelchLevel = -50.0f; // Runtime squelch level with delta applied
 
     int deempId = 0;
     bool deempAllowed;

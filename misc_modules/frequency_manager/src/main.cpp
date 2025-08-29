@@ -545,6 +545,29 @@ private:
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
                 ImGui::LeftLabel("Step");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Frequency step size for band scanning (Hz)\n"
+                                     "Creates major scan points: Start -> Start+Step -> Start+2*Step -> End\n"
+                                     "\n"
+                                     "EFFICIENT TWO-TIER SCANNING:\n"
+                                     "1. HARDWARE TUNING: Radio tunes to each step (108.0, 109.0 MHz)\n"
+                                     "   Captures FFT spectrum data across radio bandwidth\n"
+                                     "2. FFT ANALYSIS: Uses Scanner Interval for digital analysis\n"
+                                     "   Checks 108.005, 108.010... in captured data (NO retuning!)\n"
+                                     "\n"
+                                     "WHY YOUR 1000kHz + 5kHz WORKS PERFECTLY:\n"
+                                     "- Step = Hardware tuning (slow, but only every 1000kHz)\n"
+                                     "- Scanner Interval = Digital FFT analysis (fast, every 5kHz)\n"
+                                     "- Result = Fast major hops + thorough spectral coverage\n"
+                                     "- Radio bandwidth limits effective interval range per step\n"
+                                     "\n"
+                                     "RECOMMENDED STEP SIZES:\n"
+                                     "- 100-1000 kHz: Optimal for wide band scanning with intervals\n"
+                                     "- 25-100 kHz: Balanced for mixed scanning types\n"
+                                     "- 5-25 kHz: Maximum precision, hardware-limited speed\n"
+                                     "\n"
+                                     "TIP: Larger steps work great with small intervals (FFT magic!)");
+                }
                 ImGui::TableSetColumnIndex(1);
                 ImGui::SetNextItemWidth(200);
                 ImGui::InputDouble(("##freq_manager_edit_step" + name).c_str(), &editedBookmark.stepFreq);
@@ -1115,10 +1138,10 @@ private:
                 ImGui::BeginTooltip();
                 ImGui::Text("Frequency Manager Controls:");
                 ImGui::Separator();
-                ImGui::Text("• Single-click: Select entry");
-                ImGui::Text("• Double-click: Edit entry");
-                ImGui::Text("• Ctrl+Double-click: Apply entry (tune to frequency)");
-                ImGui::Text("• Edit button: Edit selected entry");
+                ImGui::Text("- Single-click: Select entry");
+                ImGui::Text("- Double-click: Apply entry (tune to frequency)");
+                ImGui::Text("- Right-click: Edit entry");
+                ImGui::Text("- Edit button: Edit selected entry");
                 ImGui::EndTooltip();
             }
             for (auto& [name, bm] : _this->bookmarks) {
@@ -1178,32 +1201,33 @@ private:
                     }
                 }
                 
-                // ENHANCED UX: Double-click behavior with modifier key support
+                // ENHANCED UX: Double-click applies bookmark (tune to frequency)
                 if (ImGui::TableGetHoveredColumn() >= 0 && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    if (ImGui::GetIO().KeyCtrl) {
-                        // Ctrl+Double-click: Apply bookmark (tune to frequency)
+                    // Double-click: Apply bookmark (tune to frequency)
                     applyBookmark(bm, gui::waterfall.selectedVFO);
+                }
+                
+                // ENHANCED UX: Right-click opens edit dialog
+                if (ImGui::TableGetHoveredColumn() >= 0 && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+                    // Right-click: Edit bookmark (open edit dialog)
+                    _this->editOpen = true;
+                    _this->editedBookmark = bm;
+                    _this->editedBookmarkName = name;
+                    _this->firstEditedBookmarkName = name;
+                    
+                    // Load values into edit buffers
+                    strcpy(_this->editedNotes, _this->editedBookmark.notes.c_str());
+                    
+                    // Load profile name buffer
+                    if (_this->editedBookmark.hasProfile()) {
+                        strcpy(_this->editedProfileName, _this->editedBookmark.getProfile()->name.c_str());
                     } else {
-                        // Double-click: Edit bookmark (open edit dialog)
-                        _this->editOpen = true;
-                        _this->editedBookmark = bm;
-                        _this->editedBookmarkName = name;
-                        _this->firstEditedBookmarkName = name;
-                        
-                        // Load values into edit buffers
-                        strcpy(_this->editedNotes, _this->editedBookmark.notes.c_str());
-                        
-                        // Load profile name buffer
-                        if (_this->editedBookmark.hasProfile()) {
-                            strcpy(_this->editedProfileName, _this->editedBookmark.getProfile()->name.c_str());
-                        } else {
-                            strcpy(_this->editedProfileName, "");
-                        }
-                        
-                        // Ensure the bookmark is selected for editing
-                        for (auto& [_name, _bm] : _this->bookmarks) {
-                            _bm.selected = (_name == name);
-                        }
+                        strcpy(_this->editedProfileName, "");
+                    }
+                    
+                    // Ensure the bookmark is selected for editing
+                    for (auto& [_name, _bm] : _this->bookmarks) {
+                        _bm.selected = (_name == name);
                     }
                 }
 
