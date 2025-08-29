@@ -24,6 +24,8 @@ public:
 
     // TODO: Replace with it's own class
     void setVFO(double freq);
+    void setFFTMin(float min);
+    void setFFTMax(float max);
 
     void setPlayState(bool _playing);
     bool isPlaying();

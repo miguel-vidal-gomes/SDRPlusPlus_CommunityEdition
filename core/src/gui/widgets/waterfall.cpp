@@ -7,6 +7,8 @@
 #include <utils/flog.h>
 #include <gui/gui.h>
 #include <gui/style.h>
+#include <core.h>
+#include <imgui/stb_image.h>
 
 float DEFAULT_COLOR_MAP[][3] = {
     { 0x00, 0x00, 0x20 },
@@ -114,6 +116,20 @@ namespace ImGui {
     }
 
     void WaterFall::init() {
+        // Get the resource directory
+        std::string resDir = core::configManager.conf["resourcesDirectory"];
+
+        // Load the auto button icon using stb_image and get its dimensions. Buffer must be conserved while texture is valid.
+        int w, h, n;
+        texbuf = stbi_load((resDir + "/icons/auto_range.png").c_str(), &w, &h, &n, 0);
+
+        // Register the OpenGL texture
+        glGenTextures(1, &autoBtnTextureId);
+        glBindTexture(GL_TEXTURE_2D, autoBtnTextureId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, (uint8_t*)texbuf);
         glGenTextures(1, &textureId);
     }
 
@@ -203,6 +219,36 @@ namespace ImGui {
         window->DrawList->AddLine(ImVec2(fftAreaMin.x, fftAreaMin.y),
                                   ImVec2(fftAreaMin.x, fftAreaMax.y - 1),
                                   text, style::uiScale);
+
+        // Auto-range button
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX()+12);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY()+(fftAreaMax.y-fftAreaMin.y) + 17);
+        if(ImGui::ImageButton((ImTextureID)autoBtnTextureId, ImVec2(20, 20))) {
+            // Get the minimum and maximum amplitude
+            float min = INFINITY;
+            float max = -INFINITY;
+            for (int i = 0; i < dataWidth; i++) {
+                // Get a value
+                const float val = latestFFT[i];
+
+                // Check for extrema
+                if (val < min) { min = val; }
+                if (val > max) { max = val; }
+            }
+            flog::debug("{} -> {}", min, max);
+
+            // Snap to 10dB increments
+            min = floorf(min / 10.0f) * 10.0f;
+            max = ceilf(max / 10.0f) * 10.0f;
+
+            // Clamp within allowable slider limits
+            min = std::clamp<float>(min, -150, 0);
+            max = std::clamp<float>(max, -150, 0);
+
+            // Update min and max values
+            gui::mainWindow.setFFTMin(min);
+            gui::mainWindow.setFFTMax(max);
+        }
     }
 
     void WaterFall::drawWaterfall() {
