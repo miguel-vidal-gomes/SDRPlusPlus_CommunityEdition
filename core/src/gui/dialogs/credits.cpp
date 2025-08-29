@@ -44,7 +44,8 @@ namespace credits {
         ImGui::Spacing();
         
         ImGui::TextUnformatted("Special Contributors");
-        ImGui::BulletText("PeiusMars (Parks-McClellan DSP)");
+        ImGui::BulletText("PeiusMars (Parks-McClellan DSP and FFT Auto-Ranging)");
+        ImGui::BulletText("crackerjacques (Spiritbox Emulator)");
         ImGui::Spacing();
         
         ImGui::TextUnformatted("Key Features");

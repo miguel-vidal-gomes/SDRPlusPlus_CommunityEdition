@@ -90,7 +90,11 @@ struct TuningProfile {
         p.squelchLevel = j.value("squelchLevel", -50.0f);
         p.deemphasisMode = j.value("deemphasisMode", 0);
         p.agcEnabled = j.value("agcEnabled", true);
-        p.rfGain = j.value("rfGain", 20.0f);
+        
+        // MIGRATION FIX: Ensure rfGain is never 0 (fix old configs with 0 dB gain)
+        float gainValue = j.value("rfGain", 20.0f);
+        p.rfGain = (gainValue <= 0.0f) ? 20.0f : gainValue;
+        
         p.centerOffset = j.value("centerOffset", 0.0);
         p.autoApply = j.value("autoApply", true);
         p.name = j.value("name", "");
@@ -141,7 +145,13 @@ struct FrequencyBookmark {
     // Performance-optimized methods
     bool isValid() const {
         if (isBand) {
-            return startFreq < endFreq && stepFreq > 0;
+            double bandBandwidth = endFreq - startFreq;
+            double sdrBandwidth = sigpath::iqFrontEnd.getEffectiveSamplerate();
+            
+            return startFreq < endFreq && 
+                   stepFreq > 0 && 
+                   stepFreq <= bandBandwidth &&
+                   stepFreq <= sdrBandwidth;
         }
         return frequency > 0;
     }
@@ -546,8 +556,13 @@ private:
                 ImGui::TableSetColumnIndex(0);
                 ImGui::LeftLabel("Step");
                 if (ImGui::IsItemHovered()) {
+                    double bandwidth = editedBookmark.endFreq - editedBookmark.startFreq;
                     ImGui::SetTooltip("Frequency step size for band scanning (Hz)\n"
                                      "Creates major scan points: Start -> Start+Step -> Start+2*Step -> End\n"
+                                     "\n"
+                                     "CRITICAL REQUIREMENT:\n"
+                                     "Step frequency MUST be <= band width (%.1f kHz)\n"
+                                     "Otherwise scanner will skip the entire band!\n"
                                      "\n"
                                      "EFFICIENT TWO-TIER SCANNING:\n"
                                      "1. HARDWARE TUNING: Radio tunes to each step (108.0, 109.0 MHz)\n"
@@ -566,11 +581,50 @@ private:
                                      "- 25-100 kHz: Balanced for mixed scanning types\n"
                                      "- 5-25 kHz: Maximum precision, hardware-limited speed\n"
                                      "\n"
-                                     "TIP: Larger steps work great with small intervals (FFT magic!)");
+                                     "TIP: Larger steps work great with small intervals (FFT magic!)",
+                                     bandwidth / 1e3);
                 }
                 ImGui::TableSetColumnIndex(1);
                 ImGui::SetNextItemWidth(200);
                 ImGui::InputDouble(("##freq_manager_edit_step" + name).c_str(), &editedBookmark.stepFreq);
+                
+                // Show bandwidth constraints info with warnings
+                double bandBandwidth = editedBookmark.endFreq - editedBookmark.startFreq;
+                double sdrBandwidth = sigpath::iqFrontEnd.getEffectiveSamplerate();
+                double maxAllowedStep = std::min(bandBandwidth, sdrBandwidth);
+                
+                // Color-code based on step frequency validity
+                ImVec4 textColor;
+                if (editedBookmark.stepFreq > maxAllowedStep) {
+                    textColor = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); // Red - invalid
+                } else if (editedBookmark.stepFreq > maxAllowedStep * 0.8) {
+                    textColor = ImVec4(1.0f, 0.6f, 0.2f, 1.0f); // Orange - close to limit
+                } else {
+                    textColor = ImVec4(0.6f, 0.6f, 0.6f, 1.0f); // Gray - normal info
+                }
+                
+                ImGui::PushStyleColor(ImGuiCol_Text, textColor);
+                ImGui::Text("Max: %.1f MHz (Band: %.1f, SDR: %.1f)", 
+                          maxAllowedStep / 1e6, bandBandwidth / 1e6, sdrBandwidth / 1e6);
+                ImGui::PopStyleColor();
+                
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Step frequency is limited by:\n"
+                                     "- Band bandwidth: %.1f MHz\n"
+                                     "- SDR hardware bandwidth: %.1f MHz\n"
+                                     "\n"
+                                     "Maximum allowed step: %.1f MHz\n"
+                                     "Current step: %.1f MHz\n"
+                                     "\n"
+                                     "%s",
+                                     bandBandwidth / 1e6, sdrBandwidth / 1e6,
+                                     maxAllowedStep / 1e6, editedBookmark.stepFreq / 1e6,
+                                     editedBookmark.stepFreq > maxAllowedStep ? 
+                                     "WARNING: Step exceeds limits!" : 
+                                     "Step frequency is within valid range.");
+                }
+                
+
 
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);

@@ -4,6 +4,7 @@
 #include <gui/style.h>
 #include <signal_path/signal_path.h>
 #include <chrono>
+#include <thread>
 #include <algorithm>
 #include <fstream> // Added for file operations
 #include <core.h>
@@ -11,6 +12,7 @@
 #include <sstream>
 #include <cstring>  // For memcpy
 #include <set>      // For std::set in profile diagnostics
+#include <cstdint>  // For uintptr_t
 #include "scanner_log.h" // Custom logging macros
 #include <gui/widgets/precision_slider.h>
 
@@ -649,9 +651,10 @@ private:
         
         // DISCRETE SLIDER: Show actual values with units instead of indices
         if (ImGui::SliderInt("##passband_ratio_discrete", &_this->passbandIndex, 0, _this->PASSBAND_VALUES_COUNT - 1, _this->PASSBAND_FORMATS[_this->passbandIndex])) {
-            _this->syncDiscreteValues(); // Update actual passband ratio value
+            // Only update passband ratio - don't affect interval or scan rate!
+            _this->passbandRatio = _this->PASSBAND_VALUES[_this->passbandIndex] / 100.0; // Convert percentage to ratio
             _this->saveConfig();
-            SCAN_DEBUG("Scanner: Passband slider changed to index {} ({})", _this->passbandIndex, _this->PASSBAND_LABELS[_this->passbandIndex]);
+            SCAN_DEBUG("Scanner: Passband slider changed to index {} ({}%)", _this->passbandIndex, _this->PASSBAND_VALUES[_this->passbandIndex]);
         }
         ImGui::LeftLabel("Tuning Time (ms)");
         if (ImGui::IsItemHovered()) {
@@ -805,6 +808,60 @@ private:
         if (ImGui::Checkbox(("##scanner_squelch_delta_auto_" + _this->name).c_str(), &_this->squelchDeltaAuto)) {
             _this->saveConfig();
         }
+        
+        // MUTE WHILE SCANNING: Prevent noise bursts during frequency sweeps
+        ImGui::LeftLabel("Mute Scanning");
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically mute audio while scanning frequencies\n"
+                             "Prevents noise bursts and audio artifacts during sweeps\n"
+                             "Audio is restored when a signal is detected and locked");
+        }
+        if (ImGui::Checkbox(("##scanner_mute_scanning_" + _this->name).c_str(), &_this->muteWhileScanning)) {
+            _this->saveConfig();
+        }
+
+        // Enhanced mute sub-settings (only show if mute while scanning is enabled)
+        if (_this->muteWhileScanning) {
+            ImGui::Indent();
+            
+            // Aggressive mute checkbox
+            ImGui::LeftLabel("Aggressive Mute");
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Enhanced noise protection during frequency/demod changes\n"
+                                 "Applies extra muting during critical operations\n"
+                                 "Disable for minimal scanning interference");
+            }
+            if (ImGui::Checkbox(("##scanner_aggressive_mute_" + _this->name).c_str(), &_this->aggressiveMute)) {
+                _this->saveConfig();
+            }
+            
+            // Aggressive mute level slider (only show if aggressive mute is enabled)
+            if (_this->aggressiveMute) {
+                ImGui::LeftLabel("Mute Level (dB)");
+                if (ImGui::IsItemHovered()) {
+                    ImGui::SetTooltip("Emergency mute squelch level during operations\n"
+                                     "Higher values (closer to 0) = more aggressive muting\n"
+                                     "Range: -10.0 dB to 0.0 dB");
+                }
+                ImGui::SetNextItemWidth(menuWidth - ImGui::GetCursorPosX());
+                if (ImGui::SliderFloat(("##scanner_aggressive_level_" + _this->name).c_str(), &_this->aggressiveMuteLevel, -10.0f, 0.0f, "%.1f dB")) {
+                    _this->saveConfig();
+                }
+            }
+            
+            ImGui::Unindent();
+        }
+
+        // Signal analysis display
+        ImGui::LeftLabel("Show Signal Info");
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically display signal strength and SNR when a signal is detected\n"
+                             "Shows the same information as Ctrl+click on VFO in waterfall\n"
+                             "Useful for analyzing signal quality during scanning");
+        }
+        if (ImGui::Checkbox(("##scanner_show_signal_info_" + _this->name).c_str(), &_this->showSignalInfo)) {
+            _this->saveConfig();
+        }
 
         // Blacklist controls
         ImGui::Separator();
@@ -824,6 +881,14 @@ private:
                 _this->frequencyNameCacheDirty = true;
                 newBlacklistFreq = 0.0;
                 _this->saveConfig();
+                
+                // UX FIX: Automatically resume scanning after blacklisting (same as "Blacklist Current")
+                {
+                    std::lock_guard<std::mutex> lck(_this->scanMtx);
+                    _this->receiving = false;
+                }
+                _this->applyMuteWhileScanning(); // Mute while resuming scanning
+                SCAN_DEBUG("Scanner: Auto-resuming scanning after adding frequency to blacklist");
             }
         }
         
@@ -871,6 +936,7 @@ private:
                         std::lock_guard<std::mutex> lck(_this->scanMtx);
                         _this->receiving = false;
                     }
+                    _this->applyMuteWhileScanning(); // Mute while resuming scanning
                     SCAN_DEBUG("Scanner: Auto-resuming scanning after blacklisting frequency");
                     
                 } else {
@@ -1185,6 +1251,7 @@ private:
             _this->receiving = false;
             _this->scanUp = false;
             _this->configNeedsSave = true;
+            _this->applyMuteWhileScanning(); // Mute while resuming scanning
         }
         if (leftSelected) {
             ImGui::PopStyleColor(); // Safe: matches the PushStyleColor above
@@ -1203,6 +1270,7 @@ private:
             _this->receiving = false;
             _this->scanUp = true;
             _this->configNeedsSave = true;
+            _this->applyMuteWhileScanning(); // Mute while resuming scanning
         }
         if (rightSelected) {
             ImGui::PopStyleColor(); // Safe: matches the PushStyleColor above
@@ -1259,6 +1327,9 @@ private:
             _this->configNeedsSave = false;
             _this->saveConfig(); // Save in background, doesn't block UI
         }
+        
+        // Draw signal analysis tooltip near VFO if enabled and signal detected
+        _this->drawSignalTooltip();
     }
 
     void start() {
@@ -1284,6 +1355,9 @@ private:
         tuning = false;
         receiving = false;
         currentEntryIsSingleFreq = false; // Default to band-style detection
+        
+        // MUTE WHILE SCANNING: Apply mute when scanner starts
+        applyMuteWhileScanning();
         
         flog::info("Scanner: Starting scanner from {:.3f} MHz", current / 1e6);
         
@@ -1319,6 +1393,17 @@ private:
             restoreSquelchLevel();
         }
         
+        // SIGNAL ANALYSIS: Clear signal info when scanner stops
+        if (showSignalInfo) {
+            lastSignalStrength = -100.0f;
+            lastSignalSNR = 0.0f;
+            lastSignalFrequency = 0.0;
+            showSignalTooltip = false;  // Hide tooltip
+        }
+        
+        // MUTE WHILE SCANNING: Restore squelch when scanner stops
+        restoreMuteWhileScanning();
+        
         if (workerThread.joinable()) {
             workerThread.join();
         }
@@ -1331,10 +1416,21 @@ private:
         tuning = false;
         reverseLock = false;
         
+        // SIGNAL ANALYSIS: Clear signal info on reset
+        if (showSignalInfo) {
+            lastSignalStrength = -100.0f;
+            lastSignalSNR = 0.0f;
+            lastSignalFrequency = 0.0;
+            showSignalTooltip = false;  // Hide tooltip
+        }
+        
         // Reset squelch delta state
         if (squelchDeltaActive) {
             restoreSquelchLevel();
         }
+        
+        // MUTE WHILE SCANNING: Restore squelch when scanner is reset
+        restoreMuteWhileScanning();
         
         flog::warn("Scanner: Reset to start frequency {:.0f} Hz", startFreq);
     }
@@ -1359,6 +1455,11 @@ private:
         // Save squelch delta settings
         config.conf["squelchDelta"] = squelchDelta;
         config.conf["squelchDeltaAuto"] = squelchDeltaAuto;
+        config.conf["muteWhileScanning"] = muteWhileScanning;
+        config.conf["aggressiveMute"] = aggressiveMute;
+        config.conf["aggressiveMuteLevel"] = aggressiveMuteLevel;
+        config.conf["showSignalInfo"] = showSignalInfo;
+        config.conf["showSignalTooltip"] = showSignalTooltip;
         config.conf["unlockHighSpeed"] = unlockHighSpeed;
         config.conf["tuningTimeAuto"] = tuningTimeAuto;
         
@@ -1387,7 +1488,7 @@ private:
         config.acquire();
         startFreq = config.conf.value("startFreq", 88000000.0);
         stopFreq = config.conf.value("stopFreq", 108000000.0);
-        interval = std::clamp(config.conf.value("interval", 100000.0), 5000.0, 200000.0);  // Guardrails: 5 kHz - 200 kHz
+        interval = std::clamp(config.conf.value("interval", 100000.0), 1000.0, 500000.0);  // Guardrails: 1 kHz - 500 kHz (matches UI)
         passbandRatio = config.conf.value("passbandRatio", 100.0);
         tuningTime = config.conf.value("tuningTime", 250);
         lingerTime = config.conf.value("lingerTime", 1000.0);
@@ -1401,12 +1502,18 @@ private:
         // Load squelch delta settings
         squelchDelta = config.conf.value("squelchDelta", 2.5f);
         squelchDeltaAuto = config.conf.value("squelchDeltaAuto", false);
+        muteWhileScanning = config.conf.value("muteWhileScanning", true);
+        aggressiveMute = config.conf.value("aggressiveMute", true);
+        aggressiveMuteLevel = config.conf.value("aggressiveMuteLevel", -3.0f);
+        showSignalInfo = config.conf.value("showSignalInfo", false);
+        showSignalTooltip = config.conf.value("showSignalTooltip", false);
         unlockHighSpeed = config.conf.value("unlockHighSpeed", false);
         tuningTimeAuto = config.conf.value("tuningTimeAuto", false);
         
         // Initialize time points
         lastNoiseUpdate = std::chrono::high_resolution_clock::now();
         tuneTime = std::chrono::high_resolution_clock::now();
+        lastSignalAnalysisTime = std::chrono::high_resolution_clock::now();
         
         // Load frequency ranges if they exist (BEFORE releasing config!)
         if (config.conf.contains("frequencyRanges") && config.conf["frequencyRanges"].is_array()) {
@@ -1453,8 +1560,8 @@ private:
             }
         }
         
-        // Initialize discrete parameter indices to match loaded values
-        initializeDiscreteIndices();
+        // Initialize passband index to match loaded ratio value
+        initializePassbandIndex();
     }
 
     void worker() {
@@ -1555,6 +1662,8 @@ private:
                 }
                 
 
+                // ENHANCED MUTE: Ensure silence during frequency changes
+                ensureMuteDuringOperation();
                 tuner::normalTuning(gui::waterfall.selectedVFO, current);
 
                 // Check if we are waiting for a tune
@@ -1682,6 +1791,17 @@ private:
                             
                             receiving = false;
                             SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
+                            
+                            // SIGNAL ANALYSIS: Clear signal info when signal is lost
+                            if (showSignalInfo) {
+                                lastSignalStrength = -100.0f;
+                                lastSignalSNR = 0.0f;
+                                lastSignalFrequency = 0.0;
+                                showSignalTooltip = false;  // Hide tooltip
+                            }
+                            
+                            // MUTE WHILE SCANNING: Apply mute when resuming scanning after signal loss
+                            applyMuteWhileScanning();
                         }
                     }
                 }
@@ -1709,10 +1829,35 @@ private:
                             lastSignalTime = now;
                             flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
                             
+                            // SIGNAL ANALYSIS: Calculate and store signal info for display
+                            if (showSignalInfo) {
+                                flog::info("Scanner: DEBUG - Attempting signal analysis for single frequency");
+                                float strength, snr;
+                                if (calculateCurrentSignalInfo(strength, snr)) {
+                                    lastSignalStrength = strength;
+                                    lastSignalSNR = snr;
+                                    lastSignalFrequency = current;
+                                    showSignalTooltip = true;  // Show tooltip near VFO
+                                    lastSignalAnalysisTime = std::chrono::high_resolution_clock::now(); // Start 50ms update timer
+                                    flog::info("Scanner: Signal analysis SUCCESS - Strength: {:.1f} dBFS, SNR: {:.1f} dB", strength, snr);
+                                } else {
+                                    flog::warn("Scanner: Signal analysis FAILED - clearing data");
+                                    // Clear previous data if analysis fails
+                                    lastSignalStrength = -100.0f;
+                                    lastSignalSNR = 0.0f;
+                                    lastSignalFrequency = 0.0;
+                                    showSignalTooltip = false;
+                                }
+                            }
+                            
+                            // MUTE WHILE SCANNING: Restore audio when signal is found
+                            restoreMuteWhileScanning();
+                            
                             // TUNING PROFILE APPLICATION: Apply profile when signal found (CRITICAL FIX)
                             if (applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
                                 const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
                                 if (profile) {
+                                    // Apply profile directly - no emergency mute needed since signal is found
                                     applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "SIGNAL");
                                 }
                             } else {
@@ -1895,10 +2040,35 @@ private:
                 receiving = true;
                 current = peakFreq;
                 
+                // SIGNAL ANALYSIS: Calculate and store signal info for display
+                if (showSignalInfo) {
+                    flog::info("Scanner: DEBUG - Attempting signal analysis for band scanning");
+                    float strength, snr;
+                    if (calculateCurrentSignalInfo(strength, snr)) {
+                        lastSignalStrength = strength;
+                        lastSignalSNR = snr;
+                        lastSignalFrequency = current;
+                        showSignalTooltip = true;  // Show tooltip near VFO
+                        lastSignalAnalysisTime = std::chrono::high_resolution_clock::now(); // Start 50ms update timer
+                        flog::info("Scanner: Band signal analysis SUCCESS - Strength: {:.1f} dBFS, SNR: {:.1f} dB", strength, snr);
+                    } else {
+                        flog::warn("Scanner: Band signal analysis FAILED - clearing data");
+                        // Clear previous data if analysis fails
+                        lastSignalStrength = -100.0f;
+                        lastSignalSNR = 0.0f;
+                        lastSignalFrequency = 0.0;
+                        showSignalTooltip = false;
+                    }
+                }
+                
+                // MUTE WHILE SCANNING: Restore audio when signal is found in band scanning
+                restoreMuteWhileScanning();
+                
                 // TUNING PROFILE APPLICATION: Apply profile when signal found (CRITICAL FIX)
                 if (useFrequencyManager && applyProfiles && currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
                     const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
                     if (profile) {
+                        // Apply profile directly - no emergency mute needed since signal is found
                         applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, freq, "BAND-SIGNAL");
                     }
                 } else {
@@ -1913,50 +2083,25 @@ private:
         return found;
     }
 
-    // DISCRETE PARAMETER HELPERS: Sync indices with actual values
-    void initializeDiscreteIndices() {
-        SCAN_DEBUG("Scanner: initializeDiscreteIndices() called - BEFORE: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
-        // Find closest interval index
-        intervalIndex = 4; // Default to 100 kHz
-        double minDiff = std::abs(interval - INTERVAL_VALUES_HZ[intervalIndex]);
-        for (int i = 0; i < INTERVAL_VALUES_COUNT; i++) {
-            double diff = std::abs(interval - INTERVAL_VALUES_HZ[i]);
-            if (diff < minDiff) {
-                intervalIndex = i;
-                minDiff = diff;
-            }
-        }
+    // PASSBAND RATIO HELPER: Sync passband index with actual ratio value
+    void initializePassbandIndex() {
+        SCAN_DEBUG("Scanner: initializePassbandIndex() called - BEFORE: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
         
-        // Find closest scan rate index
-        scanRateIndex = 3; // Default to 10/sec
-        int minScanDiff = std::abs(scanRateHz - SCAN_RATE_VALUES[scanRateIndex]);
-        for (int i = 0; i < SCAN_RATE_VALUES_COUNT; i++) {
-            int diff = std::abs(scanRateHz - SCAN_RATE_VALUES[i]);
-            if (diff < minScanDiff) {
-                scanRateIndex = i;
-                minScanDiff = diff;
-            }
-        }
-        
-        // Find closest passband index
+        // Find closest passband index (only parameter that still uses discrete values)
         passbandIndex = 6; // Default to 100% (recommended starting point)
-        double minPassbandDiff = std::abs(passbandRatio - PASSBAND_VALUES[passbandIndex]);
+        double minPassbandDiff = std::abs(passbandRatio - (PASSBAND_VALUES[passbandIndex] / 100.0));
         for (int i = 0; i < PASSBAND_VALUES_COUNT; i++) {
-            double diff = std::abs(passbandRatio - PASSBAND_VALUES[i]);
+            double diff = std::abs(passbandRatio - (PASSBAND_VALUES[i] / 100.0));
             if (diff < minPassbandDiff) {
                 passbandIndex = i;
                 minPassbandDiff = diff;
             }
         }
-        SCAN_DEBUG("Scanner: initializeDiscreteIndices() completed - AFTER: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
+        SCAN_DEBUG("Scanner: initializePassbandIndex() completed - AFTER: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
     }
     
-    void syncDiscreteValues() {
-        interval = INTERVAL_VALUES_HZ[intervalIndex];
-        scanRateHz = SCAN_RATE_VALUES[scanRateIndex];
-        passbandRatio = PASSBAND_VALUES[passbandIndex];
-        SCAN_DEBUG("Scanner: syncDiscreteValues - passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
-    }
+    // REMOVED: syncDiscreteValues() - interval and scan rate now use direct input controls
+    // Only passband ratio needs discrete values for the percentage slider
     
     // BLACKLIST: Helper function for consistent blacklist checking
     bool isFrequencyBlacklisted(double frequency) const {
@@ -2029,9 +2174,53 @@ private:
                       context, profile.name.empty() ? "Auto" : profile.name, 
                       frequency / 1e6, profile.demodMode, profile.bandwidth / 1000.0f,
                       profile.squelchEnabled ? "ON" : "OFF", profile.squelchLevel);
+        } else {
+            // CORRUPTION RECOVERY: If profile application fails, invalidate cache to prevent reuse
+            flog::warn("{}: Profile application failed for {:.6f} MHz - clearing cache", context, frequency / 1e6);
+            lastAppliedProfile = nullptr;
+            currentTuningProfile = nullptr; // Clear corrupted pointer
         }
         
         return success;
+    }
+    
+    // Force refresh of frequency manager scan list (fixes profile pointer corruption)
+    bool refreshScanList() {
+        try {
+            flog::warn("Scanner: Detected corrupted profile data, refreshing scan list from frequency manager");
+            
+            // Clear any cached profile pointers to prevent further corruption
+            currentTuningProfile = nullptr;
+            
+            // Get fresh scan list from frequency manager
+            struct ScanEntry {
+                double frequency;
+                const TuningProfile* profile;
+                const FrequencyBookmark* bookmark;
+                bool isFromBand;
+            };
+            const std::vector<ScanEntry>* scanList = nullptr;
+            const int CMD_GET_SCAN_LIST = 1;
+            
+            if (!core::modComManager.callInterface("frequency_manager", CMD_GET_SCAN_LIST, nullptr, &scanList)) {
+                flog::error("Scanner: Failed to get fresh scan list from frequency manager");
+                return false;
+            }
+            
+            if (!scanList || scanList->empty()) {
+                flog::warn("Scanner: Frequency manager returned empty scan list");
+                return false;
+            }
+            
+            flog::info("Scanner: Successfully refreshed scan list ({} entries)", (int)scanList->size());
+            
+            // Note: Profile pointers will be refreshed when worker thread processes next frequency
+            return true;
+            
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Error refreshing scan list: {}", e.what());
+            return false;
+        }
     }
     
     // PERFORMANCE-CRITICAL: Fast tuning profile application (< 10ms target)
@@ -2042,6 +2231,19 @@ private:
                 return false;
             }
             
+            // CRITICAL VALIDATION: Check for corrupted profile data
+            if (profile.demodMode < 0 || profile.demodMode > 7) {
+                flog::error("Scanner: Invalid demodulator mode {} in profile - triggering scan list refresh", profile.demodMode);
+                refreshScanList(); // Attempt to fix corruption
+                return false;
+            }
+            
+            if (profile.bandwidth <= 0 || profile.bandwidth > 10000000.0f) {
+                flog::error("Scanner: Invalid bandwidth {:.1f} Hz in profile - triggering scan list refresh", profile.bandwidth);
+                refreshScanList(); // Attempt to fix corruption  
+                return false;
+            }
+            
             // Core demodulation settings (fast direct calls)
             int mode = profile.demodMode;
             float bandwidth = profile.bandwidth;
@@ -2049,20 +2251,28 @@ private:
             core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_BANDWIDTH, &bandwidth, NULL);
             
             // SQUELCH CONTROL: Use existing radio interface (available!)
-            if (profile.squelchEnabled) {
-                bool squelchEnabled = profile.squelchEnabled;
-                float squelchLevel = profile.squelchLevel;
-                core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchEnabled, NULL);
-                core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, &squelchLevel, NULL);
+            // CRITICAL: Don't apply profile squelch if mute while scanning is active
+            if (!muteScanningActive) {
+                if (profile.squelchEnabled) {
+                    bool squelchEnabled = profile.squelchEnabled;
+                    float squelchLevel = profile.squelchLevel;
+                    core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchEnabled, NULL);
+                    core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, &squelchLevel, NULL);
+                } else {
+                    bool squelchDisabled = false;
+                    core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchDisabled, NULL);
+                }
             } else {
-                bool squelchDisabled = false;
-                core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchDisabled, NULL);
+                SCAN_DEBUG("Scanner: Skipping profile squelch application - mute while scanning is active");
             }
-            
-            // RF GAIN CONTROL: Use universal gain API from source manager
-            if (profile.rfGain > 0.0f) {
-                sigpath::sourceManager.setGain(profile.rfGain);
-            }
+        
+        // RF GAIN CONTROL: Use universal gain API from source manager
+        // Apply gain regardless of value (0 dB and negative values are valid)
+        if (profile.rfGain >= 0.0f && profile.rfGain <= 100.0f) {
+            sigpath::sourceManager.setGain(profile.rfGain);
+        } else {
+            flog::warn("Scanner: Invalid RF gain {:.1f} dB in profile, skipping", profile.rfGain);
+        }
             
             // TODO: AGC settings require direct demodulator access (not exposed via radio interface yet)
             // Available in TuningProfile: agcEnabled, but no radio interface command for AGC mode
@@ -2318,7 +2528,17 @@ private:
                         // CRITICAL FIX: Apply profile IMMEDIATELY when stepping to frequency
                         // This ensures radio is in correct mode BEFORE signal detection
                         if (applyProfiles && !gui::waterfall.selectedVFO.empty()) {
+                            // ENHANCED MUTE: Ensure silence during demodulator changes
+                            ensureMuteDuringOperation();
                             applyTuningProfileSmart(*profile, gui::waterfall.selectedVFO, current, "PREEMPTIVE");
+                            
+                            // CRITICAL: Ensure profile squelch is applied after emergency mute
+                            // This prevents emergency mute from persisting during signal detection
+                            if (muteScanningActive && profile->squelchEnabled) {
+                                float profileSquelch = profile->squelchLevel;
+                                core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, &profileSquelch, NULL);
+                                SCAN_DEBUG("Scanner: Override emergency mute with profile squelch ({:.1f} dB)", profileSquelch);
+                            }
                         }
                     } else {
                         SCAN_DEBUG("Scanner: TRACKING NULL PROFILE for {:.6f} MHz (Index:{})", 
@@ -2365,6 +2585,8 @@ private:
                 applySquelchDelta();
             }
             
+            // ENHANCED MUTE: Ensure silence during frequency changes  
+            ensureMuteDuringOperation();
             tuner::normalTuning(gui::waterfall.selectedVFO, current);
             tuning = true;
             lastTuneTime = std::chrono::high_resolution_clock::now();
@@ -2410,6 +2632,8 @@ private:
             applySquelchDelta();
         }
         
+        // ENHANCED MUTE: Ensure silence during frequency changes
+        ensureMuteDuringOperation();
         tuner::normalTuning(gui::waterfall.selectedVFO, current);
         tuning = true;
         lastTuneTime = std::chrono::high_resolution_clock::now();
@@ -2783,6 +3007,292 @@ private:
             lastNoiseUpdate = now;
         }
     }
+    
+    // Apply mute while scanning (set squelch to maximum to prevent noise bursts)
+    void applyMuteWhileScanning() {
+        if (!muteWhileScanning || muteScanningActive) {
+            return; // Feature disabled or already active
+        }
+        
+        try {
+            // Check if squelch is enabled in radio module
+            bool squelchEnabled = false;
+            if (!core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_GET_SQUELCH_ENABLED, NULL, &squelchEnabled)) {
+                return; // Can't get squelch state
+            }
+            
+            // Enable squelch if not already enabled
+            if (!squelchEnabled) {
+                squelchEnabled = true;
+                core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchEnabled, NULL);
+            }
+            
+            // Store original squelch level before muting
+            originalSquelchLevelForMute = getRadioSquelchLevel();
+            
+            // Set squelch to maximum (close to 0 dB) to mute everything
+            float muteLevel = -5.0f; // Very high squelch level to mute all scanning noise
+            setRadioSquelchLevel(muteLevel);
+            
+            muteScanningActive = true;
+            SCAN_DEBUG("Scanner: Applied mute while scanning (original: {:.1f} dB)", originalSquelchLevelForMute);
+            
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Error applying mute while scanning: {}", e.what());
+        }
+    }
+    
+    // Restore squelch level after signal detection
+    void restoreMuteWhileScanning() {
+        if (!muteScanningActive) {
+            return; // Not currently muted
+        }
+        
+        try {
+            muteScanningActive = false; // Clear mute state first
+            
+            // If we have a current tuning profile, apply its squelch settings
+            if (currentTuningProfile && !gui::waterfall.selectedVFO.empty()) {
+                const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+                if (profile) {
+                    // Apply profile's squelch settings now that mute is off
+                    if (profile->squelchEnabled) {
+                        bool squelchEnabled = profile->squelchEnabled;
+                        float squelchLevel = profile->squelchLevel;
+                        core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchEnabled, NULL);
+                        core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, &squelchLevel, NULL);
+                        SCAN_DEBUG("Scanner: Restored profile squelch after signal detection ({:.1f} dB)", squelchLevel);
+                    } else {
+                        bool squelchDisabled = false;
+                        core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchDisabled, NULL);
+                        SCAN_DEBUG("Scanner: Disabled squelch per profile after signal detection");
+                    }
+                    return; // Profile squelch applied successfully
+                }
+            }
+            
+            // Fallback: restore original squelch level if no profile
+            setRadioSquelchLevel(originalSquelchLevelForMute);
+            SCAN_DEBUG("Scanner: Restored original squelch after signal detection ({:.1f} dB)", originalSquelchLevelForMute);
+            
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Error restoring squelch after mute: {}", e.what());
+            muteScanningActive = false; // Ensure state is cleared even on error
+        }
+    }
+    
+    // Enhanced mute for critical operations (ensures silence during frequency/demod changes)
+    void ensureMuteDuringOperation() {
+        if (!muteWhileScanning) {
+            SCAN_DEBUG("Scanner: Skipping aggressive mute - mute while scanning disabled");
+            return; // Feature disabled
+        }
+        if (!aggressiveMute) {
+            SCAN_DEBUG("Scanner: Skipping aggressive mute - aggressive mute disabled by user");
+            return; // Aggressive mute disabled by user
+        }
+        if (receiving) {
+            SCAN_DEBUG("Scanner: Skipping aggressive mute - locked onto signal");
+            return; // We're locked onto a signal (don't interfere)
+        }
+        
+        try {
+            if (!gui::waterfall.selectedVFO.empty()) {
+                // Apply immediate high squelch to prevent any noise bursts during operation
+                bool squelchEnabled = true;
+                core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_ENABLED, &squelchEnabled, NULL);
+                core::modComManager.callInterface(gui::waterfall.selectedVFO, RADIO_IFACE_CMD_SET_SQUELCH_LEVEL, &aggressiveMuteLevel, NULL);
+                
+                // Small delay to ensure squelch command takes effect before proceeding
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                
+                SCAN_DEBUG("Scanner: Applied aggressive mute during critical operation ({:.1f} dB)", aggressiveMuteLevel);
+            }
+        } catch (const std::exception& e) {
+            SCAN_DEBUG("Scanner: Error applying aggressive mute: {}", e.what());
+        }
+    }
+    
+    // Calculate signal strength and SNR for current VFO (similar to waterfall Ctrl+click info)
+    bool calculateCurrentSignalInfo(float& strength, float& snr) {
+        flog::info("Scanner: calculateCurrentSignalInfo() called");
+        if (gui::waterfall.selectedVFO.empty()) {
+            flog::warn("Scanner: No selected VFO");
+            return false;
+        }
+        
+        try {
+            // Get current VFO and FFT data
+            auto vfoIt = gui::waterfall.vfos.find(gui::waterfall.selectedVFO);
+            if (vfoIt == gui::waterfall.vfos.end()) {
+                flog::warn("Scanner: VFO not found in waterfall.vfos");
+                return false;
+            }
+            
+            ImGui::WaterfallVFO* vfo = vfoIt->second;
+            if (!vfo) {
+                flog::warn("Scanner: VFO pointer is null");
+                return false;
+            }
+            
+            flog::info("Scanner: VFO found, bandwidth={:.1f}", vfo->bandwidth);
+            
+            // Get raw FFT data from waterfall
+            int fftWidth;
+            float* fftData = gui::waterfall.acquireRawFFT(fftWidth);
+            if (!fftData || fftWidth <= 0) {
+                flog::warn("Scanner: Failed to acquire FFT data (null pointer or invalid width)");
+                gui::waterfall.releaseRawFFT();
+                return false;
+            }
+            
+            flog::info("Scanner: FFT data acquired, width={}", fftWidth);
+            
+            // Implement same signal analysis algorithm as waterfall
+            // Calculate FFT index data based on waterfall's bandwidth
+            double wholeBandwidth = gui::waterfall.getBandwidth();
+            double vfoMinSizeFreq = vfo->centerOffset - vfo->bandwidth;
+            double vfoMinFreq = vfo->centerOffset - (vfo->bandwidth / 2.0);
+            double vfoMaxFreq = vfo->centerOffset + (vfo->bandwidth / 2.0);
+            double vfoMaxSizeFreq = vfo->centerOffset + vfo->bandwidth;
+            
+            int vfoMinSideOffset = std::clamp<int>(((vfoMinSizeFreq / (wholeBandwidth / 2.0)) * (double)(fftWidth / 2)) + (fftWidth / 2), 0, fftWidth);
+            int vfoMinOffset = std::clamp<int>(((vfoMinFreq / (wholeBandwidth / 2.0)) * (double)(fftWidth / 2)) + (fftWidth / 2), 0, fftWidth);
+            int vfoMaxOffset = std::clamp<int>(((vfoMaxFreq / (wholeBandwidth / 2.0)) * (double)(fftWidth / 2)) + (fftWidth / 2), 0, fftWidth);
+            int vfoMaxSideOffset = std::clamp<int>(((vfoMaxSizeFreq / (wholeBandwidth / 2.0)) * (double)(fftWidth / 2)) + (fftWidth / 2), 0, fftWidth);
+            
+            double avg = 0;
+            float max = -INFINITY;
+            int avgCount = 0;
+            
+            flog::info("Scanner: Index calculations - minSide={}, min={}, max={}, maxSide={}, fftWidth={}", 
+                      vfoMinSideOffset, vfoMinOffset, vfoMaxOffset, vfoMaxSideOffset, fftWidth);
+            flog::info("Scanner: VFO offsets - centerOffset={:.1f}, bandwidth={:.1f}", vfo->centerOffset, vfo->bandwidth);
+            flog::info("Scanner: Frequency calculations - wholeBandwidth={:.1f}", wholeBandwidth);
+            
+            // Calculate Left average (noise floor)
+            for (int i = vfoMinSideOffset; i < vfoMinOffset; i++) {
+                avg += fftData[i];
+                avgCount++;
+            }
+            
+            // Calculate Right average (noise floor)
+            for (int i = vfoMaxOffset + 1; i < vfoMaxSideOffset; i++) {
+                avg += fftData[i];
+                avgCount++;
+            }
+            
+            if (avgCount > 0) {
+                avg /= (double)(avgCount);
+            } else {
+                avg = -100.0; // Fallback noise floor
+            }
+            
+            // Calculate max (signal strength)
+            for (int i = vfoMinOffset; i <= vfoMaxOffset; i++) {
+                if (fftData[i] > max) { 
+                    max = fftData[i]; 
+                }
+            }
+            
+            flog::info("Scanner: Signal analysis - avgCount={}, avg={:.1f}, max={:.1f}, SNR={:.1f}", 
+                      avgCount, avg, max, max - avg);
+            
+            strength = max;
+            snr = max - avg;
+            
+            gui::waterfall.releaseRawFFT();
+            
+            flog::info("Scanner: Signal analysis completed - strength={:.1f}, snr={:.1f}", strength, snr);
+            return true;
+            
+        } catch (const std::exception& e) {
+            gui::waterfall.releaseRawFFT();
+            SCAN_DEBUG("Scanner: Error calculating signal info: {}", e.what());
+            return false;
+        }
+    }
+
+    // Update signal analysis every 50ms while signal is locked
+    void updateSignalAnalysis() {
+        if (!showSignalInfo || !receiving || !showSignalTooltip) {
+            return;
+        }
+        
+        auto now = std::chrono::high_resolution_clock::now();
+        auto timeSinceLastUpdate = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSignalAnalysisTime).count();
+        
+        // Update every 50ms for real-time monitoring
+        if (timeSinceLastUpdate >= 50) {
+            float strength, snr;
+            if (calculateCurrentSignalInfo(strength, snr)) {
+                lastSignalStrength = strength;
+                lastSignalSNR = snr;
+                // Keep the same frequency - we're monitoring the locked signal
+                lastSignalAnalysisTime = now;
+            } else {
+                // If analysis fails, clear tooltip
+                showSignalTooltip = false;
+            }
+        }
+    }
+
+    // Draw signal analysis tooltip near the VFO (like Ctrl+click behavior)
+    void drawSignalTooltip() {
+        if (!showSignalTooltip || !showSignalInfo || !receiving || gui::waterfall.selectedVFO.empty()) {
+            return;
+        }
+        
+        // Update signal analysis every 50ms while signal is present
+        updateSignalAnalysis();
+        
+        try {
+            // Get current VFO
+            auto vfoIt = gui::waterfall.vfos.find(gui::waterfall.selectedVFO);
+            if (vfoIt == gui::waterfall.vfos.end()) {
+                return;
+            }
+            
+            ImGui::WaterfallVFO* vfo = vfoIt->second;
+            if (!vfo) {
+                return;
+            }
+            
+            // Position tooltip near the VFO center
+            ImVec2 tooltipPos;
+            tooltipPos.x = (vfo->rectMin.x + vfo->rectMax.x) / 2.0f + 10.0f; // Offset to the right
+            tooltipPos.y = vfo->rectMin.y - 5.0f; // Slightly above VFO
+            
+            // Set tooltip position
+            ImGui::SetNextWindowPos(tooltipPos, ImGuiCond_Always);
+            
+            // Begin tooltip window
+            if (ImGui::Begin("##ScannerSignalTooltip", nullptr, 
+                           ImGuiWindowFlags_Tooltip | 
+                           ImGuiWindowFlags_NoTitleBar | 
+                           ImGuiWindowFlags_NoResize | 
+                           ImGuiWindowFlags_AlwaysAutoResize |
+                           ImGuiWindowFlags_NoSavedSettings)) {
+                
+                // Display VFO name
+                ImGui::TextUnformatted(gui::waterfall.selectedVFO.c_str());
+                ImGui::Separator();
+                
+                // Display signal info with real-time updates
+                char freqStr[64];
+                snprintf(freqStr, sizeof(freqStr), "%.6f MHz", lastSignalFrequency / 1e6);
+                ImGui::Text("Frequency: %s", freqStr);
+                
+                ImGui::Text("Strength: %.1f dBFS", lastSignalStrength);
+                ImGui::Text("SNR: %.1f dB", lastSignalSNR);
+                
+                ImGui::End();
+            }
+            
+        } catch (const std::exception& e) {
+            flog::warn("Scanner: Error drawing signal tooltip: {}", e.what());
+        }
+    }
 
     std::string name;
     bool enabled = true;
@@ -2831,6 +3341,23 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> lastNoiseUpdate; // Time of last noise floor update
     std::chrono::time_point<std::chrono::high_resolution_clock> tuneTime; // Time of last frequency tuning
     
+    // Mute while scanning functionality (prevents noise bursts during frequency sweeps)
+    bool muteWhileScanning = true; // Default to enabled - prevents noise bursts during scanning
+    bool muteScanningActive = false; // Whether mute is currently applied  
+    float originalSquelchLevelForMute = -50.0f; // Original squelch level before muting
+    
+    // Enhanced mute system settings (configurable by user)
+    bool aggressiveMute = true;              // Enable enhanced mute during operations
+    float aggressiveMuteLevel = -3.0f;       // Emergency mute level (dB)
+    
+    // Signal analysis display settings
+    bool showSignalInfo = false;             // Auto-display signal info when signal found
+    float lastSignalStrength = -100.0f;     // Last detected signal strength (dBFS)
+    float lastSignalSNR = 0.0f;              // Last detected SNR (dB)
+    double lastSignalFrequency = 0.0;       // Frequency where signal info was captured
+    bool showSignalTooltip = false;         // Whether to show persistent signal tooltip
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastSignalAnalysisTime; // Time of last signal analysis update
+    
     // Continuous signal centering
     std::chrono::time_point<std::chrono::high_resolution_clock> lastCenteringTime; // Time of last signal centering
     const int CENTERING_INTERVAL_MS = 50; // Interval for continuous centering in milliseconds
@@ -2875,18 +3402,8 @@ private:
     // PERFORMANCE: Configurable scan timing (consistent across all modes) 
     int scanRateHz = 10;                 // Default: 10 scans per second (same as legacy 100ms)
     
-    // DISCRETE PARAMETER CONTROLS: Safe preset values to prevent user errors
-    static constexpr double INTERVAL_VALUES_HZ[] = {5000, 10000, 25000, 50000, 100000, 200000};
-    static constexpr const char* INTERVAL_LABELS[] = {"5 kHz", "10 kHz", "25 kHz", "50 kHz", "100 kHz", "200 kHz"};
-    static constexpr int INTERVAL_VALUES_COUNT = 6;
-    int intervalIndex = 4; // Default to 100 kHz (index 4)
-    
-    static constexpr int SCAN_RATE_VALUES[] = {1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150, 175, 200};
-    static constexpr const char* SCAN_RATE_LABELS[] = {"1/sec", "2/sec", "5/sec", "10/sec", "15/sec", "20/sec", "25/sec", "30/sec", "40/sec", "50/sec", 
-                                                      "75/sec", "100/sec", "125/sec", "150/sec", "175/sec", "200/sec"};
-    static constexpr int SCAN_RATE_VALUES_COUNT = 16;
-    static constexpr int SCAN_RATE_NORMAL_COUNT = 10;  // First 10 values (up to 50/sec) are normal speed
-    int scanRateIndex = 6; // Default to 25/sec (index 6, recommended starting point)
+    // PASSBAND RATIO DISCRETE VALUES: Percentage options for signal detection bandwidth
+    // NOTE: Interval and scan rate now use direct input controls for full user flexibility
     
     static constexpr int PASSBAND_VALUES[] = {5, 10, 20, 30, 50, 75, 100};
     static constexpr const char* PASSBAND_LABELS[] = {"5%", "10%", "20%", "30%", "50%", "75%", "100%"};
@@ -2916,6 +3433,11 @@ MOD_EXPORT void _INIT_() {
     // Squelch delta settings
             def["squelchDelta"] = 2.5f;
         def["squelchDeltaAuto"] = false;
+        def["muteWhileScanning"] = true;
+        def["aggressiveMute"] = true;
+        def["aggressiveMuteLevel"] = -3.0f;
+        def["showSignalInfo"] = false;
+        def["showSignalTooltip"] = false;
         def["unlockHighSpeed"] = false;
         def["tuningTimeAuto"] = false;
     
