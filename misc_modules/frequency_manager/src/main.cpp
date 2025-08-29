@@ -591,7 +591,7 @@ private:
                 // Show bandwidth constraints info with warnings
                 double bandBandwidth = editedBookmark.endFreq - editedBookmark.startFreq;
                 double sdrBandwidth = sigpath::iqFrontEnd.getEffectiveSamplerate();
-                double maxAllowedStep = std::min(bandBandwidth, sdrBandwidth);
+                double maxAllowedStep = (std::min)(bandBandwidth, sdrBandwidth);
                 
                 // Color-code based on step frequency validity
                 ImVec4 textColor;
