@@ -43,6 +43,11 @@ namespace credits {
         ImGui::BulletText("Community Contributors");
         ImGui::Spacing();
         
+        ImGui::TextUnformatted("Special Contributors");
+        ImGui::BulletText("PeiusMars (Parks-McClellan DSP and FFT Auto-Ranging)");
+        ImGui::BulletText("crackerjacques (Spiritbox Emulator)");
+        ImGui::Spacing();
+        
         ImGui::TextUnformatted("Key Features");
         ImGui::BulletText("MPX Analysis for FM Broadcasting");
         ImGui::BulletText("Enhanced Configuration Management");
@@ -66,7 +71,12 @@ namespace credits {
         ImGui::Spacing();
         ImGui::Spacing();
         ImGui::Spacing();
-        ImGui::TextUnformatted("SDR++ CE v" VERSION_STR " (Built at " __TIME__ ", " __DATE__ ")");
+        
+        // Always show version string
+#ifndef VERSION_STR
+#define VERSION_STR "dev"
+#endif
+        ImGui::Text("SDR++ CE  %s  (Built at %s, %s)", VERSION_STR, __TIME__, __DATE__);
 
         ImGui::EndPopup();
         ImGui::PopStyleColor();

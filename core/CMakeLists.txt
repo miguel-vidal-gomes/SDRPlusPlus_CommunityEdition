@@ -36,6 +36,16 @@ target_compile_options(sdrpp_core PRIVATE ${SDRPP_COMPILER_FLAGS})
 # Set the install prefix
 target_compile_definitions(sdrpp_core PUBLIC INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 
+# Pass the version string from the main CMakeLists.txt
+if(DEFINED APP_VERSION_STR)
+    if(APP_VERSION_STR STREQUAL "")
+        # If APP_VERSION_STR is empty, define a flag to handle it in code
+        target_compile_definitions(sdrpp_core PUBLIC APP_VERSION_STR_EMPTY)
+    else()
+        target_compile_definitions(sdrpp_core PUBLIC APP_VERSION_STR="${APP_VERSION_STR}")
+    endif()
+endif()
+
 # Include core headers
 target_include_directories(sdrpp_core PUBLIC "src/")
 target_include_directories(sdrpp_core PUBLIC "src/imgui")

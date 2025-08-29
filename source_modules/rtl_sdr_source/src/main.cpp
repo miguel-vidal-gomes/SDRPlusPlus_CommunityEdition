@@ -389,9 +389,27 @@ private:
             }
             
             _this->gainId = closestIndex;
-            if (_this->running && !_this->tunerAgc) {
+            
+
+            
+            // CRITICAL FIX: Auto-disable AGC when external gain control is requested
+            // This allows scanner and other modules to control gain even when AGC is enabled
+            if (_this->running) {
+                if (_this->tunerAgc) {
+                    // Temporarily disable AGC for external gain control
+                    flog::info("RTLSDRSourceModule '{0}': Auto-disabling Tuner AGC for external gain control", _this->name);
+                    _this->tunerAgc = false;
+                    rtlsdr_set_tuner_gain_mode(_this->openDev, 1); // Enable manual gain mode
+                    
+                    // NOTE: Not persisting AGC change to avoid threading issues during external control
+                    // AGC will revert to original setting on next device restart
+                }
+                // Apply the gain (AGC is now guaranteed to be off)
                 rtlsdr_set_tuner_gain(_this->openDev, _this->gainList[_this->gainId]);
+            } else {
+                flog::warn("RTLSDRSourceModule '{0}': Cannot set gain - device not running", _this->name);
             }
+            
             flog::info("RTLSDRSourceModule '{0}': Set gain to {1:.1f} dB (RTL-SDR gain: {2:.1f} dB)", 
                        _this->name, gain, (double)_this->gainList[_this->gainId] / 10.0);
         } else {

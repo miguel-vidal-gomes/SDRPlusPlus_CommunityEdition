@@ -10,6 +10,9 @@
 #include <utils/optionlist.h>
 #include <algorithm>
 
+// Scanner interface commands
+#define SCANNER_IFACE_CMD_GET_RUNNING   0
+
 namespace displaymenu {
     bool showWaterfall;
     bool fullWaterfallUpdate = true;
@@ -47,6 +50,24 @@ namespace displaymenu {
         gui::waterfall.setFFTHoldSpeed((float)fftHoldSpeed / ((float)fftRate * 10.0f));
         gui::waterfall.setFFTSmoothingSpeed(std::min<float>((float)fftSmoothingSpeed / (float)(fftRate * 10.0f), 1.0f));
         gui::waterfall.setSNRSmoothingSpeed(std::min<float>((float)snrSmoothingSpeed / (float)(fftRate * 10.0f), 1.0f));
+    }
+
+    bool isAnyScannerRunning() {
+        // Check all scanner module instances
+        for (auto const& [name, instance] : core::moduleManager.instances) {
+            if (instance.module.info->name == std::string("scanner")) {
+                // Try to query the scanner's running status via its interface
+                if (core::modComManager.interfaceExists(name)) {
+                    bool running = false;
+                    if (core::modComManager.callInterface(name, SCANNER_IFACE_CMD_GET_RUNNING, NULL, &running)) {
+                        if (running) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     void init() {
@@ -153,11 +174,36 @@ namespace displaymenu {
             setWaterfallShown(showWaterfall);
         }
 
+        // Check if any scanner is running and disable Full Waterfall Update if so
+        bool scannerRunning = isAnyScannerRunning();
+        
+        // Auto-disable fullWaterfallUpdate when scanner is running
+        if (scannerRunning && fullWaterfallUpdate) {
+            fullWaterfallUpdate = false;
+            gui::waterfall.setFullWaterfallUpdate(fullWaterfallUpdate);
+            core::configManager.acquire();
+            core::configManager.conf["fullWaterfallUpdate"] = fullWaterfallUpdate;
+            core::configManager.release(true);
+        }
+        
+        // Disable the checkbox when scanner is running
+        if (scannerRunning) {
+            style::beginDisabled();
+        }
+        
         if (ImGui::Checkbox("Full Waterfall Update##_sdrpp", &fullWaterfallUpdate)) {
             gui::waterfall.setFullWaterfallUpdate(fullWaterfallUpdate);
             core::configManager.acquire();
             core::configManager.conf["fullWaterfallUpdate"] = fullWaterfallUpdate;
             core::configManager.release(true);
+        }
+        
+        if (scannerRunning) {
+            style::endDisabled();
+            // Show tooltip explaining why it's disabled
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                ImGui::SetTooltip("Full Waterfall Update is disabled while Scanner is running\nto prevent UI freezing during fast scans");
+            }
         }
 
         if (ImGui::Checkbox("Lock Menu Order##_sdrpp", &gui::menu.locked)) {
