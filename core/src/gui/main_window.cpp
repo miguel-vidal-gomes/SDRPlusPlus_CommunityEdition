@@ -713,6 +713,35 @@ void MainWindow::setViewBandwidthSlider(float bandwidth) {
     bw = bandwidth;
 }
 
+void MainWindow::setFFTMin(float min) {
+    // Update the slider
+    fftMin = min;
+
+    // Update the waterfall
+    gui::waterfall.setFFTMin(min);
+    gui::waterfall.setWaterfallMin(min);
+
+    // Save config
+    core::configManager.acquire();
+    core::configManager.conf["fftMin"] = min;
+    core::configManager.release();
+
+}
+
+void MainWindow::setFFTMax(float max) {
+    // Update the slider
+    fftMax = max;
+
+    // Update the waterfall
+    gui::waterfall.setFFTMax(max);
+    gui::waterfall.setWaterfallMax(max);
+
+    // Save config
+    core::configManager.acquire();
+    core::configManager.conf["fftMax"] = max;
+    core::configManager.release();
+}
+
 bool MainWindow::sdrIsRunning() {
     return playing;
 }
