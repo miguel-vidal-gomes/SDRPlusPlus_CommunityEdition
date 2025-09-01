@@ -102,6 +102,28 @@ We actively encourage contributions! Whether you're fixing bugs, adding features
 - 📞 **Community Support**: [Issues & Discussions](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/issues)
 - 📖 **Contributing Guide**: [contributing.md](contributing.md)
 
+## 📚 **Developer Documentation**
+
+SDR++CE provides comprehensive documentation for developers, from newcomers to experts:
+
+### **🎯 For Developers**
+- **[📖 Developer Wiki](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki)** - Complete development documentation
+- **[🏗️ Architecture Guide](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Architecture-Overview)** - Understand the system design
+- **[🔧 Development Setup](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Development-Setup)** - Get your environment ready
+- **[🧩 Module Development](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Module-Development-Guide)** - Create plugins and extensions
+
+### **🤖 AI-Powered Development**
+- **[🚀 AI-Assisted Development](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/AI-Assisted-Development)** - Cursor IDE integration and AI workflows
+- **Pre-configured `.cursorrules`** - Context-aware AI assistance for SDR/DSP development
+- **Intelligent code generation** - AI that understands real-time constraints and threading
+
+### **🔬 Technical Deep Dives**
+- **[⚡ Signal Path & DSP](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Signal-Path-DSP)** - Real-time signal processing pipeline
+- **[🎛️ UI System](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/UI-System)** - ImGui integration and custom widgets
+- **[🏛️ Core Architecture](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Core-Architecture)** - Threading model and system internals
+
+**New to SDR development?** Start with the [Architecture Overview](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Architecture-Overview) to understand the big picture, then dive into [Module Development](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Module-Development-Guide) for hands-on learning.
+
 ## Features
 
 * Multi VFO
@@ -485,6 +507,8 @@ Unlike restrictive projects, **we embrace UI/UX improvements!** Beautiful, intui
 
 SDR++ Community Edition uses CMake for compilation and [vcpkg](https://github.com/microsoft/vcpkg) for dependency management on Windows.
 
+**📚 For comprehensive setup instructions, see our [Development Setup Guide](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Development-Setup)** which covers all platforms with detailed instructions and troubleshooting.
+
 ### On Windows
 
 Install dependencies:
@@ -510,32 +534,34 @@ You can easily disable unneeded modules using the build options described above.
 
 ### How to create modules
 
+**📚 For complete module development guidance, see our [Module Development Guide](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Module-Development-Guide)** with step-by-step tutorials, working examples, and best practices.
+
+**Quick start:**
+- Follow our [Module Quick Start](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Module-Quick-Start) for experienced developers
+- Use [AI-Assisted Development](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/AI-Assisted-Development) with Cursor IDE for intelligent code generation
+- Study the [Module System Overview](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Module-System-Overview) to understand the architecture
+
+**Traditional approach:**
 To create a new module, start by copying the "demo_module" folder and rename it to whatever you like.
 You will need to edit the `CMakeLists.txt` to change the module name. The module name should be the name of the folder.
 
-You will of course also need to edit the `.cpp` file to implement your module. 
-The demo module is there to show how to use the API. If you are familiar with the concepts behind GNU Radio, the `process` function should be familiar to you.
-
-To enable the module you created, add a line to the root CMakeLists.txt file with your module name `option(OPT_BUILD_NEW_MODULE "Build my new module" ON)`.
-
-For guidance, check the existing modules.
-If you are creating a source, look at the existing source modules.
-If you are creating a sink, look at the "network_sink" module.
-If you are creating a decoder, look at the "radio" module.
-
-Remember that headers for the core need to be included as `#include <utils/flog.h>` for every module.
-
-Of course, don't forget to add the option to build it to the config.
-In addition, use `OPT_BUILD_MYMODULE` to disable the module in module_list.hpp if it should not be built.
+For guidance, check the existing modules and our comprehensive wiki documentation above.
 
 ## 🏗️ **Core Development**
 
 **Ready to dive deeper?** Core contributions help shape the fundamental architecture and capabilities of SDR++ Community Edition.
 
+**📚 Essential reading for core development:**
+- **[Core Architecture](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Core-Architecture)** - Threading model and system design
+- **[Core Internals](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Core-Internals)** - Implementation details and module loading
+- **[Signal Path & DSP](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Signal-Path-DSP)** - Real-time processing pipeline
+- **[Backend Architecture](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Backend-Architecture)** - Platform-specific implementations
+
 **Getting started with core development:**
-- Explore the source files to understand our modular architecture
-- Check our [MACOS_BUILD_INSTRUCTIONS.md](MACOS_BUILD_INSTRUCTIONS.md) for platform-specific guidance
-- Use `clang-format` for consistent code styling
+- Start with the [Architecture Overview](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Architecture-Overview) to understand the big picture
+- Use [AI-Assisted Development](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/AI-Assisted-Development) for context-aware coding assistance
+- Follow our [Development Setup](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/wiki/Development-Setup) guide
+- Check our [MACOS_BUILD_INSTRUCTIONS.md](MACOS_BUILD_INSTRUCTIONS.md) for macOS-specific guidance
 
 **We welcome architectural improvements!** This codebase has evolved over time, and fresh perspectives on design patterns, performance optimizations, and code organization are always valuable.
 
