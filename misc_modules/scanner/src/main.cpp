@@ -56,8 +56,27 @@ SDRPP_MOD_INFO{
 ConfigManager config;
 
 // Forward declarations for frequency manager integration
-struct FrequencyBookmark;
 class FrequencyManagerModule;
+
+// CRITICAL: Use frequency manager's real FrequencyBookmark struct (must match exactly!)
+struct FrequencyBookmark {
+    // Original fields (backward compatibility)
+    double frequency;
+    double bandwidth;
+    int mode;
+    bool selected;
+    
+    // NEW: Band support (performance-optimized layout)
+    bool isBand = false;                    // Flag: true = band, false = single frequency
+    double startFreq = 0.0;                 // For bands: start frequency  
+    double endFreq = 0.0;                   // For bands: end frequency
+    double stepFreq = 100000.0;             // For bands: scanning step (default 100kHz)
+    std::string notes;                      // User notes/description
+    std::vector<std::string> tags;          // Tags for categorization (pre-allocated for performance)
+    
+    // NOTE: Other fields may exist but are not accessed by scanner
+    // This struct MUST match frequency_manager's FrequencyBookmark exactly
+};
 
 // CRITICAL: Use frequency manager's real TuningProfile struct (no local copy!)
 // Forward declaration only - real definition in frequency_manager module
@@ -188,6 +207,25 @@ public:
     
     // Get current scanning bounds (supports both single range and multi-range)
     bool getCurrentScanBounds(double& currentStart, double& currentStop) {
+        // FREQUENCY MANAGER MODE: Get bounds from current band entry
+        if (useFrequencyManager && currentBookmark) {
+            const FrequencyBookmark* bookmark = static_cast<const FrequencyBookmark*>(currentBookmark);
+            if (bookmark && bookmark->isBand) {
+                // Use band boundaries from frequency manager
+                currentStart = bookmark->startFreq;
+                currentStop = bookmark->endFreq;
+                return true;
+            }
+            // For single frequencies, use 1.5x the bookmark's bandwidth as scanning window
+            if (bookmark && !bookmark->isBand) {
+                double centerFreq = bookmark->frequency;
+                double halfWindow = (bookmark->bandwidth * 1.5) / 2.0; // 1.5x bandwidth, split around center
+                currentStart = centerFreq - halfWindow;
+                currentStop = centerFreq + halfWindow;
+                return true;
+            }
+        }
+        
         if (frequencyRanges.empty()) {
             // Fall back to legacy single range
             currentStart = startFreq;
@@ -310,23 +348,53 @@ private:
             if (rawData) {
                 analysis.fftSize = actualRawFFTSize;
                 gui::waterfall.releaseRawFFT();
+                flog::info("Scanner: Got FFT size from waterfall: {}", actualRawFFTSize);
             } else {
                 analysis.fftSize = 524288; // Fallback based on typical SDR++ configuration
+                flog::warn("Scanner: Failed to acquire FFT data, using fallback FFT size: {}", analysis.fftSize);
             }
             
-            // Get actual sample rate from signal path
+            // Get actual sample rate from signal path - this should work!
+            flog::debug("Scanner: About to call iq_frontend.getEffectiveSamplerate()");
             analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
+            flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
+                      analysis.sampleRate, analysis.sampleRate/1e6);
+            
+            // Note: The effective sample rate is the actual sample rate after decimation
+            // This is the correct rate to use for FFT analysis since that's what the waterfall sees
+            
+            // Validate the sample rate
+            if (analysis.sampleRate <= 0) {
+                flog::error("Scanner: iq_frontend returned invalid sample rate: {:.0f} Hz", analysis.sampleRate);
+                throw std::runtime_error("Invalid sample rate from iq_frontend");
+            }
             
             // Calculate real FFT resolution
             if (analysis.fftSize > 0 && analysis.sampleRate > 0) {
                 analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
                 analysis.analysisSpan = analysis.sampleRate;
+                flog::info("Scanner: Calculated FFT resolution: {:.2f} Hz/bin", analysis.fftResolution);
             }
             
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Exception in coverage calculation: {}", e.what());
         } catch (...) {
             // Fallback to reasonable defaults if system access fails
             analysis.fftSize = 524288;
-            analysis.sampleRate = 2400000.0; // Typical RTL-SDR rate
+            
+            // Try to get sample rate from signal path one more time with better error handling
+            try {
+                analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
+                flog::warn("Scanner: Fallback - got sample rate from signal path: {:.0f} Hz", analysis.sampleRate);
+                if (analysis.sampleRate <= 0) {
+                    analysis.sampleRate = 10000000.0; // 10MHz default for modern SDRs
+                    flog::warn("Scanner: Sample rate was <= 0, using 10MHz default");
+                }
+            } catch (...) {
+                analysis.sampleRate = 10000000.0; // 10MHz default for modern SDRs (not RTL-SDR specific)
+                flog::warn("Scanner: Exception getting sample rate, using 10MHz default");
+            }
+            
             analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
             analysis.analysisSpan = analysis.sampleRate;
             analysis.fftWarning = "Using fallback FFT parameters - system access failed";
@@ -1766,10 +1834,10 @@ private:
 
                 if (receiving) {
                     SCAN_DEBUG("Scanner: Receiving signal...");
-                
+
                     float maxLevel = getMaxLevel(data, current, effectiveVfoWidth, dataWidth, wfStart, wfWidth);
                     if (maxLevel >= level) {
-                        // Update noise floor when signal is present
+                         // Update noise floor when signal is present
                         if (squelchDeltaAuto) {
                             updateNoiseFloor(maxLevel - 15.0f); // Estimate noise floor as 15dB below signal
                         }
@@ -1777,6 +1845,39 @@ private:
                         // Apply squelch delta when receiving strong signal
                         if (!squelchDeltaActive && squelchDelta > 0.0f && running) {
                             applySquelchDelta();
+                        }
+                        
+                        // CONTINUOUS CENTERING: Re-center on signal peak every 100ms while receiving
+                        static auto lastCenteringTime = std::chrono::high_resolution_clock::now();
+                        auto timeSinceLastCentering = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCenteringTime);
+                        
+                        if (timeSinceLastCentering.count() >= 100) { // Every 100ms
+                            printf("timeSinceLastCentering (%d ms)", timeSinceLastCentering.count());
+                            
+                            // Calculate dynamic centering threshold based on current tuning profile bandwidth
+                            double centeringThreshold = 25000.0; // Default fallback
+                            if (useFrequencyManager && currentTuningProfile) {
+                                const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+                                if (profile && profile->bandwidth > 0) {
+                                    centeringThreshold = 5.0 * profile->bandwidth; // 5x the bandwidth
+                                }
+                            }
+                            
+                            // Create a SMALL centering window around current frequency (NOT the entire scan range!)
+                            double centeringStart = current - centeringThreshold;
+                            double centeringStop = current + centeringThreshold;
+
+                            double peakFreq = findSignalPeakHighRes(current, maxLevel, effectiveVfoWidth, wfStart, wfWidth, centeringStart, centeringStop, level);
+
+                            // Only update frequency if peak is within reasonable distance and adjustment is significant
+                            if (std::abs(peakFreq - current) <= centeringThreshold && std::abs(peakFreq - current) > 100.0) {
+                                 current = peakFreq;
+                                tuner::normalTuning(gui::waterfall.selectedVFO, current);
+                            } else {
+                                SCAN_DEBUG("Scanner: No centering needed (drift: %.1f Hz, threshold: %.1f Hz)\n", peakFreq - current, centeringThreshold);
+                            }
+                            
+                            lastCenteringTime = now;
                         }
                         
                         lastSignalTime = now;
@@ -1819,19 +1920,29 @@ private:
                             double currentStart, currentStop;
                             if (getCurrentScanBounds(currentStart, currentStop)) {
                                 double peakFreq = findSignalPeak(current, maxLevel, effectiveVfoWidth, data, dataWidth, wfStart, wfWidth, currentStart, currentStop, level);
+                                
+                                // Calculate dynamic centering threshold based on current tuning profile bandwidth
+                                double centeringThreshold = 25000.0; // Default fallback
+                                if (useFrequencyManager && currentTuningProfile) {
+                                    const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+                                    if (profile && profile->bandwidth > 0) {
+                                        centeringThreshold = 5.0 * profile->bandwidth; // 5x the bandwidth
+                                    }
+                                }
+                                
                                 // Only update frequency if peak is within reasonable distance (prevents jumping to different signals)
-                                if (std::abs(peakFreq - current) <= 25000.0) { // Max 25 kHz centering adjustment
+                                if (std::abs(peakFreq - current) <= centeringThreshold) {
                                     current = peakFreq;
                                 }
                             }
                             
                             receiving = true;
+                            SCAN_DEBUG("Scanner: Setting receiving=true for single frequency signal at %.6f MHz (level: %.1f)\n", current / 1e6, maxLevel);
                             lastSignalTime = now;
                             flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
                             
                             // SIGNAL ANALYSIS: Calculate and store signal info for display
                             if (showSignalInfo) {
-                                flog::info("Scanner: DEBUG - Attempting signal analysis for single frequency");
                                 float strength, snr;
                                 if (calculateCurrentSignalInfo(strength, snr)) {
                                     lastSignalStrength = strength;
@@ -1839,9 +1950,7 @@ private:
                                     lastSignalFrequency = current;
                                     showSignalTooltip = true;  // Show tooltip near VFO
                                     lastSignalAnalysisTime = std::chrono::high_resolution_clock::now(); // Start 50ms update timer
-                                    flog::info("Scanner: Signal analysis SUCCESS - Strength: {:.1f} dBFS, SNR: {:.1f} dB", strength, snr);
-                                } else {
-                                    flog::warn("Scanner: Signal analysis FAILED - clearing data");
+                                     } else {
                                     // Clear previous data if analysis fails
                                     lastSignalStrength = -100.0f;
                                     lastSignalSNR = 0.0f;
@@ -1892,7 +2001,7 @@ private:
                         // Use frequency manager for frequency stepping
                                         if (!performFrequencyManagerScanning()) {
                     // Fall back to legacy scanning if frequency manager unavailable
-                    flog::warn("Scanner: FM integration failed, falling back to legacy mode");
+                    flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
                     performLegacyScanning();
                 }
                     } else {
@@ -2003,6 +2112,10 @@ private:
             return false; // No valid range
         }
         
+        // Calculate max iterations based on range and interval to prevent infinite loops
+        maxIterations = static_cast<int>((currentStop - currentStart) / interval) + 10; // Add a small buffer
+        iterations = 0;
+        
         for (freq += scanDir ? interval : -interval;
             scanDir ? (freq <= currentStop) : (freq >= currentStart);
             freq += scanDir ? interval : -interval) {
@@ -2013,9 +2126,8 @@ private:
                 break;
             }
 
-            // Check if signal is within bounds
-            if (freq - (vfoWidth/2.0) < wfStart) { break; }
-            if (freq + (vfoWidth/2.0) > wfEnd) { break; }
+            // Check if signal is within configured band bounds (not waterfall bounds)
+            if (freq < currentStart || freq > currentStop) { break; }
 
             // Check if frequency is blacklisted
             if (isFrequencyBlacklisted(freq)) {
@@ -2034,7 +2146,7 @@ private:
                 }
                 
                 // SIGNAL CENTERING: Find the actual peak of the signal for optimal tuning
-                double peakFreq = findSignalPeak(freq, maxLevel, vfoWidth, data, dataWidth, wfStart, wfWidth, currentStart, currentStop, level);
+                double peakFreq = findSignalPeakHighRes(freq, maxLevel, vfoWidth, wfStart, wfWidth, currentStart, currentStop, level);
                 
                 found = true;
                 receiving = true;
@@ -2042,7 +2154,6 @@ private:
                 
                 // SIGNAL ANALYSIS: Calculate and store signal info for display
                 if (showSignalInfo) {
-                    flog::info("Scanner: DEBUG - Attempting signal analysis for band scanning");
                     float strength, snr;
                     if (calculateCurrentSignalInfo(strength, snr)) {
                         lastSignalStrength = strength;
@@ -2050,9 +2161,7 @@ private:
                         lastSignalFrequency = current;
                         showSignalTooltip = true;  // Show tooltip near VFO
                         lastSignalAnalysisTime = std::chrono::high_resolution_clock::now(); // Start 50ms update timer
-                        flog::info("Scanner: Band signal analysis SUCCESS - Strength: {:.1f} dBFS, SNR: {:.1f} dB", strength, snr);
-                    } else {
-                        flog::warn("Scanner: Band signal analysis FAILED - clearing data");
+                     } else {
                         // Clear previous data if analysis fails
                         lastSignalStrength = -100.0f;
                         lastSignalSNR = 0.0f;
@@ -2085,8 +2194,7 @@ private:
 
     // PASSBAND RATIO HELPER: Sync passband index with actual ratio value
     void initializePassbandIndex() {
-        SCAN_DEBUG("Scanner: initializePassbandIndex() called - BEFORE: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
-        
+
         // Find closest passband index (only parameter that still uses discrete values)
         passbandIndex = 6; // Default to 100% (recommended starting point)
         double minPassbandDiff = std::abs(passbandRatio - (PASSBAND_VALUES[passbandIndex] / 100.0));
@@ -2097,8 +2205,7 @@ private:
                 minPassbandDiff = diff;
             }
         }
-        SCAN_DEBUG("Scanner: initializePassbandIndex() completed - AFTER: passbandIndex={}, passbandRatio={}", passbandIndex, passbandRatio);
-    }
+     }
     
     // REMOVED: syncDiscreteValues() - interval and scan rate now use direct input controls
     // Only passband ratio needs discrete values for the percentage slider
@@ -2170,10 +2277,10 @@ private:
             lastProfileFrequency = frequency;
             lastAppliedVFO = vfoName;
             
-            flog::info("{}: APPLIED PROFILE '{}' for {:.6f} MHz (Mode:{} BW:{:.1f}kHz Squelch:{}@{:.1f}dB)", 
-                      context, profile.name.empty() ? "Auto" : profile.name, 
-                      frequency / 1e6, profile.demodMode, profile.bandwidth / 1000.0f,
-                      profile.squelchEnabled ? "ON" : "OFF", profile.squelchLevel);
+            //flog::info("{}: APPLIED PROFILE '{}' for {:.6f} MHz (Mode:{} BW:{:.1f}kHz Squelch:{}@{:.1f}dB)",
+            //          context, profile.name.empty() ? "Auto" : profile.name,
+            //          frequency / 1e6, profile.demodMode, profile.bandwidth / 1000.0f,
+            //          profile.squelchEnabled ? "ON" : "OFF", profile.squelchLevel);
         } else {
             // CORRUPTION RECOVERY: If profile application fails, invalidate cache to prevent reuse
             flog::warn("{}: Profile application failed for {:.6f} MHz - clearing cache", context, frequency / 1e6);
@@ -2312,6 +2419,7 @@ private:
             static std::vector<double> realScanList;
             static std::vector<bool> realScanTypes;
             static std::vector<const void*> realScanProfiles; // Store profile pointers
+            static std::vector<const void*> realScanBookmarks; // Store bookmark pointers
             static bool scanListLoaded = false;
             static auto lastScanListUpdate = std::chrono::steady_clock::now();
             
@@ -2356,12 +2464,14 @@ private:
                     realScanList.clear();
                     realScanTypes.clear();
                     realScanProfiles.clear();
+                    realScanBookmarks.clear();
             
             // CRITICAL: Comprehensive profile extraction with full diagnostics
             for (const auto& entry : *scanList) {
                 realScanList.push_back(entry.frequency);
                 realScanTypes.push_back(!entry.isFromBand); // Single frequency if NOT from band  
                 realScanProfiles.push_back(entry.profile);   // Store profile pointer
+                realScanBookmarks.push_back(entry.bookmark); // Store bookmark pointer
                 
                 // Detailed profile logging removed - too verbose for normal operation
             }
@@ -2400,6 +2510,7 @@ private:
             const std::vector<double>& testScanList = realScanList;
             const std::vector<bool>& isSingleFrequency = realScanTypes;
             const std::vector<const void*>& testScanProfiles = realScanProfiles;
+            const std::vector<const void*>& testScanBookmarks = realScanBookmarks;
             
             // Real frequency manager integration - no more demo mode!
             
@@ -2518,9 +2629,10 @@ private:
                 // Set current frequency to the NEW scan list entry
                 current = testScanList[currentScanIndex];
                 
-                // Store the corresponding tuning profile for later use
+                // Store the corresponding tuning profile and bookmark for later use
                 if (currentScanIndex < testScanProfiles.size()) {
                     currentTuningProfile = testScanProfiles[currentScanIndex];
+                    currentBookmark = (currentScanIndex < testScanBookmarks.size()) ? testScanBookmarks[currentScanIndex] : nullptr;
                     // DIAGNOSTIC: Log profile tracking during frequency stepping (reduced logging)
                     if (currentTuningProfile) {
                         const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
@@ -2546,6 +2658,7 @@ private:
                     }
                 } else {
                     currentTuningProfile = nullptr;
+                    currentBookmark = nullptr;
                     flog::warn("Scanner: INDEX OUT OF BOUNDS for profile tracking! Index:{} Size:{}", 
                               (int)currentScanIndex, (int)testScanProfiles.size());
                 }
@@ -2650,8 +2763,31 @@ private:
             if (data[i] > max) { max = data[i]; }
         }
         
-
+        return max;
+    }
+    
+    // HIGH-RESOLUTION version using raw FFT data for precise signal centering
+    float getMaxLevelHighRes(double freq, double width, double wfStart, double wfWidth) {
+        // Get raw FFT data with full resolution
+        int rawFFTSize;
+        float* rawData = gui::waterfall.acquireRawFFT(rawFFTSize);
+        if (!rawData || rawFFTSize <= 0) {
+            if (rawData) gui::waterfall.releaseRawFFT();
+            return -INFINITY;
+        }
         
+        // Calculate frequency range in raw FFT bins
+        double low = freq - (width/2.0);
+        double high = freq + (width/2.0);
+        int lowId = std::clamp<int>((low - wfStart) * (double)rawFFTSize / wfWidth, 0, rawFFTSize - 1);
+        int highId = std::clamp<int>((high - wfStart) * (double)rawFFTSize / wfWidth, 0, rawFFTSize - 1);
+        
+        float max = -INFINITY;
+        for (int i = lowId; i <= highId; i++) {
+            if (rawData[i] > max) { max = rawData[i]; }
+        }
+        
+        gui::waterfall.releaseRawFFT();
         return max;
     }
 
@@ -2715,6 +2851,144 @@ private:
         lastCenteringTime = now;
     }
 
+    // HIGH-RESOLUTION SIGNAL CENTERING: Find the peak using raw FFT data for precise tuning
+    double findSignalPeakHighRes(double initialFreq, float initialLevel, double vfoWidth, 
+                                double wfStart, double wfWidth, double rangeStart, double rangeStop, float triggerLevel) {
+        double peakFreq = initialFreq;
+        float peakLevel = initialLevel;
+        
+        // SMART SEARCH RADIUS: Use signal bandwidth from Frequency Manager profile
+        double searchRadius;
+        double signalBandwidth = 0.0;
+        
+        if (currentTuningProfile) {
+            const TuningProfile* profile = static_cast<const TuningProfile*>(currentTuningProfile);
+            if (profile) {
+                signalBandwidth = profile->bandwidth;
+                // Search radius = 1.5x signal bandwidth (allows for frequency offset/drift)
+                searchRadius = signalBandwidth * 1.5;
+                // Reasonable bounds: min 5kHz (narrow signals), max 50kHz (very wide signals)
+                searchRadius = std::clamp(searchRadius, 5000.0, 50000.0);
+            } else {
+                // Fallback: interval-based for non-Frequency Manager mode
+                searchRadius = std::max(interval * 2.0, 10000.0);
+                searchRadius = std::min(searchRadius, 50000.0);
+            }
+        } else {
+            // Fallback: interval-based for non-Frequency Manager mode
+            searchRadius = std::max(interval * 2.0, 10000.0);
+            searchRadius = std::min(searchRadius, 50000.0);
+        }
+        
+        // HIGH-RESOLUTION SEARCH STEP: Use raw FFT resolution for maximum precision
+        // Get raw FFT size for resolution calculation
+        int rawFFTSize;
+        float* rawData = gui::waterfall.acquireRawFFT(rawFFTSize);
+        if (!rawData || rawFFTSize <= 0) {
+            if (rawData) gui::waterfall.releaseRawFFT();
+            return initialFreq; // Fallback to original frequency
+        }
+        gui::waterfall.releaseRawFFT();
+        
+        double rawFFTResolution = wfWidth / (double)rawFFTSize;
+        double searchStep;
+        
+        if (signalBandwidth > 0) {
+            // Step size = signal bandwidth / 20 (good resolution for peak finding)
+            searchStep = signalBandwidth / 20.0;
+            // But don't go below 10x the raw FFT resolution for meaningful steps
+            searchStep = std::max(searchStep, rawFFTResolution * 10.0);
+            // Reasonable bounds: min 100Hz (very precise), max 2kHz (fast)
+            searchStep = std::clamp(searchStep, 100.0, 2000.0);
+        } else {
+            // Fallback: use 500Hz steps (good balance of precision and speed)
+            searchStep = 500.0;
+            searchStep = std::max(searchStep, rawFFTResolution * 10.0);
+        }
+        
+        // Use narrow analysis window for precise measurements
+        double testWidth = std::min(searchStep * 0.8, signalBandwidth * 0.5);
+        if (testWidth < rawFFTResolution * 5.0) testWidth = rawFFTResolution * 5.0; // At least 5 bins
+        
+        printf("findSignalPeakHighRes: initialFreq=%.6f MHz, signalBandwidth=%.1f Hz, searchRadius=%.1f Hz, searchStep=%.1f Hz, testWidth=%.1f Hz\n", 
+               initialFreq / 1e6, signalBandwidth, searchRadius, searchStep, testWidth);
+        printf("  Raw FFT resolution: %.1f Hz/bin (rawFFTSize=%d, wfWidth=%.0f Hz)\n", 
+               rawFFTResolution, rawFFTSize, wfWidth);
+        
+        int peaksFound = 0;
+        double bestFreq = initialFreq;
+        float bestLevel = initialLevel;
+        
+        // Search around the initial frequency for the strongest signal
+        std::vector<std::pair<double, float>> plateauFreqs;
+        
+        for (double testFreq = initialFreq - searchRadius; testFreq <= initialFreq + searchRadius; testFreq += searchStep) {
+            // Stay within range bounds
+            if (testFreq < rangeStart || testFreq > rangeStop) continue;
+            
+            // Skip if frequency is blacklisted
+            if (isFrequencyBlacklisted(testFreq)) continue;
+            
+            // Check if test frequency is within waterfall bounds
+            if (testFreq - (testWidth/2.0) < wfStart || testFreq + (testWidth/2.0) > wfWidth + wfStart) continue;
+            
+            // Get signal level using high-resolution raw FFT data
+            float testLevel = getMaxLevelHighRes(testFreq, testWidth, wfStart, wfWidth);
+            
+            printf("  Testing %.6f MHz: level=%.1f dBFS (best so far: %.6f MHz at %.1f dBFS)\n", 
+                   testFreq / 1e6, testLevel, bestFreq / 1e6, bestLevel);
+            
+            // Find the strongest frequency within search radius (or equal strength at different frequency)
+            // NOTE: In dBFS, LESS NEGATIVE = STRONGER signal, so we want HIGHER values (closer to 0)
+            if (testLevel > bestLevel - 0.1) { // Allow equal or slightly better signals
+                if (testLevel > bestLevel + 0.1) {
+                    printf("  NEW PEAK FOUND: %.6f MHz at %.1f dBFS (improvement: %.1f dB)\n", 
+                           testFreq / 1e6, testLevel, testLevel - bestLevel);
+                    peaksFound++;
+                } else if (std::abs(testLevel - bestLevel) <= 0.1) {
+                    printf("  EQUAL PEAK FOUND: %.6f MHz at %.1f dBFS (same level as best)\n", 
+                           testFreq / 1e6, testLevel);
+                }
+                bestLevel = testLevel;
+                bestFreq = testFreq;
+                printf("  UPDATED BEST: %.6f MHz at %.1f dBFS\n", bestFreq / 1e6, bestLevel);
+            } else {
+                printf("  REJECTED: %.1f dBFS is weaker than %.1f dBFS (threshold: %.1f dBFS)\n", 
+                       testLevel, bestLevel, bestLevel - 0.1);
+            }
+            
+            // Check for plateau region (signal within 1dB of initial level)
+            if (std::abs(testLevel - initialLevel) <= 1.0 && testLevel >= initialLevel - 3.0) {
+                plateauFreqs.push_back({testFreq, testLevel});
+            }
+        }
+        
+        // IMPROVED DECISION LOGIC: Handle equal-level signals better
+        if (bestLevel >= initialLevel - 0.1) { // Found signal at least as good as initial
+            // If we found a better frequency (even at same level), use it
+            if (bestFreq != initialFreq) {
+                printf("  CENTERING: Moving from %.6f MHz to %.6f MHz (level: %.1f dBFS)\n", 
+                       initialFreq / 1e6, bestFreq / 1e6, bestLevel);
+                peakFreq = bestFreq;
+                peakLevel = bestLevel;
+            } else {
+                peakFreq = initialFreq; // Stay at original if no better frequency found
+            }
+        } else if (plateauFreqs.size() >= 3) {
+            // No significant peak, but we found a plateau - move to center
+            std::sort(plateauFreqs.begin(), plateauFreqs.end());
+            size_t centerIndex = plateauFreqs.size() / 2;
+            peakFreq = plateauFreqs[centerIndex].first;
+            peakLevel = plateauFreqs[centerIndex].second;
+            printf("  PLATEAU CENTERING: Moving to center of plateau at %.6f MHz\n", peakFreq / 1e6);
+        } else {
+            peakFreq = initialFreq; // Stay at original frequency
+            printf("  NO CENTERING: Staying at original frequency %.6f MHz\n", initialFreq / 1e6);
+        }
+        
+        return peakFreq;
+    }
+
     // SIGNAL CENTERING: Find the peak of a detected signal for optimal tuning
     double findSignalPeak(double initialFreq, float initialLevel, double vfoWidth, float* data, int dataWidth, 
                          double wfStart, double wfWidth, double rangeStart, double rangeStop, float triggerLevel) {
@@ -2747,23 +3021,36 @@ private:
 
         }
         
-        // SMART SEARCH STEP: Base on signal bandwidth for optimal precision
+        // SMART SEARCH STEP: Align with FFT resolution for accurate measurements
+        // Calculate actual FFT bin resolution to avoid quantization errors
+        double fftBinResolution = wfWidth / (double)dataWidth;
+        
         double searchStep;
         if (signalBandwidth > 0) {
             // Step size = signal bandwidth / 20 (good resolution for peak finding)
             searchStep = signalBandwidth / 20.0;
             // Reasonable bounds: min 500Hz (precise), max 5kHz (fast)
             searchStep = std::clamp(searchStep, 500.0, 5000.0);
-
         } else {
             // Fallback: interval-based
             searchStep = std::max(interval / 8.0, 1000.0);
             searchStep = std::min(searchStep, 2000.0);
-
         }
+        
+        // CRITICAL FIX: Ensure step is at least 2 FFT bins for meaningful resolution
+        searchStep = std::max(searchStep, fftBinResolution * 2.0);
+        
+        // Round search step to nearest FFT bin boundary for consistent results
+        int binsPerStep = std::max(1, (int)std::round(searchStep / fftBinResolution));
+        searchStep = binsPerStep * fftBinResolution;
         
         // Use narrow analysis window to avoid overlap between test frequencies
         double testWidth = searchStep * 0.8; // Use 80% of search step to minimize overlap between adjacent tests
+        
+        printf("findSignalPeak: initialFreq=%.6f MHz, signalBandwidth=%.1f Hz, searchRadius=%.1f Hz, searchStep=%.1f Hz, testWidth=%.1f Hz\n", 
+               initialFreq / 1e6, signalBandwidth, searchRadius, searchStep, testWidth);
+        printf("  FFT resolution: %.1f Hz/bin (dataWidth=%d, wfWidth=%.0f Hz), binsPerStep=%d\n", 
+               fftBinResolution, dataWidth, wfWidth, binsPerStep);
         
         int peaksFound = 0;
         double bestFreq = initialFreq;
@@ -2794,11 +3081,15 @@ private:
             // Get signal level at test frequency using consistent width
             float testLevel = getMaxLevel(data, testFreq, testWidth, dataWidth, wfStart, wfWidth);
             
+            printf("  Testing %.6f MHz: level=%.1f dBFS (best so far: %.6f MHz at %.1f dBFS)\n", 
+                   testFreq / 1e6, testLevel, bestFreq / 1e6, bestLevel);
 
             
             // PEAK OPTIMIZATION: Find the strongest frequency within search radius (ignore trigger level during search)
             // Check for traditional peak (stronger signal)
             if (testLevel > bestLevel + 0.1) {
+                printf("  NEW PEAK FOUND: %.6f MHz at %.1f dBFS (improvement: %.1f dB)\n", 
+                       testFreq / 1e6, testLevel, testLevel - bestLevel);
                 bestLevel = testLevel;
                 bestFreq = testFreq;
                 peaksFound++;
@@ -3393,6 +3684,7 @@ private:
     size_t currentScanIndex = 0;         // Current position in frequency manager scan list
     bool currentEntryIsSingleFreq = false; // Track if current entry is single frequency vs band
     const void* currentTuningProfile = nullptr; // Current frequency's tuning profile (from FM)
+    const void* currentBookmark = nullptr;       // Current frequency's bookmark (from FM)
     
     // PERFORMANCE: Smart profile caching to prevent redundant applications
     const void* lastAppliedProfile = nullptr; // Last successfully applied profile
