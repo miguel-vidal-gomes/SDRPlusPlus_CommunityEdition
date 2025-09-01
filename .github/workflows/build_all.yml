@@ -213,17 +213,25 @@ jobs:
         - name: Install SDRplay API
           run: wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg && sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.0.pkg -target /
 
-        - name: Install libiio
-          run: wget https://github.com/analogdevicesinc/libiio/archive/refs/tags/v0.25.zip && 7z x v0.25.zip && cd libiio-0.25 && mkdir build && cd build && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
+        - name: Install MacPorts
+          run: |
+            # Download and install MacPorts for macOS 13 (Ventura)
+            curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1-13-Ventura.pkg
+            sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
+            echo "/opt/local/bin" >> $GITHUB_PATH
+            echo "/opt/local/sbin" >> $GITHUB_PATH
 
-        - name: Install libad9361
-          run: git clone https://github.com/analogdevicesinc/libad9361-iio && cd libad9361-iio && mkdir build && cd build && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
+        - name: Install libiio and libad9361-iio (MacPorts)
+          run: |
+            export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+            sudo port selfupdate
+            sudo port install libiio libad9361-iio
 
         - name: Install LimeSuite
           run: git clone https://github.com/myriadrf/LimeSuite && cd LimeSuite && mkdir builddir && cd builddir && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
 
-        - name: Install libperseus
-          run: git clone https://github.com/Microtelecom/libperseus-sdr && cd libperseus-sdr && autoreconf -i && ./configure --prefix=/usr/local && make && sudo make install && cd ..
+        # - name: Install libperseus
+        #   run: git clone https://github.com/Microtelecom/libperseus-sdr && cd libperseus-sdr && autoreconf -i && ./configure --prefix=/usr/local && make && sudo make install && cd ..
 
         - name: Install librfnm
           run: git clone https://github.com/AlexandreRouma/librfnm && cd librfnm && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && make && sudo make install && cd ..
@@ -236,6 +244,20 @@ jobs:
 
         - name: Install libhydrasdr
           run: git clone https://github.com/hydrasdr/rfone_host && cd rfone_host && mkdir build && cd build && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
+
+        - name: Install MacPorts
+          run: |
+            # Download and install MacPorts for macOS 13 (Ventura)
+            curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1-13-Ventura.pkg
+            sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
+            echo "/opt/local/bin" >> $GITHUB_PATH
+            echo "/opt/local/sbin" >> $GITHUB_PATH
+
+        - name: Install libiio and libad9361-iio (MacPorts)
+          run: |
+            export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+            sudo port selfupdate
+            sudo port install libiio libad9361-iio
 
         - name: Prepare CMake
           working-directory: ${{runner.workspace}}/build
@@ -322,11 +344,19 @@ jobs:
         - name: Install SDRplay API
           run: wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg && sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.0.pkg -target /
 
-        - name: Install libiio
-          run: wget https://github.com/analogdevicesinc/libiio/archive/refs/tags/v0.25.zip && 7z x v0.25.zip && cd libiio-0.25 && mkdir build && cd build && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
+        - name: Install MacPorts
+          run: |
+            # Download and install MacPorts for macOS 14 (Sonoma)
+            curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1-14-Sonoma.pkg
+            sudo installer -pkg MacPorts-2.8.1-14-Sonoma.pkg -target /
+            echo "/opt/local/bin" >> $GITHUB_PATH
+            echo "/opt/local/sbin" >> $GITHUB_PATH
 
-        - name: Install libad9361
-          run: git clone https://github.com/analogdevicesinc/libad9361-iio && cd libad9361-iio && mkdir build && cd build && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../
+        - name: Install libiio and libad9361-iio (MacPorts)
+          run: |
+            export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
+            sudo port selfupdate
+            sudo port install libiio libad9361-iio
 
         - name: Install LimeSuite
           run: git clone https://github.com/myriadrf/LimeSuite && cd LimeSuite && mkdir builddir && cd builddir && cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 -DCMAKE_BUILD_TYPE=Release .. && make -j3 && sudo make install && cd ../../

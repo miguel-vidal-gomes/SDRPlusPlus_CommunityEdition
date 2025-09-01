@@ -11,20 +11,36 @@ This document provides step-by-step instructions for building SDR++ Community Ed
 - **CMake**: `brew install cmake`
 
 ### Required Dependencies
-Install all dependencies via Homebrew:
+Install all dependencies via Homebrew and MacPorts:
 ```bash
-# Core dependencies
+# Core dependencies (Homebrew)
 brew install fftw glfw volk zstd
 
-# SDR Hardware support
+# SDR Hardware support (Homebrew)
 brew install airspy airspyhf hackrf librtlsdr
 
-# Audio support
+# Audio support (Homebrew)
 brew install rtaudio
 
-# Optional dependencies
+# Optional dependencies (Homebrew)
 brew install libusb
+
+# PlutoSDR specific dependencies (MacPorts)
+# Install MacPorts: https://www.macports.org/install.php
+sudo port install libiio libad9361-iio
 ```
+
+**PlutoSDR `config.txt` Modification (CRITICAL for macOS)**
+Before connecting your PlutoSDR to macOS, you *must* change its USB Ethernet compatibility mode to CDC-NCM. This ensures macOS recognizes the device as a network interface. If you don't do this, the PlutoSDR will not be detected.
+
+1. Connect your PlutoSDR to your Mac.
+2. Open the mounted "PlutoSDR" drive (it appears as a USB drive).
+3. Edit the `config.txt` file (usually in the root of the drive).
+4. Change the line `usb_ethernet_mode = rndis` to `usb_ethernet_mode = ncm`.
+5. Save the changes and safely eject the PlutoSDR drive.
+6. Wait for the PlutoSDR to reboot (LEDs will stabilize) before proceeding.
+
+After this, macOS should detect a new Ethernet interface for your PlutoSDR.
 
 ## Build Process
 
@@ -45,14 +61,14 @@ mkdir build && cd build
 cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Release \
-  -DOPT_BUILD_PLUTOSDR_SOURCE=OFF
+  -DOPT_BUILD_PLUTOSDR_SOURCE=ON
 ```
 
 **Configuration Options Explained:**
 - `CMAKE_OSX_DEPLOYMENT_TARGET=11.0`: Target macOS 11.0+ (**CHANGED FROM 10.15** - see note below)
 - `USE_BUNDLE_DEFAULTS=ON`: **CRITICAL** - Enables proper macOS bundle behavior
 - `CMAKE_BUILD_TYPE=Release`: Optimized release build
-- `OPT_BUILD_PLUTOSDR_SOURCE=OFF`: Disable PlutoSDR (requires libiio)
+- `OPT_BUILD_PLUTOSDR_SOURCE=ON`: **NEW** - Enables PlutoSDR source module (requires libiio and libad9361 from MacPorts)
 
 **⚠️ IMPORTANT: macOS Deployment Target Change**
 - **Previous versions** used `CMAKE_OSX_DEPLOYMENT_TARGET=10.15`

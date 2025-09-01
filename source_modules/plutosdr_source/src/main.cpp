@@ -55,10 +55,19 @@ public:
         // Enumerate devices
         refresh();
 
-        // Select device
+        // Load manual IP configuration
         config.acquire();
         devDesc = config.conf["device"];
+        if (config.conf.contains("manualIP")) {
+            std::string ipStr = config.conf["manualIP"];
+            strcpy(manualIP, ipStr.c_str());
+        }
+        if (config.conf.contains("useManualIP")) {
+            useManualIP = config.conf["useManualIP"];
+        }
         config.release();
+        
+        // Select device
         select(devDesc);
 
         // Register source
@@ -186,6 +195,13 @@ private:
         
         // Destroy scan context
         iio_scan_context_destroy(sctx);
+
+        // Add manual IP entry if enabled
+        if (useManualIP && strlen(manualIP) > 0) {
+            std::string manualURI = "ip:" + std::string(manualIP);
+            std::string manualName = "Manual IP (" + std::string(manualIP) + ")";
+            devices.define(manualName, manualName, manualURI);
+        }
 
 #ifdef __ANDROID__
         // On Android, a default IP entry must be made (TODO: This is not ideal since the IP cannot be changed)
@@ -391,6 +407,31 @@ private:
         }
         if (_this->running) { SmGui::EndDisabled(); }
 
+        // Manual IP configuration section
+        if (SmGui::Checkbox(CONCAT("Use Manual IP##_pluto_manual_ip_", _this->name), &_this->useManualIP)) {
+            config.acquire();
+            config.conf["useManualIP"] = _this->useManualIP;
+            config.release(true);
+            // Refresh device list to include/exclude manual IP entry
+            _this->refresh();
+            _this->select(_this->devDesc);
+            core::setInputSampleRate(_this->samplerate);
+        }
+
+        if (_this->useManualIP) {
+            SmGui::LeftLabel("IP Address");
+            SmGui::FillWidth();
+            if (SmGui::InputText(CONCAT("##_pluto_manual_ip_input_", _this->name), _this->manualIP, 1024)) {
+                config.acquire();
+                config.conf["manualIP"] = std::string(_this->manualIP);
+                config.release(true);
+                // Refresh device list to update manual IP entry
+                _this->refresh();
+                _this->select(_this->devDesc);
+                core::setInputSampleRate(_this->samplerate);
+            }
+        }
+
         SmGui::LeftLabel("Bandwidth");
         SmGui::FillWidth();
         if (SmGui::Combo(CONCAT("##_pluto_bw_", _this->name), &_this->bwId, _this->bandwidths.txt)) {
@@ -516,6 +557,10 @@ private:
     int bwId = 0;
     int gmId = 0;
 
+    // Manual IP address configuration
+    char manualIP[1024] = "192.168.2.1";
+    bool useManualIP = false;
+
     OptionList<std::string, std::string> devices;
     OptionList<int, double> samplerates;
     OptionList<int, double> bandwidths;
@@ -526,13 +571,19 @@ MOD_EXPORT void _INIT_() {
     json defConf = {};
     defConf["device"] = "";
     defConf["devices"] = {};
+    defConf["manualIP"] = "192.168.2.1";
+    defConf["useManualIP"] = false;
     config.setPath(core::args["root"].s() + "/plutosdr_source_config.json");
     config.load(defConf);
     config.enableAutoSave();
 
-    // Reset the configuration if the old format is still used
+    // Reset the configuration if the old format is still used or missing new fields
     config.acquire();
-    if (!config.conf.contains("device") || !config.conf.contains("devices")) {
+    if (!config.conf.contains("device") || !config.conf.contains("devices") || 
+        !config.conf.contains("manualIP") || !config.conf.contains("useManualIP")) {
+        // Preserve existing device and devices if they exist
+        if (config.conf.contains("device")) { defConf["device"] = config.conf["device"]; }
+        if (config.conf.contains("devices")) { defConf["devices"] = config.conf["devices"]; }
         config.conf = defConf;
         config.release(true);
     }
