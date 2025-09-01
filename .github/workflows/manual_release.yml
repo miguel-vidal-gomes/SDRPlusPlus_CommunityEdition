@@ -35,7 +35,30 @@ permissions:
   actions: read
 
 jobs:
+  check_permissions:
+    runs-on: ubuntu-latest
+    outputs:
+      can_release: ${{ steps.check.outputs.can_release }}
+    steps:
+    - name: Check if user has admin permissions
+      id: check
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # Check if the triggering user has admin or maintain permissions
+        USER_PERMISSION=$(gh api repos/${{ github.repository }}/collaborators/${{ github.actor }}/permission --jq '.permission')
+        echo "User ${{ github.actor }} has permission: $USER_PERMISSION"
+        
+        if [[ "$USER_PERMISSION" == "admin" || "$USER_PERMISSION" == "maintain" ]]; then
+          echo "can_release=true" >> $GITHUB_OUTPUT
+          echo "✅ User has sufficient permissions to create releases"
+        else
+          echo "can_release=false" >> $GITHUB_OUTPUT
+          echo "❌ User does not have admin/maintain permissions"
+          exit 1
+        fi
   build_windows:
+    needs: check_permissions
     runs-on: windows-latest
 
     steps:
