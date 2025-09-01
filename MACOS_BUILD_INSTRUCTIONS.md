@@ -17,7 +17,7 @@ Install all dependencies via Homebrew and MacPorts:
 brew install fftw glfw volk zstd
 
 # SDR Hardware support (Homebrew)
-brew install airspy airspyhf hackrf librtlsdr
+brew install airspy airspyhf hackrf librtlsdr soapysdr
 
 # Audio support (Homebrew)
 brew install rtaudio
@@ -61,7 +61,8 @@ mkdir build && cd build
 cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Release \
-  -DOPT_BUILD_PLUTOSDR_SOURCE=ON
+  -DOPT_BUILD_PLUTOSDR_SOURCE=ON \
+  -DOPT_BUILD_SOAPY_SOURCE=ON
 ```
 
 **Configuration Options Explained:**
