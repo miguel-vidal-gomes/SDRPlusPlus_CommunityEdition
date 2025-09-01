@@ -52,6 +52,4 @@ else (MSVC)
         target_link_directories(plutosdr_source PRIVATE ${LIBAD9361_LIBRARY_DIRS})
         target_link_libraries(plutosdr_source PRIVATE ${LIBAD9361_LIBRARIES})
     endif()
-
-    target_include_directories(plutosdr_source PRIVATE ${LIBAD9361_INCLUDE_DIRS})
 endif ()

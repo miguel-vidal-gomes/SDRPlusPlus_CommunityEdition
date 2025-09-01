@@ -17,7 +17,7 @@ Install all dependencies via Homebrew and MacPorts:
 brew install fftw glfw volk zstd
 
 # SDR Hardware support (Homebrew)
-brew install airspy airspyhf hackrf librtlsdr
+brew install airspy airspyhf hackrf librtlsdr soapysdr
 
 # Audio support (Homebrew)
 brew install rtaudio
@@ -61,7 +61,8 @@ mkdir build && cd build
 cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
   -DUSE_BUNDLE_DEFAULTS=ON \
   -DCMAKE_BUILD_TYPE=Release \
-  -DOPT_BUILD_PLUTOSDR_SOURCE=ON
+  -DOPT_BUILD_PLUTOSDR_SOURCE=ON \
+  -DOPT_BUILD_SOAPY_SOURCE=ON
 ```
 
 **Configuration Options Explained:**
@@ -69,6 +70,7 @@ cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 .. \
 - `USE_BUNDLE_DEFAULTS=ON`: **CRITICAL** - Enables proper macOS bundle behavior
 - `CMAKE_BUILD_TYPE=Release`: Optimized release build
 - `OPT_BUILD_PLUTOSDR_SOURCE=ON`: **NEW** - Enables PlutoSDR source module (requires libiio and libad9361 from MacPorts)
+- `OPT_BUILD_SOAPY_SOURCE=ON`: **NEW** - Enables SoapySDR source module (requires soapysdr from Homebrew)
 
 **⚠️ IMPORTANT: macOS Deployment Target Change**
 - **Previous versions** used `CMAKE_OSX_DEPLOYMENT_TARGET=10.15`
