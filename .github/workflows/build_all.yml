@@ -214,11 +214,17 @@ jobs:
           run: wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg && sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.0.pkg -target /
 
 
-        - name: Setup MacPorts
-          uses: melusina-org/setup-macports@v1.1.4
+        - name: Install MacPorts
+          run: |
+            # Download and install MacPorts for macOS 13 (Ventura)
+            curl -O https://distfiles.macports.org/MacPorts/MacPorts-2.8.1-13-Ventura.pkg
+            sudo installer -pkg MacPorts-2.8.1-13-Ventura.pkg -target /
+            echo "/opt/local/bin" >> $GITHUB_PATH
+            echo "/opt/local/sbin" >> $GITHUB_PATH
 
         - name: Install libiio and libad9361-iio (MacPorts)
           run: |
+            export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
             sudo port selfupdate
             sudo port install libiio libad9361-iio
 
