@@ -352,7 +352,7 @@ private:
             // Get actual sample rate from signal path - this should work!
             flog::debug("Scanner: About to call iq_frontend.getEffectiveSamplerate()");
             analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
-                            flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
+            flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
                           (double)analysis.sampleRate, (double)(analysis.sampleRate/1e6));
             
             // Note: The effective sample rate is the actual sample rate after decimation
@@ -1542,7 +1542,7 @@ private:
 
     void reset() {
         std::lock_guard<std::mutex> lck(scanMtx);
-        current = startFreq;
+            current = startFreq;
         receiving = false;
         
         // AUTO-RECORDING: Stop any active recording when scanner resets
@@ -2129,12 +2129,12 @@ private:
                     // CRITICAL FIX: Use frequency manager integration or legacy frequency stepping
                     if (useFrequencyManager) {
                         // Use frequency manager for frequency stepping
-                        if (!performFrequencyManagerScanning()) {
+                                        if (!performFrequencyManagerScanning()) {
                             // Fall back to legacy scanning if frequency manager unavailable or has no valid data
-                            flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
+                    flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
                             useFrequencyManager = false; // Switch to legacy mode permanently until restart
-                            performLegacyScanning();
-                        }
+                    performLegacyScanning();
+                }
                     } else {
                         // Legacy frequency stepping
                         if (scanUp) {
