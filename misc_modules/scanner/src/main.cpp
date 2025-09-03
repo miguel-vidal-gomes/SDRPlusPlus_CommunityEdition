@@ -349,15 +349,15 @@ private:
             // Get actual sample rate from signal path - this should work!
             flog::debug("Scanner: About to call iq_frontend.getEffectiveSamplerate()");
             analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
-            flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
-                      analysis.sampleRate, analysis.sampleRate/1e6);
+                            flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
+                          (double)analysis.sampleRate, (double)(analysis.sampleRate/1e6));
             
             // Note: The effective sample rate is the actual sample rate after decimation
             // This is the correct rate to use for FFT analysis since that's what the waterfall sees
             
             // Validate the sample rate
             if (analysis.sampleRate <= 0) {
-                flog::error("Scanner: iq_frontend returned invalid sample rate: {:.0f} Hz", analysis.sampleRate);
+                flog::error("Scanner: iq_frontend returned invalid sample rate: {:.0f} Hz", (double)analysis.sampleRate);
                 throw std::runtime_error("Invalid sample rate from iq_frontend");
             }
             
@@ -365,7 +365,7 @@ private:
             if (analysis.fftSize > 0 && analysis.sampleRate > 0) {
                 analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
                 analysis.analysisSpan = analysis.sampleRate;
-                flog::info("Scanner: Calculated FFT resolution: {:.2f} Hz/bin", analysis.fftResolution);
+                flog::info("Scanner: Calculated FFT resolution: {:.2f} Hz/bin", (double)analysis.fftResolution);
             }
             
         } catch (const std::exception& e) {
@@ -377,7 +377,7 @@ private:
             // Try to get sample rate from signal path one more time with better error handling
             try {
                 analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
-                flog::warn("Scanner: Fallback - got sample rate from signal path: {:.0f} Hz", analysis.sampleRate);
+                flog::warn("Scanner: Fallback - got sample rate from signal path: {:.0f} Hz", (double)analysis.sampleRate);
                 if (analysis.sampleRate <= 0) {
                     analysis.sampleRate = 10000000.0; // 10MHz default for modern SDRs
                     flog::warn("Scanner: Sample rate was <= 0, using 10MHz default");
@@ -1000,7 +1000,7 @@ private:
                     SCAN_DEBUG("Scanner: Auto-resuming scanning after blacklisting frequency");
                     
                 } else {
-                    flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", currentFreq);
+                    flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", (double)currentFreq);
                 }
             } else {
                 flog::warn("Scanner: No VFO selected, cannot blacklist current frequency");
@@ -1471,7 +1471,7 @@ private:
         // MUTE WHILE SCANNING: Apply mute when scanner starts
         applyMuteWhileScanning();
         
-        flog::info("Scanner: Starting scanner from {:.3f} MHz", current / 1e6);
+        flog::info("Scanner: Starting scanner from {:.3f} MHz", (double)(current / 1e6));
         
         running = true;
         
@@ -1554,7 +1554,7 @@ private:
         // MUTE WHILE SCANNING: Restore squelch when scanner is reset
         restoreMuteWhileScanning();
         
-        flog::warn("Scanner: Reset to start frequency {:.0f} Hz", startFreq);
+        flog::warn("Scanner: Reset to start frequency {:.0f} Hz", (double)startFreq);
     }
 
     void saveConfig() {
@@ -1795,7 +1795,7 @@ private:
                 // Ensure current frequency is within bounds
                 // PERFORMANCE-CRITICAL: Ensure current frequency is within bounds (legacy mode only)
                 if (!useFrequencyManager && (current < currentStart || current > currentStop)) {
-                    flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
+                    flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", (double)current);
                     current = currentStart;
                 }
                 // Record tuning time for debounce
@@ -1906,7 +1906,7 @@ private:
                     effectiveVfoWidth = baseVfoWidth;
                     static bool loggedBandMode = false;
                     if (!loggedBandMode && useFrequencyManager) {
-                        flog::info("Scanner: Band scanning mode - using full VFO bandwidth ({:.1f} kHz) for signal detection", baseVfoWidth / 1000.0);
+                        flog::info("Scanner: Band scanning mode - using full VFO bandwidth ({:.1f} kHz) for signal detection", (double)(baseVfoWidth / 1000.0));
                         loggedBandMode = true;
                     }
                 }
