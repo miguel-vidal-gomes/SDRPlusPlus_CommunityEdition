@@ -3904,9 +3904,7 @@ private:
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
         
-        // Create date-based directory structure: YYYY/MM/DD
-        char dateDir[32];
-        snprintf(dateDir, sizeof(dateDir), "%04d/%02d/%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+        // No nested directories - put date in filename instead
         
         // Generate filename with template replacement
         std::string filename = autoRecordNameTemplate;
@@ -3933,9 +3931,9 @@ private:
             filename = std::regex_replace(filename, regexPatterns[i], replacements[i]);
         }
         
-        // Construct full path
+        // Construct full path (single directory, date in filename)
         std::string basePath = autoRecordFolderSelect.expandString(autoRecordFolderSelect.path);
-        std::string fullPath = basePath + "/" + dateDir + "/" + filename + ".wav";
+        std::string fullPath = basePath + "/" + filename + ".wav";
         return fullPath;
     }
     
@@ -3957,11 +3955,13 @@ private:
         std::string filepath = generateRecordingFilename(frequency, mode);
         flog::info("Scanner: Generated recording filename: {}", filepath);
         
-        // Create directory if it doesn't exist
+        // Create base recording directory if it doesn't exist
         std::filesystem::path dir = std::filesystem::path(filepath).parent_path();
         try {
-            std::filesystem::create_directories(dir);
-            flog::info("Scanner: Created recording directory: {}", dir.string());
+            if (!std::filesystem::exists(dir)) {
+                std::filesystem::create_directories(dir);
+                flog::info("Scanner: Created recording directory: {}", dir.string());
+            }
         } catch (const std::exception& e) {
             flog::error("Scanner: Failed to create recording directory: {}", e.what());
             return;
