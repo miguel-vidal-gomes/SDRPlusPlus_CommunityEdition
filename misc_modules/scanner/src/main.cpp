@@ -125,6 +125,9 @@ public:
         gui::menu.registerEntry(name, menuHandler, this, NULL);
         loadConfig();
         
+        // Check for midnight reset on module initialization
+        checkMidnightReset();
+        
         // Register scanner interface for external communication
         core::modComManager.registerInterface("scanner", name, scannerInterfaceHandler, this);
         
@@ -1438,6 +1441,13 @@ private:
             
             ImGui::LeftLabel("Files Today");
             ImGui::Text("%d", _this->recordingFilesCount);
+            ImGui::SameLine();
+            if (ImGui::Button("Reset##files_today_reset")) {
+                _this->resetFilesTodayCounter();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reset the daily file counter to 0\n(Counter also resets automatically at midnight)");
+            }
         }
         
         // Draw signal analysis tooltip near VFO if enabled and signal detected
@@ -1608,6 +1618,7 @@ private:
         config.conf["autoRecordMinDuration"] = autoRecordMinDuration;
         config.conf["recordingFilesCount"] = recordingFilesCount;
         config.conf["recordingSequenceNum"] = recordingSequenceNum;
+        config.conf["lastResetDate"] = lastResetDate;
         config.conf["autoRecordPath"] = autoRecordFolderSelect.path;
         config.conf["autoRecordNameTemplate"] = std::string(autoRecordNameTemplate);
         
@@ -1680,6 +1691,7 @@ private:
         autoRecordMinDuration = config.conf.value("autoRecordMinDuration", 5.0f);
         recordingFilesCount = config.conf.value("recordingFilesCount", 0);
         recordingSequenceNum = config.conf.value("recordingSequenceNum", 1);
+        lastResetDate = config.conf.value("lastResetDate", "");
         
         if (config.conf.contains("autoRecordPath")) {
             autoRecordFolderSelect.setPath(config.conf["autoRecordPath"]);
@@ -1717,8 +1729,21 @@ private:
             // Initialize timer for sleep_until to reduce drift
             auto nextWakeTime = std::chrono::steady_clock::now();
             
+            // Check for midnight reset on startup
+            checkMidnightReset();
+            
+            // Track midnight reset checks (check every ~10 minutes during scanning)
+            auto lastMidnightCheck = std::chrono::steady_clock::now();
+            const auto midnightCheckInterval = std::chrono::minutes(10);
+            
             // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
             while (running) {
+                // Periodic midnight reset check (every 10 minutes)
+                auto now = std::chrono::steady_clock::now();
+                if (now - lastMidnightCheck >= midnightCheckInterval) {
+                    checkMidnightReset();
+                    lastMidnightCheck = now;
+                }
                     // Implement actual scan rate control with different max based on unlock status
                     // Safety guard against division by zero and enforce limits
                     const int maxHz = unlockHighSpeed ? MAX_SCAN_RATE : NORMAL_MAX_SCAN_RATE;
@@ -3838,8 +3863,37 @@ private:
     std::string recordingMode = "Unknown";
     int recordingSequenceNum = 1;
     int recordingFilesCount = 0;
+    std::string lastResetDate = "";
     
     // Auto-recording helper methods
+    void checkMidnightReset() {
+        auto now = std::time(nullptr);
+        auto tm = *std::localtime(&now);
+        
+        // Get current date as YYYY-MM-DD string
+        char dateBuffer[11];
+        snprintf(dateBuffer, sizeof(dateBuffer), "%04d-%02d-%02d", 
+                tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+        std::string currentDate(dateBuffer);
+        
+        // Check if we've crossed midnight (date changed)
+        if (lastResetDate != currentDate) {
+            if (!lastResetDate.empty()) {
+                flog::info("Scanner: Midnight reset - Files Today counter reset from {} to 0", recordingFilesCount);
+            }
+            recordingFilesCount = 0;
+            lastResetDate = currentDate;
+            saveConfig(); // Persist the reset
+        }
+    }
+    
+    void resetFilesTodayCounter() {
+        int oldCount = recordingFilesCount;
+        recordingFilesCount = 0;
+        saveConfig();
+        flog::info("Scanner: Manual reset - Files Today counter reset from {} to 0", oldCount);
+    }
+    
     std::string generateRecordingFilename(double frequency, const std::string& mode) {
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
@@ -4050,6 +4104,7 @@ MOD_EXPORT void _INIT_() {
     def["autoRecordNameTemplate"] = "$y-$M-$d_$h-$m-$s_$f_$r_$n";
     def["recordingFilesCount"] = 0;
     def["recordingSequenceNum"] = 1;
+    def["lastResetDate"] = "";
 
     config.setPath(core::args["root"].s() + "/scanner_config.json");
     config.load(def);
