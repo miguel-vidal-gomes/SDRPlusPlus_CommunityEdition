@@ -15,6 +15,10 @@
 #include <cstdint>  // For uintptr_t
 #include "scanner_log.h" // Custom logging macros
 #include <gui/widgets/precision_slider.h>
+#include <gui/widgets/folder_select.h>
+#include <filesystem>
+#include <regex>
+#include "../../recorder/src/recorder_interface.h"
 
 // Windows MSVC compatibility 
 #ifdef _WIN32
@@ -103,19 +107,7 @@ struct TuningProfile {
 
 class ScannerModule : public ModuleManager::Instance {
 public:
-    // Module interface handler for external communication
-    static void scannerInterfaceHandler(int code, void* in, void* out, void* ctx) {
-        ScannerModule* _this = (ScannerModule*)ctx;
-        switch (code) {
-            case SCANNER_IFACE_CMD_GET_RUNNING:
-                if (out != NULL) {
-                    *(bool*)out = _this->running;
-                }
-                break;
-        }
-    }
-
-    ScannerModule(std::string name) {
+    ScannerModule(std::string name) : autoRecordFolderSelect("%ROOT%/scanner_recordings") {
         this->name = name;
         
         // Initialize time points to current time to prevent crashes
@@ -1396,6 +1388,58 @@ private:
             _this->saveConfig(); // Save in background, doesn't block UI
         }
         
+        // === AUTO-RECORDING CONTROLS ===
+        ImGui::Spacing();
+        ImGui::Text("Auto Recording");
+        ImGui::Separator();
+        
+        if (ImGui::Checkbox("Auto Record##scanner_auto_record", &_this->autoRecord)) {
+            _this->saveConfig();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically record detected signals to separate files");
+        }
+        
+        if (_this->autoRecord) {
+            ImGui::LeftLabel("Recording Path");
+            if (_this->autoRecordFolderSelect.render("##scanner_record_path")) {
+                _this->saveConfig();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Directory where recording files will be saved");
+            }
+            
+            ImGui::LeftLabel("Min Duration (s)");
+            if (ImGui::PrecisionSliderFloat(("##scanner_min_duration_" + _this->name).c_str(), &_this->autoRecordMinDuration, 1, 60, "%.0f")) {
+                _this->saveConfig();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Minimum recording duration in seconds\nRecordings shorter than this will be deleted");
+            }
+            
+            // Recording status
+            const char* statusLabels[] = {"Disabled", "Waiting for Signal", "Recording", "Suspended (Manual)"};
+            const ImVec4 statusColors[] = {
+                ImVec4(0.5f, 0.5f, 0.5f, 1.0f), // Gray for disabled
+                ImVec4(1.0f, 1.0f, 0.0f, 1.0f), // Yellow for waiting
+                ImVec4(0.0f, 1.0f, 0.0f, 1.0f), // Green for recording
+                ImVec4(1.0f, 0.5f, 0.0f, 1.0f)  // Orange for suspended
+            };
+            
+            ImGui::LeftLabel("Status");
+            int statusIndex = (int)_this->recordingControlState;
+            if (statusIndex >= 0 && statusIndex < 4) {
+                ImGui::TextColored(statusColors[statusIndex], "%s", statusLabels[statusIndex]);
+                if (_this->recordingControlState == RECORDING_ACTIVE) {
+                    ImGui::SameLine();
+                    ImGui::Text("(%.1f MHz)", _this->recordingFrequency / 1e6);
+                }
+            }
+            
+            ImGui::LeftLabel("Files Today");
+            ImGui::Text("%d", _this->recordingFilesCount);
+        }
+        
         // Draw signal analysis tooltip near VFO if enabled and signal detected
         _this->drawSignalTooltip();
     }
@@ -1456,6 +1500,11 @@ private:
         if (!running) { return; }
         running = false;
         
+        // AUTO-RECORDING: Stop any active recording when scanner stops
+        if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+            stopAutoRecording();
+        }
+        
         // Restore squelch level if modified
         if (squelchDeltaActive) {
             restoreSquelchLevel();
@@ -1479,8 +1528,13 @@ private:
 
     void reset() {
         std::lock_guard<std::mutex> lck(scanMtx);
-            current = startFreq;
+        current = startFreq;
         receiving = false;
+        
+        // AUTO-RECORDING: Stop any active recording when scanner resets
+        if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+            stopAutoRecording();
+        }
         tuning = false;
         reverseLock = false;
         
@@ -1549,6 +1603,14 @@ private:
         // NOTE: useFrequencyManager and applyProfiles are now always enabled (no longer configurable)
         config.conf["scanRateHz"] = scanRateHz;
         
+        // Save auto-recording settings
+        config.conf["autoRecord"] = autoRecord;
+        config.conf["autoRecordMinDuration"] = autoRecordMinDuration;
+        config.conf["recordingFilesCount"] = recordingFilesCount;
+        config.conf["recordingSequenceNum"] = recordingSequenceNum;
+        config.conf["autoRecordPath"] = autoRecordFolderSelect.path;
+        config.conf["autoRecordNameTemplate"] = std::string(autoRecordNameTemplate);
+        
         config.release(true);
     }
 
@@ -1612,6 +1674,23 @@ private:
         // Load frequency manager integration settings
         // NOTE: useFrequencyManager and applyProfiles are now always true (simplified UI)
         scanRateHz = config.conf.value("scanRateHz", 25);
+        
+        // Load auto-recording settings
+        autoRecord = config.conf.value("autoRecord", false);
+        autoRecordMinDuration = config.conf.value("autoRecordMinDuration", 5.0f);
+        recordingFilesCount = config.conf.value("recordingFilesCount", 0);
+        recordingSequenceNum = config.conf.value("recordingSequenceNum", 1);
+        
+        if (config.conf.contains("autoRecordPath")) {
+            autoRecordFolderSelect.setPath(config.conf["autoRecordPath"]);
+        }
+        
+        if (config.conf.contains("autoRecordNameTemplate")) {
+            std::string nameTemplate = config.conf["autoRecordNameTemplate"];
+            if (nameTemplate.length() < sizeof(autoRecordNameTemplate)) {
+                strcpy(autoRecordNameTemplate, nameTemplate.c_str());
+            }
+        }
         
         config.release();
         
@@ -1893,6 +1972,11 @@ private:
                             receiving = false;
                             SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
                             
+                            // AUTO-RECORDING: Stop recording when signal lost (linger time expired)
+                            if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+                                stopAutoRecording();
+                            }
+                            
                             // SIGNAL ANALYSIS: Clear signal info when signal is lost
                             if (showSignalInfo) {
                                 lastSignalStrength = -100.0f;
@@ -1940,6 +2024,22 @@ private:
                             SCAN_DEBUG("Scanner: Setting receiving=true for single frequency signal at %.6f MHz (level: %.1f)\n", current / 1e6, maxLevel);
                             lastSignalTime = now;
                             flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
+                            
+                            // AUTO-RECORDING: Start recording when signal detected
+                            if (autoRecord) {
+                                flog::info("Scanner: Signal detected at {:.3f} MHz, recording state: {}", 
+                                          current / 1e6, (int)recordingControlState);
+                                if (recordingControlState == RECORDING_IDLE) {
+                                    startAutoRecording(current, getCurrentMode());
+                                } else if (recordingControlState == RECORDING_ACTIVE) {
+                                    // Extend current recording - update frequency if changed significantly
+                                    if (std::abs(current - recordingFrequency) > 10000.0) { // 10kHz threshold
+                                        flog::info("Scanner: Signal moved from {:.3f} to {:.3f} MHz during recording", 
+                                                  recordingFrequency / 1e6, current / 1e6);
+                                        recordingFrequency = current; // Update tracked frequency
+                                    }
+                                }
+                            }
                             
                             // SIGNAL ANALYSIS: Calculate and store signal info for display
                             if (showSignalInfo) {
@@ -2151,6 +2251,22 @@ private:
                 found = true;
                 receiving = true;
                 current = peakFreq;
+                
+                // AUTO-RECORDING: Start recording when signal detected
+                if (autoRecord) {
+                    flog::info("Scanner: Signal detected at {:.3f} MHz, recording state: {}", 
+                              current / 1e6, (int)recordingControlState);
+                    if (recordingControlState == RECORDING_IDLE) {
+                        startAutoRecording(current, getCurrentMode());
+                    } else if (recordingControlState == RECORDING_ACTIVE) {
+                        // Extend current recording - update frequency if changed significantly
+                        if (std::abs(current - recordingFrequency) > 10000.0) { // 10kHz threshold
+                            flog::info("Scanner: Signal moved from {:.3f} to {:.3f} MHz during recording", 
+                                      recordingFrequency / 1e6, current / 1e6);
+                            recordingFrequency = current; // Update tracked frequency
+                        }
+                    }
+                }
                 
                 // SIGNAL ANALYSIS: Calculate and store signal info for display
                 if (showSignalInfo) {
@@ -3703,6 +3819,190 @@ private:
     static constexpr int PASSBAND_VALUES_COUNT = 7;
     int passbandIndex = 6; // Default to 100% (index 6, recommended starting point)
     
+    // Auto-recording functionality
+    bool autoRecord = false;
+    FolderSelect autoRecordFolderSelect;
+    float autoRecordMinDuration = 5.0f;  // Minimum recording duration in seconds
+    char autoRecordNameTemplate[256] = "$y-$M-$d_$h-$m-$s_$f_$r_$n";
+    
+    // Recording control state
+    enum RecordingControlState {
+        RECORDING_DISABLED = 0,
+        RECORDING_IDLE = 1,
+        RECORDING_ACTIVE = 2,
+        RECORDING_SUSPENDED = 3
+    };
+    RecordingControlState recordingControlState = RECORDING_IDLE;
+    std::chrono::high_resolution_clock::time_point recordingStartTime;
+    double recordingFrequency = 0.0;
+    std::string recordingMode = "Unknown";
+    int recordingSequenceNum = 1;
+    int recordingFilesCount = 0;
+    
+    // Auto-recording helper methods
+    std::string generateRecordingFilename(double frequency, const std::string& mode) {
+        auto now = std::time(nullptr);
+        auto tm = *std::localtime(&now);
+        
+        // Create date-based directory structure: YYYY/MM/DD
+        char dateDir[32];
+        snprintf(dateDir, sizeof(dateDir), "%04d/%02d/%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+        
+        // Generate filename with template replacement
+        std::string filename = autoRecordNameTemplate;
+        
+        // Replace template variables
+        std::regex regexPatterns[] = {
+            std::regex("\\$y"), std::regex("\\$M"), std::regex("\\$d"),
+            std::regex("\\$h"), std::regex("\\$m"), std::regex("\\$s"),
+            std::regex("\\$f"), std::regex("\\$r"), std::regex("\\$n")
+        };
+        
+        char replacements[9][32];
+        snprintf(replacements[0], sizeof(replacements[0]), "%04d", tm.tm_year + 1900);
+        snprintf(replacements[1], sizeof(replacements[1]), "%02d", tm.tm_mon + 1);
+        snprintf(replacements[2], sizeof(replacements[2]), "%02d", tm.tm_mday);
+        snprintf(replacements[3], sizeof(replacements[3]), "%02d", tm.tm_hour);
+        snprintf(replacements[4], sizeof(replacements[4]), "%02d", tm.tm_min);
+        snprintf(replacements[5], sizeof(replacements[5]), "%02d", tm.tm_sec);
+        snprintf(replacements[6], sizeof(replacements[6]), "%.0f", frequency);
+        snprintf(replacements[7], sizeof(replacements[7]), "%s", mode.c_str());
+        snprintf(replacements[8], sizeof(replacements[8]), "%03d", recordingSequenceNum);
+        
+        for (int i = 0; i < 9; i++) {
+            filename = std::regex_replace(filename, regexPatterns[i], replacements[i]);
+        }
+        
+        // Construct full path
+        std::string basePath = autoRecordFolderSelect.expandString(autoRecordFolderSelect.path);
+        std::string fullPath = basePath + "/" + dateDir + "/" + filename + ".wav";
+        return fullPath;
+    }
+    
+    void startAutoRecording(double frequency, const std::string& mode) {
+        if (recordingControlState != RECORDING_IDLE || !autoRecordFolderSelect.pathIsValid()) {
+            flog::warn("Scanner: Cannot start recording - state: {}, path valid: {}", 
+                      (int)recordingControlState, autoRecordFolderSelect.pathIsValid());
+            return;
+        }
+        
+        // Check if Recorder module interface exists
+        if (!core::modComManager.interfaceExists("Recorder")) {
+            flog::error("Scanner: Recorder module interface not found - is Recorder module loaded?");
+            return;
+        }
+        flog::info("Scanner: Recorder module interface found");
+        
+        // Generate unique filename
+        std::string filepath = generateRecordingFilename(frequency, mode);
+        flog::info("Scanner: Generated recording filename: {}", filepath);
+        
+        // Create directory if it doesn't exist
+        std::filesystem::path dir = std::filesystem::path(filepath).parent_path();
+        try {
+            std::filesystem::create_directories(dir);
+            flog::info("Scanner: Created recording directory: {}", dir.string());
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Failed to create recording directory: {}", e.what());
+            return;
+        }
+        
+        // Set recorder to audio mode first
+        int audioMode = RECORDER_MODE_AUDIO;
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_SET_MODE, &audioMode, nullptr)) {
+            flog::error("Scanner: Failed to set recorder to audio mode");
+            return;
+        }
+        flog::info("Scanner: Set recorder to audio mode");
+        
+        // Set external control
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_SET_EXTERNAL_CONTROL, (void*)"Scanner", nullptr)) {
+            flog::error("Scanner: Failed to set external control on Recorder module");
+            return;
+        }
+        flog::info("Scanner: Set external control to Scanner");
+        
+        // Start recording with custom filename
+        const char* filenamePtr = filepath.c_str();
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_START_WITH_FILENAME, (void*)filenamePtr, nullptr)) {
+            flog::error("Scanner: Failed to start recording with filename: {}", filepath);
+            return;
+        }
+        
+        recordingControlState = RECORDING_ACTIVE;
+        recordingStartTime = std::chrono::high_resolution_clock::now();
+        recordingFrequency = frequency;
+        recordingMode = mode;
+        
+        flog::info("Scanner: Started auto-recording: {}", filepath);
+    }
+    
+    void stopAutoRecording() {
+        if (recordingControlState != RECORDING_ACTIVE) {
+            return;
+        }
+        
+        // Calculate recording duration
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - recordingStartTime);
+        
+        // Stop recorder interface
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_STOP, nullptr, nullptr)) {
+            flog::error("Scanner: Failed to stop recording");
+        } else {
+            flog::info("Scanner: Successfully stopped recording");
+        }
+        
+        // Check minimum duration and delete file if too short
+        if (duration.count() < autoRecordMinDuration) {
+            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", duration.count(), autoRecordMinDuration);
+            // Delete the short file
+            std::string filepath = generateRecordingFilename(recordingFrequency, recordingMode);
+            try {
+                std::filesystem::remove(filepath);
+                flog::info("Scanner: Deleted short recording file: {}", filepath);
+            } catch (const std::exception& e) {
+                flog::warn("Scanner: Failed to delete short recording file: {}", e.what());
+            }
+        } else {
+            recordingFilesCount++;
+            recordingSequenceNum++;
+            flog::info("Scanner: Completed auto-recording ({}s), saved as file #{}", duration.count(), recordingFilesCount);
+        }
+        
+        recordingControlState = RECORDING_IDLE;
+        saveConfig(); // Save updated counters
+    }
+    
+    std::string getCurrentMode() {
+        if (gui::waterfall.selectedVFO.empty()) {
+            return "Unknown";
+        }
+        
+        std::string vfoName = gui::waterfall.selectedVFO;
+        if (core::modComManager.getModuleName(vfoName) == "radio") {
+            int mode = -1;
+            core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_GET_MODE, NULL, &mode);
+            if (mode >= 0) {
+                // Map radio modes to strings (from recorder module)
+                const char* radioModeStrings[] = {"NFM", "WFM", "AM", "DSB", "USB", "CW", "LSB", "RAW"};
+                if (mode < 8) return radioModeStrings[mode];
+            }
+        }
+        return "Unknown";
+    }
+    
+    // Module interface handler for external communication
+    static void scannerInterfaceHandler(int code, void* in, void* out, void* ctx) {
+        ScannerModule* _this = (ScannerModule*)ctx;
+        switch (code) {
+            case SCANNER_IFACE_CMD_GET_RUNNING:
+                if (out != NULL) {
+                    *(bool*)out = _this->running;
+                }
+                break;
+        }
+    }
 
 };
 
@@ -3742,6 +4042,14 @@ MOD_EXPORT void _INIT_() {
     
     // Frequency manager integration (now always enabled for simplified operation)
     def["scanRateHz"] = 25;                 // 25 scans per second (recommended starting point)
+    
+    // Auto-recording defaults
+    def["autoRecord"] = false;
+    def["autoRecordMinDuration"] = 5.0f;
+    def["autoRecordPath"] = "%ROOT%/scanner_recordings";
+    def["autoRecordNameTemplate"] = "$y-$M-$d_$h-$m-$s_$f_$r_$n";
+    def["recordingFilesCount"] = 0;
+    def["recordingSequenceNum"] = 1;
 
     config.setPath(core::args["root"].s() + "/scanner_config.json");
     config.load(def);
