@@ -925,13 +925,10 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout (needed for creating release)
+    - name: Checkout for tagging
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
-    - name: Checkout specific commit SHA
-      run: git checkout ${{ inputs.commit_sha }}
 
     - name: Point origin to tokened URL
       env:
@@ -947,16 +944,21 @@ jobs:
         set -euo pipefail
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        
-        # Create the tag at the specified commit
         git tag -a "${{ inputs.release_tag }}" "${{ inputs.commit_sha }}" -m "Release ${{ inputs.release_tag }}"
-        git push origin "${{ inputs.release_tag }}"
+        git push origin "refs/tags/${{ inputs.release_tag }}"
 
     - name: Download consolidated artifact
       uses: actions/download-artifact@v4
       with:
         name: sdrpp_all
         path: sdrpp_all
+
+    - name: Get full commit SHA
+      id: get_sha
+      run: |
+        FULL_SHA=$(git rev-parse ${{ inputs.commit_sha }})
+        echo "full_sha=$FULL_SHA" >> $GITHUB_OUTPUT
+        echo "Full SHA: $FULL_SHA"
 
     - name: Create GitHub release
       env:
@@ -967,13 +969,13 @@ jobs:
           gh release create "${{ inputs.release_tag }}" \
             --title "${{ inputs.release_title }}" \
             --notes "${{ inputs.release_description }}" \
-            --target "${{ inputs.commit_sha }}" \
+            --target "${{ steps.get_sha.outputs.full_sha }}" \
             --prerelease \
             sdrpp_all/*
         else
           gh release create "${{ inputs.release_tag }}" \
             --title "${{ inputs.release_title }}" \
             --notes "${{ inputs.release_description }}" \
-            --target "${{ inputs.commit_sha }}" \
+            --target "${{ steps.get_sha.outputs.full_sha }}" \
             sdrpp_all/*
         fi

@@ -1,0 +1,292 @@
+name: Clean Up Failed Workflow Runs
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_age_days:
+        description: 'Maximum age of runs to delete (in days)'
+        required: false
+        type: number
+        default: 30
+      dry_run:
+        description: 'Dry run - show what would be deleted without actually deleting'
+        required: false
+        type: boolean
+        default: true
+      delete_cancelled:
+        description: 'Delete cancelled workflow runs'
+        required: false
+        type: boolean
+        default: true
+      delete_errored:
+        description: 'Delete failed/errored workflow runs'
+        required: false
+        type: boolean
+        default: true
+      delete_timed_out:
+        description: 'Delete timed out workflow runs'
+        required: false
+        type: boolean
+        default: true
+      workflow_name:
+        description: 'Specific workflow name to clean (leave empty for all workflows)'
+        required: false
+        type: string
+        default: ''
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  check_permissions:
+    runs-on: ubuntu-latest
+    outputs:
+      can_cleanup: ${{ steps.check.outputs.can_cleanup }}
+    steps:
+    - name: Check if user has admin permissions
+      id: check
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        # Check if the triggering user has admin or maintain permissions
+        USER_PERMISSION=$(gh api repos/${{ github.repository }}/collaborators/${{ github.actor }}/permission --jq '.permission')
+        echo "User ${{ github.actor }} has permission: $USER_PERMISSION"
+        
+        if [[ "$USER_PERMISSION" == "admin" || "$USER_PERMISSION" == "maintain" ]]; then
+          echo "can_cleanup=true" >> $GITHUB_OUTPUT
+          echo "✅ User has sufficient permissions to delete workflow runs"
+        else
+          echo "can_cleanup=false" >> $GITHUB_OUTPUT
+          echo "❌ User does not have admin/maintain permissions"
+          exit 1
+        fi
+
+  cleanup_workflow_runs:
+    needs: check_permissions
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup cleanup parameters
+      id: setup
+      run: |
+        echo "Setting up cleanup parameters..."
+        
+        # Calculate cutoff date for age filtering
+        if [ "${{ inputs.max_age_days }}" != "" ] && [ "${{ inputs.max_age_days }}" != "0" ]; then
+          CUTOFF_DATE=$(date -d "${{ inputs.max_age_days }} days ago" +%Y-%m-%d)
+          echo "cutoff_date=$CUTOFF_DATE" >> $GITHUB_OUTPUT
+          echo "📅 Will only delete runs older than: $CUTOFF_DATE"
+        else
+          echo "cutoff_date=" >> $GITHUB_OUTPUT
+          echo "📅 No age restriction applied"
+        fi
+        
+        # Setup status filters
+        STATUSES=()
+        if [ "${{ inputs.delete_cancelled }}" = "true" ]; then
+          STATUSES+=("cancelled")
+        fi
+        if [ "${{ inputs.delete_errored }}" = "true" ]; then
+          STATUSES+=("failure")
+        fi
+        if [ "${{ inputs.delete_timed_out }}" = "true" ]; then
+          STATUSES+=("timed_out")
+        fi
+        
+        if [ ${#STATUSES[@]} -eq 0 ]; then
+          echo "❌ No statuses selected for deletion"
+          exit 1
+        fi
+        
+        # Join statuses with comma
+        STATUS_LIST=$(IFS=','; echo "${STATUSES[*]}")
+        echo "status_list=$STATUS_LIST" >> $GITHUB_OUTPUT
+        echo "🎯 Will target runs with statuses: $STATUS_LIST"
+        
+        if [ "${{ inputs.dry_run }}" = "true" ]; then
+          echo "🔍 DRY RUN MODE - No actual deletions will be performed"
+        else
+          echo "⚠️  LIVE MODE - Runs will be permanently deleted"
+        fi
+
+    - name: List workflows and get runs to delete
+      id: list_runs
+      env:
+        CUTOFF_DATE: ${{ steps.setup.outputs.cutoff_date }}
+        STATUS_LIST: ${{ steps.setup.outputs.status_list }}
+        WORKFLOW_NAME: ${{ inputs.workflow_name }}
+      run: |
+        echo "🔍 Scanning for workflow runs to delete..."
+        
+        # Get list of workflows
+        if [ -n "$WORKFLOW_NAME" ]; then
+          echo "📋 Filtering for workflow: $WORKFLOW_NAME"
+          WORKFLOWS=$(gh api repos/${{ github.repository }}/actions/workflows --jq '.workflows[] | select(.name == "'"$WORKFLOW_NAME"'") | .id')
+        else
+          echo "📋 Scanning all workflows"
+          WORKFLOWS=$(gh api repos/${{ github.repository }}/actions/workflows --jq '.workflows[].id')
+        fi
+        
+        if [ -z "$WORKFLOWS" ]; then
+          echo "❌ No workflows found matching criteria"
+          exit 1
+        fi
+        
+        # Collect runs to delete
+        RUNS_TO_DELETE=""
+        TOTAL_RUNS=0
+        TOTAL_SIZE=0
+        
+        for workflow_id in $WORKFLOWS; do
+          echo "🔄 Checking workflow ID: $workflow_id"
+          
+          # Get workflow name for logging
+          WORKFLOW_INFO=$(gh api repos/${{ github.repository }}/actions/workflows/$workflow_id --jq '{name: .name, path: .path}')
+          WORKFLOW_NAME_ACTUAL=$(echo "$WORKFLOW_INFO" | jq -r '.name')
+          echo "  📝 Workflow: $WORKFLOW_NAME_ACTUAL"
+          
+          # Split status list and query each status
+          IFS=',' read -ra STATUSES_ARRAY <<< "$STATUS_LIST"
+          for status in "${STATUSES_ARRAY[@]}"; do
+            echo "    🔍 Checking status: $status"
+            
+            # Get runs with this status (paginated)
+            page=1
+            while true; do
+              RUNS_PAGE=$(gh api "repos/${{ github.repository }}/actions/workflows/$workflow_id/runs?status=$status&per_page=100&page=$page" \
+                --jq '.workflow_runs[]')
+              
+              if [ -z "$RUNS_PAGE" ]; then
+                break
+              fi
+              
+              # Process each run
+              while IFS= read -r run; do
+                if [ -z "$run" ] || [ "$run" = "null" ]; then
+                  continue
+                fi
+                
+                RUN_ID=$(echo "$run" | jq -r '.id')
+                RUN_DATE=$(echo "$run" | jq -r '.created_at')
+                RUN_STATUS=$(echo "$run" | jq -r '.conclusion // .status')
+                RUN_BRANCH=$(echo "$run" | jq -r '.head_branch // "unknown"')
+                RUN_COMMIT=$(echo "$run" | jq -r '.head_sha[0:7]')
+                
+                # Skip if run is too recent
+                if [ -n "$CUTOFF_DATE" ]; then
+                  RUN_DATE_ONLY=$(echo "$RUN_DATE" | cut -d'T' -f1)
+                  if [[ "$RUN_DATE_ONLY" > "$CUTOFF_DATE" ]]; then
+                    continue
+                  fi
+                fi
+                
+                # Add to deletion list
+                if [ -n "$RUNS_TO_DELETE" ]; then
+                  RUNS_TO_DELETE="$RUNS_TO_DELETE,$RUN_ID"
+                else
+                  RUNS_TO_DELETE="$RUN_ID"
+                fi
+                
+                TOTAL_RUNS=$((TOTAL_RUNS + 1))
+                echo "    ➡️  Found run: $RUN_ID ($RUN_STATUS) on $RUN_BRANCH ($RUN_COMMIT) from $RUN_DATE"
+                
+              done <<< "$RUNS_PAGE"
+              
+              page=$((page + 1))
+            done
+          done
+        done
+        
+        echo ""
+        echo "📊 SUMMARY:"
+        echo "  • Total runs found: $TOTAL_RUNS"
+        echo "  • Status filters: $STATUS_LIST"
+        if [ -n "$CUTOFF_DATE" ]; then
+          echo "  • Age filter: older than $CUTOFF_DATE"
+        fi
+        
+        if [ $TOTAL_RUNS -eq 0 ]; then
+          echo "✅ No runs found matching deletion criteria"
+          echo "runs_to_delete=" >> $GITHUB_OUTPUT
+          echo "total_runs=0" >> $GITHUB_OUTPUT
+        else
+          echo "runs_to_delete=$RUNS_TO_DELETE" >> $GITHUB_OUTPUT
+          echo "total_runs=$TOTAL_RUNS" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Delete workflow runs
+      if: steps.list_runs.outputs.total_runs != '0'
+      env:
+        RUNS_TO_DELETE: ${{ steps.list_runs.outputs.runs_to_delete }}
+        TOTAL_RUNS: ${{ steps.list_runs.outputs.total_runs }}
+        DRY_RUN: ${{ inputs.dry_run }}
+      run: |
+        if [ "$DRY_RUN" = "true" ]; then
+          echo "🔍 DRY RUN - Would delete $TOTAL_RUNS workflow runs"
+          echo "Run IDs that would be deleted:"
+          IFS=',' read -ra RUN_IDS <<< "$RUNS_TO_DELETE"
+          for run_id in "${RUN_IDS[@]}"; do
+            echo "  • $run_id"
+          done
+          echo ""
+          echo "To actually delete these runs, re-run this workflow with 'Dry run' set to false"
+          exit 0
+        fi
+        
+        echo "🗑️  DELETING $TOTAL_RUNS workflow runs..."
+        
+        DELETED_COUNT=0
+        FAILED_COUNT=0
+        
+        IFS=',' read -ra RUN_IDS <<< "$RUNS_TO_DELETE"
+        for run_id in "${RUN_IDS[@]}"; do
+          echo "Deleting run: $run_id"
+          
+          if gh api -X DELETE "repos/${{ github.repository }}/actions/runs/$run_id" 2>/dev/null; then
+            DELETED_COUNT=$((DELETED_COUNT + 1))
+            echo "  ✅ Deleted successfully"
+          else
+            FAILED_COUNT=$((FAILED_COUNT + 1))
+            echo "  ❌ Failed to delete"
+          fi
+          
+          # Add small delay to avoid rate limiting
+          sleep 0.1
+        done
+        
+        echo ""
+        echo "📊 DELETION SUMMARY:"
+        echo "  • Successfully deleted: $DELETED_COUNT runs"
+        echo "  • Failed to delete: $FAILED_COUNT runs"
+        echo "  • Total processed: $TOTAL_RUNS runs"
+        
+        if [ $FAILED_COUNT -gt 0 ]; then
+          echo "⚠️  Some deletions failed. This might be due to rate limiting or permissions."
+          exit 1
+        else
+          echo "✅ All deletions completed successfully!"
+        fi
+
+    - name: Cleanup summary
+      if: always()
+      run: |
+        echo ""
+        echo "🎯 CLEANUP WORKFLOW COMPLETED"
+        echo "================================"
+        echo "Parameters used:"
+        echo "  • Max age: ${{ inputs.max_age_days }} days"
+        echo "  • Dry run: ${{ inputs.dry_run }}"
+        echo "  • Delete cancelled: ${{ inputs.delete_cancelled }}"
+        echo "  • Delete errored: ${{ inputs.delete_errored }}"
+        echo "  • Delete timed out: ${{ inputs.delete_timed_out }}"
+        echo "  • Workflow filter: ${{ inputs.workflow_name || 'All workflows' }}"
+        echo ""
+        if [ "${{ inputs.dry_run }}" = "true" ]; then
+          echo "💡 This was a dry run. To actually delete runs, set 'Dry run' to false"
+        fi

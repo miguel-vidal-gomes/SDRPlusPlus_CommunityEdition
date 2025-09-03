@@ -27,8 +27,7 @@ bundle_is_not_to_be_installed() {
     if [ "$1" = "SystemConfiguration" ]; then echo 1; fi
     if [ "$1" = "Security" ]; then echo 1; fi
     if [ "$1" = "AppleFSCompression" ]; then echo 1; fi
-    if [ "$1" = "libsdrplay_api.so.3.14" ]; then echo 1; fi
-    if [ "$1" = "libsdrplay_api.so.3.15" ]; then echo 1; fi
+
     if [ "$1" = "libxml2.2.dylib" ]; then echo 1; fi
 }
 
@@ -66,6 +65,12 @@ bundle_get_exec_rpaths() {
 
 # bundle_find_full_path [dep_path] [exec_rpaths]
 bundle_find_full_path() {
+    # Special case for SDRPlay API library - handle absolute path lookup
+    if [ "$1" = "libsdrplay_api.so.3" ] && [ -f /usr/local/lib/libsdrplay_api.so.3 ]; then
+        echo /usr/local/lib/libsdrplay_api.so.3
+        return
+    fi
+    
     # If path is relative to rpath, find the full path
     local IS_RPATH_RELATIVE=$(echo $1 | grep @rpath/)
     if [ "$IS_RPATH_RELATIVE" = "" ]; then
@@ -94,6 +99,12 @@ bundle_find_full_path() {
     fi
     if [ -f /Library/Frameworks/$RPATH_NEXT ]; then
         echo /Library/Frameworks/$RPATH_NEXT 
+        return
+    fi
+    
+    # Special case for SDRPlay API library
+    if [ "$RPATH_NEXT" = "libsdrplay_api.so.3" ] && [ -f /usr/local/lib/libsdrplay_api.so.3 ]; then
+        echo /usr/local/lib/libsdrplay_api.so.3
         return
     fi
 
