@@ -1436,6 +1436,9 @@ private:
                 if (_this->recordingControlState == RECORDING_ACTIVE) {
                     ImGui::SameLine();
                     ImGui::Text("(%.1f MHz)", _this->recordingFrequency / 1e6);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Recording with %.0fs minimum duration\n(Captured when recording started)", _this->recordingMinDurationCapture);
+                    }
                 }
             }
             
@@ -3861,6 +3864,7 @@ private:
     std::chrono::high_resolution_clock::time_point recordingStartTime;
     double recordingFrequency = 0.0;
     std::string recordingMode = "Unknown";
+    float recordingMinDurationCapture = 5.0f;  // Captured min duration when recording started
     int recordingSequenceNum = 1;
     int recordingFilesCount = 0;
     std::string lastResetDate = "";
@@ -3987,6 +3991,7 @@ private:
         recordingStartTime = std::chrono::high_resolution_clock::now();
         recordingFrequency = frequency;
         recordingMode = mode;
+        recordingMinDurationCapture = autoRecordMinDuration;  // Capture current setting
         
         flog::info("Scanner: Started auto-recording: {}", filepath);
     }
@@ -4007,9 +4012,9 @@ private:
             flog::info("Scanner: Successfully stopped recording");
         }
         
-        // Check minimum duration and delete file if too short
-        if (duration.count() < autoRecordMinDuration) {
-            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)autoRecordMinDuration);
+        // Check minimum duration and delete file if too short (use captured value from when recording started)
+        if (duration.count() < recordingMinDurationCapture) {
+            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)recordingMinDurationCapture);
             // Delete the short file
             std::string filepath = generateRecordingFilename(recordingFrequency, recordingMode);
             try {
