@@ -1956,7 +1956,7 @@ private:
                         auto timeSinceLastCentering = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCenteringTime);
                         
                         if (timeSinceLastCentering.count() >= 100) { // Every 100ms
-                            printf("timeSinceLastCentering (%d ms)", timeSinceLastCentering.count());
+                            printf("timeSinceLastCentering (%lld ms)", (long long)timeSinceLastCentering.count());
                             
                             // Calculate dynamic centering threshold based on current tuning profile bandwidth
                             double centeringThreshold = 25000.0; // Default fallback
@@ -4009,7 +4009,7 @@ private:
         
         // Check minimum duration and delete file if too short
         if (duration.count() < autoRecordMinDuration) {
-            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", duration.count(), autoRecordMinDuration);
+            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)autoRecordMinDuration);
             // Delete the short file
             std::string filepath = generateRecordingFilename(recordingFrequency, recordingMode);
             try {
@@ -4021,7 +4021,7 @@ private:
         } else {
             recordingFilesCount++;
             recordingSequenceNum++;
-            flog::info("Scanner: Completed auto-recording ({}s), saved as file #{}", duration.count(), recordingFilesCount);
+            flog::info("Scanner: Completed auto-recording ({}s), saved as file #{}", (double)duration.count(), recordingFilesCount);
         }
         
         recordingControlState = RECORDING_IDLE;
