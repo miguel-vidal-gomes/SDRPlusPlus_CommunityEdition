@@ -1,5 +1,4 @@
 #include "digital_network_sink.h"
-#include <condition_variable>
 
 namespace digital_demod {
 

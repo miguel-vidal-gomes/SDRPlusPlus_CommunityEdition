@@ -2,6 +2,14 @@
 #include <cstdint>
 #include <string>
 
+// Cross-platform packed struct support
+#ifdef _WIN32
+    #pragma pack(push, 1)
+    #define PACKED
+#else
+    #define PACKED __attribute__((packed))
+#endif
+
 namespace digital_demod {
 
     // Protocol enumeration for digital demodulators
@@ -42,7 +50,7 @@ namespace digital_demod {
         uint8_t bits_per_symbol;         // 1 for FSK2, 2 for FSK4
         uint8_t reserved[3];             // Future expansion
         uint64_t timestamp;              // Unix timestamp in microseconds
-    } __attribute__((packed));
+    } PACKED;
 
     // File format header for recorded digital streams
     struct DigitalFileHeader {
@@ -55,7 +63,7 @@ namespace digital_demod {
         uint64_t start_timestamp;        // Recording start time
         uint64_t sample_count;           // Total samples in file
         char description[64];            // Human-readable description
-    } __attribute__((packed));
+    } PACKED;
 
     // Protocol configuration lookup table
     static const ProtocolConfig PROTOCOL_CONFIGS[] = {
@@ -90,3 +98,8 @@ namespace digital_demod {
         return config ? config->name : "Unknown";
     }
 }
+
+// Restore packing settings
+#ifdef _WIN32
+    #pragma pack(pop)
+#endif
