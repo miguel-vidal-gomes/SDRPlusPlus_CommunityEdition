@@ -1,4 +1,13 @@
 #pragma once
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+#include <utils/networking.h>
 #include <dsp/stream.h>
 #include <dsp/sink/handler_sink.h>
 #include <utils/flog.h>
@@ -9,7 +18,6 @@
 #include <chrono>
 #include <condition_variable>
 #include "protocol_types.h"
-#include <utils/networking.h>
 
 namespace digital_demod {
 

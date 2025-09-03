@@ -2,6 +2,16 @@
 #include <cstdint>
 #include <string>
 
+// Windows header protection
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
 // Cross-platform packed struct support
 #ifdef _WIN32
     #pragma pack(push, 1)
