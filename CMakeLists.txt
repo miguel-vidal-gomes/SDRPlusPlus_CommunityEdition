@@ -56,8 +56,14 @@ option(OPT_BUILD_RADIO "Main audio modulation decoder (AM, FM, SSB, etc...)" ON)
 option(OPT_BUILD_RYFI_DECODER "RyFi data link decoder" OFF)
 option(OPT_BUILD_VOR_RECEIVER "VOR beacon receiver" OFF)
 option(OPT_BUILD_WEATHER_SAT_DECODER "Build the HRPT decoder module (no dependencies required)" OFF)
-option(OPT_BUILD_DIGITAL_DEMOD_BASE "Build the digital demodulator base library (no dependencies required)" ON)
-option(OPT_BUILD_P25_DIGITAL_DEMOD "Build the P25 digital demodulator module (no dependencies required)" OFF)
+# Digital demodulator modules - temporarily disabled on Windows due to socket header conflicts
+if(WIN32)
+    option(OPT_BUILD_DIGITAL_DEMOD_BASE "Build the digital demodulator base library (Windows: disabled due to socket conflicts)" OFF)
+    option(OPT_BUILD_P25_DIGITAL_DEMOD "Build the P25 digital demodulator module (Windows: disabled due to socket conflicts)" OFF)
+else()
+    option(OPT_BUILD_DIGITAL_DEMOD_BASE "Build the digital demodulator base library (no dependencies required)" ON)
+    option(OPT_BUILD_P25_DIGITAL_DEMOD "Build the P25 digital demodulator module (no dependencies required)" OFF)
+endif()
 
 # Misc
 option(OPT_BUILD_DISCORD_PRESENCE "Build the Discord Rich Presence module" ON)
