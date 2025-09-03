@@ -3866,6 +3866,7 @@ private:
     std::chrono::high_resolution_clock::time_point recordingStartTime;
     double recordingFrequency = 0.0;
     std::string recordingMode = "Unknown";
+    std::string recordingFilename = "";  // Captured filename when recording started
     float recordingMinDurationCapture = 5.0f;  // Captured min duration when recording started
     int recordingSequenceNum = 1;
     int recordingFilesCount = 0;
@@ -3993,6 +3994,7 @@ private:
         recordingStartTime = std::chrono::high_resolution_clock::now();
         recordingFrequency = frequency;
         recordingMode = mode;
+        recordingFilename = filepath;  // Capture the actual filename being recorded
         recordingMinDurationCapture = autoRecordMinDuration;  // Capture current setting
         
         flog::info("Scanner: Started auto-recording: {} (min duration captured: {}s)", filepath, recordingMinDurationCapture);
@@ -4019,11 +4021,10 @@ private:
                    (double)duration.count(), (double)recordingMinDurationCapture, (double)autoRecordMinDuration);
         if (duration.count() < recordingMinDurationCapture) {
             flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)recordingMinDurationCapture);
-            // Delete the short file
-            std::string filepath = generateRecordingFilename(recordingFrequency, recordingMode);
+            // Delete the short file using captured filename
             try {
-                std::filesystem::remove(filepath);
-                flog::info("Scanner: Deleted short recording file: {}", filepath);
+                std::filesystem::remove(recordingFilename);
+                flog::info("Scanner: Deleted short recording file: {}", recordingFilename);
             } catch (const std::exception& e) {
                 flog::warn("Scanner: Failed to delete short recording file: {}", e.what());
             }
