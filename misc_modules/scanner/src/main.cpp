@@ -2129,11 +2129,12 @@ private:
                     // CRITICAL FIX: Use frequency manager integration or legacy frequency stepping
                     if (useFrequencyManager) {
                         // Use frequency manager for frequency stepping
-                                        if (!performFrequencyManagerScanning()) {
-                    // Fall back to legacy scanning if frequency manager unavailable
-                    flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
-                    performLegacyScanning();
-                }
+                        if (!performFrequencyManagerScanning()) {
+                            // Fall back to legacy scanning if frequency manager unavailable or has no valid data
+                            flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
+                            useFrequencyManager = false; // Switch to legacy mode permanently until restart
+                            performLegacyScanning();
+                        }
                     } else {
                         // Legacy frequency stepping
                         if (scanUp) {
@@ -2547,8 +2548,7 @@ private:
         if (!interfaceChecked) {
             interfaceAvailable = core::modComManager.interfaceExists("frequency_manager");
             if (!interfaceAvailable) {
-                flog::warn("Scanner: Frequency manager module NOT AVAILABLE - check if module is enabled/loaded");
-                flog::warn("Scanner: Falling back to legacy scanning (interval setting will be used)");
+                flog::info("Scanner: Frequency manager module not available, using legacy mode");
             }
             interfaceChecked = true;
         }
@@ -2601,8 +2601,7 @@ private:
                     }
                     
                     if (!scanList || scanList->empty()) {
-                        flog::warn("Scanner: No scannable entries found in frequency manager");
-                        flog::warn("Scanner: Please add some frequencies to your frequency manager and mark them as scannable (S checkbox)");
+                        flog::info("Scanner: No scannable entries found in frequency manager, will use legacy mode");
                         return false;
                     }
                     
@@ -2824,8 +2823,8 @@ private:
             
             // Check if we found any non-blacklisted frequency
             if (attempts >= maxAttempts || isFrequencyBlacklisted(current)) {
-                flog::warn("Scanner: All frequencies in scan list are blacklisted!");
-                return false; // No valid frequencies to scan
+                flog::info("Scanner: All frequencies in frequency manager scan list are blacklisted, will use legacy mode");
+                return false; // No valid frequencies to scan, fallback to legacy mode
             }
             
             // CRITICAL: Store entry type for adaptive signal detection
@@ -3824,8 +3823,8 @@ private:
     double newRangeStop = 108000000.0;
     float newRangeGain = 20.0f;
     
-    // PERFORMANCE: Frequency manager integration (always enabled for simplified operation)
-    bool useFrequencyManager = true;     // Always enabled - scanner uses frequency manager exclusively  
+    // PERFORMANCE: Frequency manager integration (auto-detect based on availability and configuration)
+    bool useFrequencyManager = true;     // Auto-detect: use frequency manager if available and has data
     bool applyProfiles = true;           // Always enabled - automatically apply tuning profiles
     size_t currentScanIndex = 0;         // Current position in frequency manager scan list
     bool currentEntryIsSingleFreq = false; // Track if current entry is single frequency vs band
