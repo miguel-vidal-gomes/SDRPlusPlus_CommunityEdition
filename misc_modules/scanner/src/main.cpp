@@ -1785,9 +1785,9 @@ private:
                     
                     // Sleep until next scheduled time to reduce drift
                     // Reset nextWakeTime if we've fallen too far behind to prevent catch-up bursts
-                    auto now = std::chrono::steady_clock::now();
-                    if (nextWakeTime + std::chrono::milliseconds(2*intervalMs) < now) {
-                        nextWakeTime = now;
+                    auto sleepNow = std::chrono::steady_clock::now();
+                    if (nextWakeTime + std::chrono::milliseconds(2*intervalMs) < sleepNow) {
+                        nextWakeTime = sleepNow;
                     }
                     nextWakeTime += std::chrono::milliseconds(intervalMs);
                     std::this_thread::sleep_until(nextWakeTime);
