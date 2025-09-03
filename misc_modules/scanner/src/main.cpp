@@ -1414,6 +1414,7 @@ private:
             
             ImGui::LeftLabel("Min Duration (s)");
             if (ImGui::PrecisionSliderFloat(("##scanner_min_duration_" + _this->name).c_str(), &_this->autoRecordMinDuration, 1, 60, "%.0f")) {
+                flog::info("Scanner: Min duration changed to {}s", _this->autoRecordMinDuration);
                 _this->saveConfig();
             }
             if (ImGui::IsItemHovered()) {
@@ -1692,6 +1693,7 @@ private:
         // Load auto-recording settings
         autoRecord = config.conf.value("autoRecord", false);
         autoRecordMinDuration = config.conf.value("autoRecordMinDuration", 5.0f);
+        flog::info("Scanner: Loaded autoRecordMinDuration = {}s", autoRecordMinDuration);
         recordingFilesCount = config.conf.value("recordingFilesCount", 0);
         recordingSequenceNum = config.conf.value("recordingSequenceNum", 1);
         lastResetDate = config.conf.value("lastResetDate", "");
@@ -3993,7 +3995,7 @@ private:
         recordingMode = mode;
         recordingMinDurationCapture = autoRecordMinDuration;  // Capture current setting
         
-        flog::info("Scanner: Started auto-recording: {}", filepath);
+        flog::info("Scanner: Started auto-recording: {} (min duration captured: {}s)", filepath, recordingMinDurationCapture);
     }
     
     void stopAutoRecording() {
@@ -4013,6 +4015,8 @@ private:
         }
         
         // Check minimum duration and delete file if too short (use captured value from when recording started)
+        flog::info("Scanner: Recording duration check: {}s vs captured minimum {}s (current slider: {}s)", 
+                   (double)duration.count(), (double)recordingMinDurationCapture, (double)autoRecordMinDuration);
         if (duration.count() < recordingMinDurationCapture) {
             flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)recordingMinDurationCapture);
             // Delete the short file
