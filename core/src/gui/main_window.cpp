@@ -394,7 +394,7 @@ void MainWindow::draw() {
     gui::freqSelect.draw();
 
     // Scanner controls - check if scanner module is available
-    if (core::modComManager.interfaceExists("scanner")) {
+    if (core::modComManager.interfaceExists("Scanner")) {
         ImGui::SameLine();
         ImGui::SetCursorPosY(origY);
         
@@ -403,8 +403,8 @@ void MainWindow::draw() {
         int scannerStatus = 0; // 0=idle, 1=scanning, 2=tuning, 3=receiving
         
         // Use command codes that match the scanner module's interface
-        core::modComManager.callInterface("scanner", 0, NULL, &scannerRunning); // GET_RUNNING
-        core::modComManager.callInterface("scanner", 4, NULL, &scannerStatus);  // GET_STATUS
+        core::modComManager.callInterface("Scanner", 0, NULL, &scannerRunning); // GET_RUNNING
+        core::modComManager.callInterface("Scanner", 4, NULL, &scannerStatus);  // GET_STATUS
         
         // Scanner start/stop button
         if (scannerRunning) {
@@ -420,7 +420,7 @@ void MainWindow::draw() {
             
             ImGui::PushID(ImGui::GetID("sdrpp_scanner_stop_btn"));
             if (ImGui::ImageButton(icons::STOP, btnSize, ImVec2(0, 0), ImVec2(1, 1), 5, buttonColor, textCol)) {
-                core::modComManager.callInterface("scanner", 2, NULL, NULL); // STOP
+                core::modComManager.callInterface("Scanner", 2, NULL, NULL); // STOP
             }
             ImGui::PopID();
             
@@ -438,7 +438,7 @@ void MainWindow::draw() {
             
             ImGui::PushID(ImGui::GetID("sdrpp_scanner_start_btn"));
             if (ImGui::ImageButton(icons::PLAY, btnSize, ImVec2(0, 0), ImVec2(1, 1), 5, ImVec4(0, 0, 0, 0), textCol)) {
-                core::modComManager.callInterface("scanner", 1, NULL, NULL); // START
+                core::modComManager.callInterface("Scanner", 1, NULL, NULL); // START
             }
             ImGui::PopID();
             
@@ -464,9 +464,9 @@ void MainWindow::draw() {
             // Previous frequency button
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
             ImGui::PushID(ImGui::GetID("sdrpp_scanner_prev_btn"));
-            if (ImGui::Button("<<##scanner_prev", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
-                core::modComManager.callInterface("scanner", 5, NULL, NULL); // PREV_FREQ
-            }
+                            if (ImGui::Button("<<##scanner_prev", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
+                    core::modComManager.callInterface("Scanner", 5, NULL, NULL); // PREV_FREQ
+                }
             ImGui::PopID();
             ImGui::PopStyleVar();
             
@@ -480,9 +480,9 @@ void MainWindow::draw() {
             // Next frequency button  
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
             ImGui::PushID(ImGui::GetID("sdrpp_scanner_next_btn"));
-            if (ImGui::Button(">>##scanner_next", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
-                core::modComManager.callInterface("scanner", 6, NULL, NULL); // NEXT_FREQ
-            }
+                            if (ImGui::Button(">>##scanner_next", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
+                    core::modComManager.callInterface("Scanner", 6, NULL, NULL); // NEXT_FREQ
+                }
             ImGui::PopID();
             ImGui::PopStyleVar();
             
@@ -503,9 +503,9 @@ void MainWindow::draw() {
         
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 4));
         ImGui::PushID(ImGui::GetID("sdrpp_scanner_blacklist_btn"));
-        if (ImGui::Button("BL##scanner_blacklist", ImVec2(btnSize.x * 0.8f, btnSize.y))) {
-            core::modComManager.callInterface("scanner", 7, NULL, NULL); // BLACKLIST
-        }
+                    if (ImGui::Button("BL##scanner_blacklist", ImVec2(btnSize.x * 0.8f, btnSize.y))) {
+                core::modComManager.callInterface("Scanner", 7, NULL, NULL); // BLACKLIST
+            }
         ImGui::PopID();
         ImGui::PopStyleVar();
         
@@ -529,9 +529,9 @@ void MainWindow::draw() {
             // Create a small reset button using text
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
             ImGui::PushID(ImGui::GetID("sdrpp_scanner_reset_btn"));
-            if (ImGui::Button("R##scanner_reset", ImVec2(btnSize.x * 0.6f, btnSize.y))) {
-                core::modComManager.callInterface("scanner", 3, NULL, NULL); // RESET
-            }
+                            if (ImGui::Button("R##scanner_reset", ImVec2(btnSize.x * 0.6f, btnSize.y))) {
+                    core::modComManager.callInterface("Scanner", 3, NULL, NULL); // RESET
+                }
             ImGui::PopID();
             ImGui::PopStyleVar();
             

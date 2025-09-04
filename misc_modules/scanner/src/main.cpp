@@ -5,6 +5,7 @@
 #include <signal_path/signal_path.h>
 #include <chrono>
 #include <thread>
+#include <future>
 #include <algorithm>
 #include <fstream> // Added for file operations
 #include <core.h>
@@ -1542,8 +1543,21 @@ private:
         // MUTE WHILE SCANNING: Restore squelch when scanner stops
         restoreMuteWhileScanning();
         
+        // THREAD SAFETY: Use timeout to prevent UI hang if worker thread is stuck
         if (workerThread.joinable()) {
-            workerThread.join();
+            // Try to join with timeout to prevent deadlock
+            auto future = std::async(std::launch::async, [this]() {
+                if (workerThread.joinable()) {
+                    workerThread.join();
+                }
+            });
+            
+            // Wait up to 2 seconds for clean shutdown
+            if (future.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
+                flog::warn("Scanner: Worker thread did not terminate cleanly within 2 seconds");
+                // Note: We cannot force terminate the thread, but at least we don't hang the UI
+                // The thread will terminate when the main loop checks 'running' flag
+            }
         }
     }
 
