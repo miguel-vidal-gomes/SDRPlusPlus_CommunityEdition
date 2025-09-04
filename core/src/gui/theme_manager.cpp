@@ -142,27 +142,63 @@ bool ThemeManager::applyTheme(std::string name) {
     auto& style = ImGui::GetStyle();
 
     // Set default modern style values (can be overridden by theme)
-    style.WindowRounding = 6.0f;
-    style.ChildRounding = 4.0f;
-    style.FrameRounding = 4.0f;
-    style.GrabRounding = 3.0f;
-    style.PopupRounding = 4.0f;
-    style.ScrollbarRounding = 9.0f;
-    style.TabRounding = 4.0f;
-    
-    // Modern padding and spacing
-    style.WindowPadding = ImVec2(12.0f, 12.0f);
-    style.FramePadding = ImVec2(8.0f, 4.0f);
-    style.ItemSpacing = ImVec2(8.0f, 6.0f);
-    style.ItemInnerSpacing = ImVec2(6.0f, 4.0f);
-    style.IndentSpacing = 22.0f;
-    
-    // Better borders and separators
-    style.WindowBorderSize = 1.0f;
-    style.ChildBorderSize = 1.0f;
-    style.PopupBorderSize = 1.0f;
-    style.FrameBorderSize = 0.0f;
-    style.TabBorderSize = 0.0f;
+    if (name == "Advanced") {
+        // Advanced theme - sleek modern styling
+        style.WindowRounding = 8.0f;
+        style.ChildRounding = 6.0f;
+        style.FrameRounding = 5.0f;
+        style.GrabRounding = 4.0f;
+        style.PopupRounding = 6.0f;
+        style.ScrollbarRounding = 12.0f;
+        style.TabRounding = 6.0f;
+        
+        // Refined padding and spacing for premium feel
+        style.WindowPadding = ImVec2(15.0f, 15.0f);
+        style.FramePadding = ImVec2(10.0f, 6.0f);
+        style.ItemSpacing = ImVec2(10.0f, 8.0f);
+        style.ItemInnerSpacing = ImVec2(8.0f, 6.0f);
+        style.IndentSpacing = 25.0f;
+        
+        // Subtle borders for clean look
+        style.WindowBorderSize = 0.0f;
+        style.ChildBorderSize = 0.0f;
+        style.PopupBorderSize = 1.0f;
+        style.FrameBorderSize = 0.0f;
+        style.TabBorderSize = 0.0f;
+        
+        // Enhanced visual elements
+        style.ScrollbarSize = 16.0f;
+        style.GrabMinSize = 12.0f;
+        style.WindowTitleAlign = ImVec2(0.5f, 0.5f); // Center window titles
+        style.ButtonTextAlign = ImVec2(0.5f, 0.5f);  // Center button text
+        
+        // Smooth shadows and depth
+        style.WindowShadowSize = 8.0f;
+        style.FrameBorderSize = 0.0f;
+    } else {
+        // Default modern style for other themes
+        style.WindowRounding = 6.0f;
+        style.ChildRounding = 4.0f;
+        style.FrameRounding = 4.0f;
+        style.GrabRounding = 3.0f;
+        style.PopupRounding = 4.0f;
+        style.ScrollbarRounding = 9.0f;
+        style.TabRounding = 4.0f;
+        
+        // Modern padding and spacing
+        style.WindowPadding = ImVec2(12.0f, 12.0f);
+        style.FramePadding = ImVec2(8.0f, 4.0f);
+        style.ItemSpacing = ImVec2(8.0f, 6.0f);
+        style.ItemInnerSpacing = ImVec2(6.0f, 4.0f);
+        style.IndentSpacing = 22.0f;
+        
+        // Better borders and separators
+        style.WindowBorderSize = 1.0f;
+        style.ChildBorderSize = 1.0f;
+        style.PopupBorderSize = 1.0f;
+        style.FrameBorderSize = 0.0f;
+        style.TabBorderSize = 0.0f;
+    }
 
     ImVec4* colors = style.Colors;
     Theme thm = themes[name];
