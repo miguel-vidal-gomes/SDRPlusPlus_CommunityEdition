@@ -46,11 +46,13 @@ namespace credits {
         ImGui::TextUnformatted("Special Contributors");
         ImGui::BulletText("PeiusMars (Parks-McClellan DSP and FFT Auto-Ranging)");
         ImGui::BulletText("crackerjacques (Spiritbox Emulator)");
+        ImGui::BulletText("Axpelle (Discrete Recording System Feature Request)");
         ImGui::Spacing();
         
         ImGui::TextUnformatted("Key Features");
+        ImGui::BulletText("Discrete Audio Recording System");
         ImGui::BulletText("MPX Analysis for FM Broadcasting");
-        ImGui::BulletText("Enhanced Configuration Management");
+        ImGui::BulletText("Enhanced Scanner with Frequency Manager");
         ImGui::BulletText("Cross-Platform Build Improvements");
         ImGui::BulletText("Community-First Development");
 

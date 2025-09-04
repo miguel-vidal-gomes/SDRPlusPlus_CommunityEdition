@@ -9,6 +9,7 @@ namespace sdrpp_credits {
         "Special Contributors:",
         "  PeiusMars (Parks-McClellan DSP Optimization and FFT Auto-range)",
         "  crackerjacques (Spiritbox Emulator Module)",
+        "  Axpelle (Discrete Recording System Feature Request)",
         "",
         "Original SDR++ Contributors:",
         "Aang23",
