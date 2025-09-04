@@ -75,10 +75,11 @@ namespace thememenu {
                 ImGui::Text("✨ Advanced Theme Features");
                 ImGui::PopStyleColor();
                 
-                ImGui::BulletText("Enhanced rounded corners (8px windows)");
-                ImGui::BulletText("Professional blue accent colors");
-                ImGui::BulletText("Improved spacing and padding");
-                ImGui::BulletText("Centered window titles and buttons");
+                ImGui::BulletText("🔘 ULTRA-ROUNDED corners (15px windows!)");
+                ImGui::BulletText("🎨 Dramatic CYAN accent theme");
+                ImGui::BulletText("📏 SPACIOUS padding (25px window padding)");
+                ImGui::BulletText("🖼️ Visible borders for definition");
+                ImGui::BulletText("📱 LARGE touch-friendly controls");
                 
                 ImGui::Spacing();
                 
@@ -103,8 +104,8 @@ namespace thememenu {
                 ImGui::Separator();
                 ImGui::Spacing();
                 
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
-                ImGui::TextWrapped("The Advanced theme provides a modern, professional interface with enhanced visual elements and improved usability.");
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
+                ImGui::TextWrapped("🌟 The Advanced theme transforms SDR++ into a premium, modern experience with DRAMATICALLY larger elements, ultra-smooth curves, and a distinctive cyan aesthetic that's impossible to miss!");
                 ImGui::PopStyleColor();
             }
         } else {

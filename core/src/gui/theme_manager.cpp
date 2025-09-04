@@ -143,38 +143,37 @@ bool ThemeManager::applyTheme(std::string name) {
 
     // Set default modern style values (can be overridden by theme)
     if (name == "Advanced") {
-        // Advanced theme - sleek modern styling
-        style.WindowRounding = 8.0f;
-        style.ChildRounding = 6.0f;
-        style.FrameRounding = 5.0f;
-        style.GrabRounding = 4.0f;
-        style.PopupRounding = 6.0f;
-        style.ScrollbarRounding = 12.0f;
-        style.TabRounding = 6.0f;
+        // Advanced theme - DRAMATICALLY different styling
+        style.WindowRounding = 15.0f;     // Much more rounded windows
+        style.ChildRounding = 12.0f;      // Rounded child windows
+        style.FrameRounding = 8.0f;       // Very rounded frames
+        style.GrabRounding = 10.0f;       // Rounded sliders/scrollbars
+        style.PopupRounding = 12.0f;      // Rounded popups
+        style.ScrollbarRounding = 20.0f;  // Very rounded scrollbars
+        style.TabRounding = 10.0f;        // Rounded tabs
         
-        // Refined padding and spacing for premium feel
-        style.WindowPadding = ImVec2(15.0f, 15.0f);
-        style.FramePadding = ImVec2(10.0f, 6.0f);
-        style.ItemSpacing = ImVec2(10.0f, 8.0f);
-        style.ItemInnerSpacing = ImVec2(8.0f, 6.0f);
-        style.IndentSpacing = 25.0f;
+        // MUCH larger padding and spacing for spacious feel
+        style.WindowPadding = ImVec2(25.0f, 25.0f);    // Much bigger window padding
+        style.FramePadding = ImVec2(16.0f, 10.0f);     // Bigger frame padding
+        style.ItemSpacing = ImVec2(16.0f, 12.0f);      // More space between items
+        style.ItemInnerSpacing = ImVec2(12.0f, 8.0f);  // More inner spacing
+        style.IndentSpacing = 35.0f;                   // Bigger indentation
         
-        // Subtle borders for clean look
-        style.WindowBorderSize = 0.0f;
-        style.ChildBorderSize = 0.0f;
-        style.PopupBorderSize = 1.0f;
-        style.FrameBorderSize = 0.0f;
-        style.TabBorderSize = 0.0f;
+        // Visible borders for definition
+        style.WindowBorderSize = 1.0f;    // Add window borders
+        style.ChildBorderSize = 1.0f;     // Add child borders
+        style.PopupBorderSize = 2.0f;     // Thicker popup borders
+        style.FrameBorderSize = 1.0f;     // Add frame borders
+        style.TabBorderSize = 1.0f;       // Add tab borders
         
-        // Enhanced visual elements
-        style.ScrollbarSize = 16.0f;
-        style.GrabMinSize = 12.0f;
+        // Larger visual elements
+        style.ScrollbarSize = 20.0f;      // Bigger scrollbars
+        style.GrabMinSize = 16.0f;        // Bigger grab handles
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f); // Center window titles
         style.ButtonTextAlign = ImVec2(0.5f, 0.5f);  // Center button text
         
         // Enhanced visual elements (note: WindowShadowSize not available in this ImGui version)
         // style.WindowShadowSize = 8.0f;  // Not available in current ImGui version
-        style.FrameBorderSize = 0.0f;
     } else {
         // Default modern style for other themes
         style.WindowRounding = 6.0f;
