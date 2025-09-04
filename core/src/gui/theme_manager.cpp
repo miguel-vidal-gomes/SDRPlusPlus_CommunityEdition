@@ -143,32 +143,32 @@ bool ThemeManager::applyTheme(std::string name) {
 
     // Set default modern style values (can be overridden by theme)
     if (name == "Advanced") {
-        // Advanced theme - DRAMATICALLY different styling
-        style.WindowRounding = 15.0f;     // Much more rounded windows
-        style.ChildRounding = 12.0f;      // Rounded child windows
-        style.FrameRounding = 8.0f;       // Very rounded frames
-        style.GrabRounding = 10.0f;       // Rounded sliders/scrollbars
-        style.PopupRounding = 12.0f;      // Rounded popups
-        style.ScrollbarRounding = 20.0f;  // Very rounded scrollbars
-        style.TabRounding = 10.0f;        // Rounded tabs
+        // Advanced theme - Sophisticated professional styling
+        style.WindowRounding = 10.0f;     // Smooth rounded windows
+        style.ChildRounding = 8.0f;       // Subtle rounded child windows
+        style.FrameRounding = 6.0f;       // Professional rounded frames
+        style.GrabRounding = 6.0f;        // Smooth sliders/scrollbars
+        style.PopupRounding = 8.0f;       // Clean rounded popups
+        style.ScrollbarRounding = 12.0f;  // Elegant scrollbars
+        style.TabRounding = 6.0f;         // Clean tabs
         
-        // MUCH larger padding and spacing for spacious feel
-        style.WindowPadding = ImVec2(25.0f, 25.0f);    // Much bigger window padding
-        style.FramePadding = ImVec2(16.0f, 10.0f);     // Bigger frame padding
-        style.ItemSpacing = ImVec2(16.0f, 12.0f);      // More space between items
-        style.ItemInnerSpacing = ImVec2(12.0f, 8.0f);  // More inner spacing
-        style.IndentSpacing = 35.0f;                   // Bigger indentation
+        // Professional spacing - refined but not excessive
+        style.WindowPadding = ImVec2(16.0f, 16.0f);    // Professional window padding
+        style.FramePadding = ImVec2(12.0f, 8.0f);      // Comfortable frame padding
+        style.ItemSpacing = ImVec2(12.0f, 8.0f);       // Clean spacing between items
+        style.ItemInnerSpacing = ImVec2(8.0f, 6.0f);   // Refined inner spacing
+        style.IndentSpacing = 28.0f;                   // Professional indentation
         
-        // Visible borders for definition
-        style.WindowBorderSize = 1.0f;    // Add window borders
-        style.ChildBorderSize = 1.0f;     // Add child borders
-        style.PopupBorderSize = 2.0f;     // Thicker popup borders
-        style.FrameBorderSize = 1.0f;     // Add frame borders
-        style.TabBorderSize = 1.0f;       // Add tab borders
+        // Subtle borders for definition
+        style.WindowBorderSize = 0.0f;    // Clean borderless windows
+        style.ChildBorderSize = 1.0f;     // Subtle child borders
+        style.PopupBorderSize = 1.0f;     // Clean popup borders
+        style.FrameBorderSize = 0.0f;     // Clean frameless controls
+        style.TabBorderSize = 0.0f;       // Clean borderless tabs
         
-        // Larger visual elements
-        style.ScrollbarSize = 20.0f;      // Bigger scrollbars
-        style.GrabMinSize = 16.0f;        // Bigger grab handles
+        // Professional visual elements
+        style.ScrollbarSize = 16.0f;      // Standard scrollbars
+        style.GrabMinSize = 12.0f;        // Professional grab handles
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f); // Center window titles
         style.ButtonTextAlign = ImVec2(0.5f, 0.5f);  // Center button text
         
