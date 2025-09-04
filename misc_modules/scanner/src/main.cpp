@@ -143,10 +143,34 @@ public:
     }
 
     ~ScannerModule() {
+        flog::info("Scanner: Destructor called, cleaning up");
+        
+        // Stop scanner and set running to false
+        running = false;
+        
+        // Clean up worker thread with timeout
+        if (workerThread.joinable()) {
+            flog::info("Scanner: Cleaning up worker thread in destructor");
+            try {
+                auto future = std::async(std::launch::async, [this]() {
+                    workerThread.join();
+                });
+                if (future.wait_for(std::chrono::seconds(1)) == std::future_status::timeout) {
+                    flog::warn("Scanner: Worker thread cleanup timed out in destructor, detaching");
+                    workerThread.detach();
+                }
+            } catch (const std::exception& e) {
+                flog::error("Scanner: Exception during thread cleanup in destructor: {}", e.what());
+                workerThread.detach();
+            }
+        }
+        
+        // Clean up other resources
         saveConfig();
         gui::menu.removeEntry(name);
         core::modComManager.unregisterInterface(name);
-        stop();
+        
+        flog::info("Scanner: Destructor completed");
     }
 
     void postInit() {}
@@ -1472,6 +1496,24 @@ private:
             return; 
         }
         
+        // THREAD SAFETY: Clean up any existing thread before starting new one
+        if (workerThread.joinable()) {
+            flog::info("Scanner: Cleaning up previous worker thread");
+            try {
+                // Try to join with a short timeout
+                auto future = std::async(std::launch::async, [this]() {
+                    workerThread.join();
+                });
+                if (future.wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout) {
+                    flog::warn("Scanner: Previous thread cleanup timed out, detaching");
+                    workerThread.detach();
+                }
+            } catch (const std::exception& e) {
+                flog::error("Scanner: Exception during thread cleanup: {}", e.what());
+                workerThread.detach();
+            }
+        }
+        
         // SAFETY CHECK: Ensure radio source is running before starting scanner
         if (!gui::mainWindow.sdrIsRunning()) {
             flog::error("Scanner: Cannot start scanning - radio source is not running");
@@ -1520,6 +1562,8 @@ private:
 
     void stop() {
         if (!running) { return; }
+        
+        flog::info("Scanner: Stop requested, setting running=false");
         running = false;
         
         // AUTO-RECORDING: Stop any active recording when scanner stops
@@ -1543,22 +1587,10 @@ private:
         // MUTE WHILE SCANNING: Restore squelch when scanner stops
         restoreMuteWhileScanning();
         
-        // THREAD SAFETY: Use timeout to prevent UI hang if worker thread is stuck
-        if (workerThread.joinable()) {
-            // Try to join with timeout to prevent deadlock
-            auto future = std::async(std::launch::async, [this]() {
-                if (workerThread.joinable()) {
-                    workerThread.join();
-                }
-            });
-            
-            // Wait up to 2 seconds for clean shutdown
-            if (future.wait_for(std::chrono::seconds(2)) == std::future_status::timeout) {
-                flog::warn("Scanner: Worker thread did not terminate cleanly within 2 seconds");
-                // Note: We cannot force terminate the thread, but at least we don't hang the UI
-                // The thread will terminate when the main loop checks 'running' flag
-            }
-        }
+        // THREAD SAFETY: Don't join thread from UI thread to prevent deadlock
+        // The worker thread will exit on its own when it sees running=false
+        // We'll clean up the thread in the destructor or when starting a new scan
+        flog::info("Scanner: Stop completed (thread will exit asynchronously)");
     }
 
     void reset() {
