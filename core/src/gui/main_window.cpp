@@ -456,6 +456,71 @@ void MainWindow::draw() {
             }
         }
         
+        // Scanner direction buttons (only when running)
+        if (scannerRunning) {
+            ImGui::SameLine();
+            ImGui::SetCursorPosY(origY);
+            
+            // Previous frequency button
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
+            ImGui::PushID(ImGui::GetID("sdrpp_scanner_prev_btn"));
+            if (ImGui::Button("<<##scanner_prev", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
+                core::modComManager.callInterface("scanner", 5, NULL, NULL); // PREV_FREQ
+            }
+            ImGui::PopID();
+            ImGui::PopStyleVar();
+            
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Previous Frequency");
+            }
+            
+            ImGui::SameLine();
+            ImGui::SetCursorPosY(origY);
+            
+            // Next frequency button  
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 4));
+            ImGui::PushID(ImGui::GetID("sdrpp_scanner_next_btn"));
+            if (ImGui::Button(">>##scanner_next", ImVec2(btnSize.x * 0.7f, btnSize.y))) {
+                core::modComManager.callInterface("scanner", 6, NULL, NULL); // NEXT_FREQ
+            }
+            ImGui::PopID();
+            ImGui::PopStyleVar();
+            
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Next Frequency");
+            }
+        }
+        
+        // Blacklist current frequency button (always available when scanner module loaded)
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(origY);
+        
+        // Check if we have a valid VFO for blacklisting
+        bool hasValidVFO = !gui::waterfall.selectedVFO.empty();
+        if (!hasValidVFO) { 
+            style::beginDisabled(); 
+        }
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 4));
+        ImGui::PushID(ImGui::GetID("sdrpp_scanner_blacklist_btn"));
+        if (ImGui::Button("BL##scanner_blacklist", ImVec2(btnSize.x * 0.8f, btnSize.y))) {
+            core::modComManager.callInterface("scanner", 7, NULL, NULL); // BLACKLIST
+        }
+        ImGui::PopID();
+        ImGui::PopStyleVar();
+        
+        if (!hasValidVFO) { 
+            style::endDisabled(); 
+        }
+        
+        if (ImGui::IsItemHovered()) {
+            if (hasValidVFO) {
+                ImGui::SetTooltip("Blacklist Current Frequency");
+            } else {
+                ImGui::SetTooltip("Blacklist Current Frequency (No VFO selected)");
+            }
+        }
+        
         // Scanner reset button (only when running)
         if (scannerRunning) {
             ImGui::SameLine();

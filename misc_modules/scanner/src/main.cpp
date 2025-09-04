@@ -108,6 +108,9 @@ struct TuningProfile {
 #define SCANNER_IFACE_CMD_STOP          2
 #define SCANNER_IFACE_CMD_RESET         3
 #define SCANNER_IFACE_CMD_GET_STATUS    4
+#define SCANNER_IFACE_CMD_PREV_FREQ     5
+#define SCANNER_IFACE_CMD_NEXT_FREQ     6
+#define SCANNER_IFACE_CMD_BLACKLIST     7
 
 class ScannerModule : public ModuleManager::Instance {
 public:
@@ -4093,6 +4096,58 @@ private:
                         else status = 1;
                     }
                     *(int*)out = status;
+                }
+                break;
+            case SCANNER_IFACE_CMD_PREV_FREQ:
+                if (_this->enabled && _this->running) {
+                    // Same logic as << button
+                    _this->reverseLock = true;
+                    _this->receiving = false;
+                    _this->scanUp = false;
+                    _this->configNeedsSave = true;
+                    _this->applyMuteWhileScanning();
+                }
+                break;
+            case SCANNER_IFACE_CMD_NEXT_FREQ:
+                if (_this->enabled && _this->running) {
+                    // Same logic as >> button
+                    _this->reverseLock = true;
+                    _this->receiving = false;
+                    _this->scanUp = true;
+                    _this->configNeedsSave = true;
+                    _this->applyMuteWhileScanning();
+                }
+                break;
+            case SCANNER_IFACE_CMD_BLACKLIST:
+                if (_this->enabled && !gui::waterfall.selectedVFO.empty()) {
+                    // Same logic as "Blacklist Current Frequency" button
+                    double currentFreq = gui::waterfall.getCenterFrequency();
+                    if (gui::waterfall.vfos.find(gui::waterfall.selectedVFO) != gui::waterfall.vfos.end()) {
+                        currentFreq += gui::waterfall.vfos[gui::waterfall.selectedVFO]->centerOffset;
+                    }
+                    
+                    // Check if frequency is already blacklisted (avoid duplicates)
+                    bool alreadyBlacklisted = false;
+                    for (const double& blacklisted : _this->blacklistedFreqs) {
+                        if (std::abs(currentFreq - blacklisted) < _this->blacklistTolerance) {
+                            alreadyBlacklisted = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!alreadyBlacklisted) {
+                        _this->blacklistedFreqs.push_back(currentFreq);
+                        _this->frequencyNameCache.clear();
+                        _this->frequencyNameCacheDirty = true;
+                        _this->saveConfig();
+                        
+                        // Auto-resume scanning after blacklisting
+                        {
+                            std::lock_guard<std::mutex> lck(_this->scanMtx);
+                            _this->receiving = false;
+                        }
+                        _this->applyMuteWhileScanning();
+                    }
                 }
                 break;
         }
