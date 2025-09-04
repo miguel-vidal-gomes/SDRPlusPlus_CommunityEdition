@@ -104,6 +104,10 @@ struct TuningProfile {
 
 // Scanner module interface commands
 #define SCANNER_IFACE_CMD_GET_RUNNING   0
+#define SCANNER_IFACE_CMD_START         1
+#define SCANNER_IFACE_CMD_STOP          2
+#define SCANNER_IFACE_CMD_RESET         3
+#define SCANNER_IFACE_CMD_GET_STATUS    4
 
 class ScannerModule : public ModuleManager::Instance {
 public:
@@ -4062,6 +4066,33 @@ private:
             case SCANNER_IFACE_CMD_GET_RUNNING:
                 if (out != NULL) {
                     *(bool*)out = _this->running;
+                }
+                break;
+            case SCANNER_IFACE_CMD_START:
+                if (_this->enabled) {
+                    _this->start();
+                }
+                break;
+            case SCANNER_IFACE_CMD_STOP:
+                if (_this->enabled) {
+                    _this->stop();
+                }
+                break;
+            case SCANNER_IFACE_CMD_RESET:
+                if (_this->enabled) {
+                    _this->reset();
+                }
+                break;
+            case SCANNER_IFACE_CMD_GET_STATUS:
+                if (out != NULL) {
+                    // Return status as integer: 0=idle, 1=scanning, 2=tuning, 3=receiving
+                    int status = 0;
+                    if (_this->running) {
+                        if (_this->receiving) status = 3;
+                        else if (_this->tuning) status = 2;
+                        else status = 1;
+                    }
+                    *(int*)out = status;
                 }
                 break;
         }

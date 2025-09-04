@@ -393,6 +393,89 @@ void MainWindow::draw() {
     ImGui::SetCursorPosY(origY);
     gui::freqSelect.draw();
 
+    // Scanner controls - check if scanner module is available
+    if (core::modComManager.interfaceExists("scanner")) {
+        ImGui::SameLine();
+        ImGui::SetCursorPosY(origY);
+        
+        // Get scanner status using interface commands (defined in scanner module)
+        bool scannerRunning = false;
+        int scannerStatus = 0; // 0=idle, 1=scanning, 2=tuning, 3=receiving
+        
+        // Use command codes that match the scanner module's interface
+        core::modComManager.callInterface("scanner", 0, NULL, &scannerRunning); // GET_RUNNING
+        core::modComManager.callInterface("scanner", 4, NULL, &scannerStatus);  // GET_STATUS
+        
+        // Scanner start/stop button
+        if (scannerRunning) {
+            // Show stop button with status-based coloring
+            ImVec4 buttonColor = ImVec4(0, 0, 0, 0); // Default
+            if (scannerStatus == 3) { // Receiving
+                buttonColor = ImVec4(0.0f, 0.8f, 0.0f, 0.3f); // Green tint
+            } else if (scannerStatus == 2) { // Tuning  
+                buttonColor = ImVec4(0.0f, 0.8f, 0.8f, 0.3f); // Cyan tint
+            } else if (scannerStatus == 1) { // Scanning
+                buttonColor = ImVec4(0.8f, 0.8f, 0.0f, 0.3f); // Yellow tint
+            }
+            
+            ImGui::PushID(ImGui::GetID("sdrpp_scanner_stop_btn"));
+            if (ImGui::ImageButton(icons::STOP, btnSize, ImVec2(0, 0), ImVec2(1, 1), 5, buttonColor, textCol)) {
+                core::modComManager.callInterface("scanner", 2, NULL, NULL); // STOP
+            }
+            ImGui::PopID();
+            
+            // Tooltip with status
+            if (ImGui::IsItemHovered()) {
+                const char* statusText[] = {"Idle", "Scanning", "Tuning", "Receiving"};
+                ImGui::SetTooltip("Scanner: %s (Click to stop)", statusText[scannerStatus]);
+            }
+        } else {
+            // Show start button (only if radio is running)
+            bool sourceRunning = playing;
+            if (!sourceRunning) { 
+                style::beginDisabled(); 
+            }
+            
+            ImGui::PushID(ImGui::GetID("sdrpp_scanner_start_btn"));
+            if (ImGui::ImageButton(icons::PLAY, btnSize, ImVec2(0, 0), ImVec2(1, 1), 5, ImVec4(0, 0, 0, 0), textCol)) {
+                core::modComManager.callInterface("scanner", 1, NULL, NULL); // START
+            }
+            ImGui::PopID();
+            
+            if (!sourceRunning) { 
+                style::endDisabled(); 
+            }
+            
+            // Tooltip
+            if (ImGui::IsItemHovered()) {
+                if (sourceRunning) {
+                    ImGui::SetTooltip("Start Scanner");
+                } else {
+                    ImGui::SetTooltip("Start Scanner (Radio must be running)");
+                }
+            }
+        }
+        
+        // Scanner reset button (only when running)
+        if (scannerRunning) {
+            ImGui::SameLine();
+            ImGui::SetCursorPosY(origY);
+            
+            // Create a small reset button using text
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+            ImGui::PushID(ImGui::GetID("sdrpp_scanner_reset_btn"));
+            if (ImGui::Button("R##scanner_reset", ImVec2(btnSize.x * 0.6f, btnSize.y))) {
+                core::modComManager.callInterface("scanner", 3, NULL, NULL); // RESET
+            }
+            ImGui::PopID();
+            ImGui::PopStyleVar();
+            
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reset Scanner");
+            }
+        }
+    }
+
     ImGui::SameLine();
 
     ImGui::SetCursorPosY(origY);
