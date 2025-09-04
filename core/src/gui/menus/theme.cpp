@@ -2,7 +2,6 @@
 #include <gui/gui.h>
 #include <core.h>
 #include <gui/style.h>
-#include <gui/widgets/advanced_widgets.h>
 
 namespace thememenu {
     int themeId;
@@ -47,16 +46,13 @@ namespace thememenu {
         bool isAdvancedTheme = (themeId < themeNames.size() && themeNames[themeId] == "Advanced");
         
         if (isAdvancedTheme) {
-            // Modern section header for Advanced theme
-            ImGui::ModernSectionHeader("Visual Theme");
+            // Enhanced theme selector for Advanced theme - use standard ImGui but with enhanced styling
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12.0f, 8.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
             
-            // Enhanced theme selector with modern styling
-            ImGui::Text("Select Theme:");
+            ImGui::Text("🎨 Visual Theme (Advanced Mode)");
             ImGui::SetNextItemWidth(menuWidth);
-            
-            // Use modern styling for combo
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 6.0f));
             
             if (ImGui::Combo("##theme_select_combo", &themeId, themeNamesTxt.c_str())) {
                 applyTheme();
@@ -65,55 +61,51 @@ namespace thememenu {
                 core::configManager.release(true);
             }
             
+            ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
             
             // Theme preview/info for Advanced theme
             if (themeNames[themeId] == "Advanced") {
                 ImGui::Spacing();
-                
-                // Theme features showcase
-                if (ImGui::BeginModernCard("Advanced Theme Features")) {
-                    ImGui::Text("🎨 Modern Design Elements");
-                    ImGui::BulletText("Rounded corners and smooth gradients");
-                    ImGui::BulletText("Enhanced spacing and typography");
-                    ImGui::BulletText("Professional color palette");
-                    
-                    ImGui::Spacing();
-                    
-                    // Demo of modern components
-                    static bool demo_toggle = false;
-                    ImGui::Text("Demo Components:");
-                    ImGui::ModernToggle("Modern Toggle", &demo_toggle);
-                    
-                    ImGui::Spacing();
-                    
-                    static float demo_progress = 0.75f;
-                    ImGui::Text("Progress Bar:");
-                    ImGui::ModernProgressBar(demo_progress, ImVec2(-1, 20), "75%");
-                    
-                    ImGui::Spacing();
-                    
-                    if (ImGui::ModernButton("Primary Action", ImVec2(120, 0), true)) {
-                        // Demo action
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::ModernButton("Secondary", ImVec2(120, 0), false)) {
-                        // Demo action
-                    }
-                    
-                    ImGui::EndModernCard();
-                }
-                
-                // Theme info with tooltip
+                ImGui::Separator();
                 ImGui::Spacing();
-                ImGui::Text("ℹ️ Advanced Theme Active");
-                ImGui::ModernTooltip("The Advanced theme provides a modern, professional interface\n"
-                                   "with enhanced visual elements and improved usability.\n\n"
-                                   "Features include:\n"
-                                   "• Smooth rounded corners\n"
-                                   "• Professional color scheme\n"
-                                   "• Enhanced component styling\n"
-                                   "• Better visual hierarchy");
+                
+                // Theme features showcase using standard ImGui components
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.8f, 1.0f, 1.0f));
+                ImGui::Text("✨ Advanced Theme Features");
+                ImGui::PopStyleColor();
+                
+                ImGui::BulletText("Enhanced rounded corners (8px windows)");
+                ImGui::BulletText("Professional blue accent colors");
+                ImGui::BulletText("Improved spacing and padding");
+                ImGui::BulletText("Centered window titles and buttons");
+                
+                ImGui::Spacing();
+                
+                // Demo components using standard ImGui
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.6f, 1.0f));
+                ImGui::Text("🔧 Enhanced Controls:");
+                ImGui::PopStyleColor();
+                
+                static bool demo_check = false;
+                ImGui::Checkbox("Enhanced Checkbox", &demo_check);
+                
+                static float demo_slider = 0.75f;
+                ImGui::SliderFloat("Smooth Slider", &demo_slider, 0.0f, 1.0f, "%.2f");
+                
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+                if (ImGui::Button("Modern Button", ImVec2(120, 32))) {
+                    // Demo action
+                }
+                ImGui::PopStyleVar();
+                
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+                
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+                ImGui::TextWrapped("The Advanced theme provides a modern, professional interface with enhanced visual elements and improved usability.");
+                ImGui::PopStyleColor();
             }
         } else {
             // Standard theme selector for other themes
