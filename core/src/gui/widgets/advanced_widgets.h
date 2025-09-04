@@ -87,14 +87,16 @@ namespace ImGui {
         const float width = size.x;
         const float radius = height * 0.5f;
         
-        const ImVec2 pos = window->DC.CursorPos;
-        const ImRect total_bb(pos, pos + ImVec2(width + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), height));
+        ImVec2 pos = window->DC.CursorPos;
+        ImVec2 size_vec = ImVec2(width + (label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f), height);
+        const ImRect total_bb(pos, ImVec2(pos.x + size_vec.x, pos.y + size_vec.y));
         
         ItemSize(total_bb, style.FramePadding.y);
         if (!ItemAdd(total_bb, id)) return false;
         
         bool hovered, held;
-        bool pressed = ButtonBehavior(ImRect(pos, pos + ImVec2(width, height)), id, &hovered, &held);
+        ImVec2 toggle_size = ImVec2(width, height);
+        bool pressed = ButtonBehavior(ImRect(pos, ImVec2(pos.x + toggle_size.x, pos.y + toggle_size.y)), id, &hovered, &held);
         if (pressed) *v = !*v;
         
         // Animation value (you could store this per-widget for smooth animation)
@@ -114,7 +116,7 @@ namespace ImGui {
         ImDrawList* draw_list = window->DrawList;
         
         // Background track
-        draw_list->AddRectFilled(pos, pos + ImVec2(width, height), bg_col, radius);
+        draw_list->AddRectFilled(pos, ImVec2(pos.x + width, pos.y + height), bg_col, radius);
         
         // Knob
         float knob_pos = pos.x + radius + t * (width - radius * 2.0f);
@@ -141,7 +143,7 @@ namespace ImGui {
         
         ImVec2 pos = window->DC.CursorPos;
         ImVec2 size = CalcItemSize(size_arg, CalcItemWidth(), g.FontSize + style.FramePadding.y * 2.0f);
-        ImRect bb(pos, pos + size);
+        ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
         
         ItemSize(size, style.FramePadding.y);
         if (!ItemAdd(bb, 0)) return;

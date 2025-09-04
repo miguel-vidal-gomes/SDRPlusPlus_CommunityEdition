@@ -172,8 +172,8 @@ bool ThemeManager::applyTheme(std::string name) {
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f); // Center window titles
         style.ButtonTextAlign = ImVec2(0.5f, 0.5f);  // Center button text
         
-        // Smooth shadows and depth
-        style.WindowShadowSize = 8.0f;
+        // Enhanced visual elements (note: WindowShadowSize not available in this ImGui version)
+        // style.WindowShadowSize = 8.0f;  // Not available in current ImGui version
         style.FrameBorderSize = 0.0f;
     } else {
         // Default modern style for other themes
