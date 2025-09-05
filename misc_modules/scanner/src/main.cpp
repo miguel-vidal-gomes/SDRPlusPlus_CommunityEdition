@@ -15,6 +15,10 @@
 #include <cstdint>  // For uintptr_t
 #include "scanner_log.h" // Custom logging macros
 #include <gui/widgets/precision_slider.h>
+#include <gui/widgets/folder_select.h>
+#include <filesystem>
+#include <regex>
+#include "../../recorder/src/recorder_interface.h"
 
 // Windows MSVC compatibility 
 #ifdef _WIN32
@@ -103,19 +107,7 @@ struct TuningProfile {
 
 class ScannerModule : public ModuleManager::Instance {
 public:
-    // Module interface handler for external communication
-    static void scannerInterfaceHandler(int code, void* in, void* out, void* ctx) {
-        ScannerModule* _this = (ScannerModule*)ctx;
-        switch (code) {
-            case SCANNER_IFACE_CMD_GET_RUNNING:
-                if (out != NULL) {
-                    *(bool*)out = _this->running;
-                }
-                break;
-        }
-    }
-
-    ScannerModule(std::string name) {
+    ScannerModule(std::string name) : autoRecordFolderSelect("%ROOT%/scanner_recordings") {
         this->name = name;
         
         // Initialize time points to current time to prevent crashes
@@ -132,6 +124,9 @@ public:
         
         gui::menu.registerEntry(name, menuHandler, this, NULL);
         loadConfig();
+        
+        // Check for midnight reset on module initialization
+        checkMidnightReset();
         
         // Register scanner interface for external communication
         core::modComManager.registerInterface("scanner", name, scannerInterfaceHandler, this);
@@ -358,14 +353,14 @@ private:
             flog::debug("Scanner: About to call iq_frontend.getEffectiveSamplerate()");
             analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
             flog::info("Scanner: Effective sample rate from iq_frontend: {:.0f} Hz ({:.1f} MHz)", 
-                      analysis.sampleRate, analysis.sampleRate/1e6);
+                          (double)analysis.sampleRate, (double)(analysis.sampleRate/1e6));
             
             // Note: The effective sample rate is the actual sample rate after decimation
             // This is the correct rate to use for FFT analysis since that's what the waterfall sees
             
             // Validate the sample rate
             if (analysis.sampleRate <= 0) {
-                flog::error("Scanner: iq_frontend returned invalid sample rate: {:.0f} Hz", analysis.sampleRate);
+                flog::error("Scanner: iq_frontend returned invalid sample rate: {:.0f} Hz", (double)analysis.sampleRate);
                 throw std::runtime_error("Invalid sample rate from iq_frontend");
             }
             
@@ -373,7 +368,7 @@ private:
             if (analysis.fftSize > 0 && analysis.sampleRate > 0) {
                 analysis.fftResolution = analysis.sampleRate / analysis.fftSize;
                 analysis.analysisSpan = analysis.sampleRate;
-                flog::info("Scanner: Calculated FFT resolution: {:.2f} Hz/bin", analysis.fftResolution);
+                flog::info("Scanner: Calculated FFT resolution: {:.2f} Hz/bin", (double)analysis.fftResolution);
             }
             
         } catch (const std::exception& e) {
@@ -385,7 +380,7 @@ private:
             // Try to get sample rate from signal path one more time with better error handling
             try {
                 analysis.sampleRate = sigpath::iqFrontEnd.getEffectiveSamplerate();
-                flog::warn("Scanner: Fallback - got sample rate from signal path: {:.0f} Hz", analysis.sampleRate);
+                flog::warn("Scanner: Fallback - got sample rate from signal path: {:.0f} Hz", (double)analysis.sampleRate);
                 if (analysis.sampleRate <= 0) {
                     analysis.sampleRate = 10000000.0; // 10MHz default for modern SDRs
                     flog::warn("Scanner: Sample rate was <= 0, using 10MHz default");
@@ -1008,7 +1003,7 @@ private:
                     SCAN_DEBUG("Scanner: Auto-resuming scanning after blacklisting frequency");
                     
                 } else {
-                    flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", currentFreq);
+                    flog::warn("Scanner: Frequency {:.0f} Hz already blacklisted (within tolerance)", (double)currentFreq);
                 }
             } else {
                 flog::warn("Scanner: No VFO selected, cannot blacklist current frequency");
@@ -1396,6 +1391,69 @@ private:
             _this->saveConfig(); // Save in background, doesn't block UI
         }
         
+        // === AUTO-RECORDING CONTROLS ===
+        ImGui::Spacing();
+        ImGui::Text("Auto Recording");
+        ImGui::Separator();
+        
+        if (ImGui::Checkbox("Auto Record##scanner_auto_record", &_this->autoRecord)) {
+            _this->saveConfig();
+        }
+        if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("Automatically record detected signals to separate files");
+        }
+        
+        if (_this->autoRecord) {
+            ImGui::LeftLabel("Recording Path");
+            if (_this->autoRecordFolderSelect.render("##scanner_record_path")) {
+                _this->saveConfig();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Directory where recording files will be saved");
+            }
+            
+            ImGui::LeftLabel("Min Duration (s)");
+            if (ImGui::PrecisionSliderFloat(("##scanner_min_duration_" + _this->name).c_str(), &_this->autoRecordMinDuration, 1, 60, "%.0f")) {
+                flog::info("Scanner: Min duration changed to {}s", _this->autoRecordMinDuration);
+                _this->saveConfig();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Minimum recording duration in seconds\nRecordings shorter than this will be deleted");
+            }
+            
+            // Recording status
+            const char* statusLabels[] = {"Disabled", "Waiting for Signal", "Recording", "Suspended (Manual)"};
+            const ImVec4 statusColors[] = {
+                ImVec4(0.5f, 0.5f, 0.5f, 1.0f), // Gray for disabled
+                ImVec4(1.0f, 1.0f, 0.0f, 1.0f), // Yellow for waiting
+                ImVec4(0.0f, 1.0f, 0.0f, 1.0f), // Green for recording
+                ImVec4(1.0f, 0.5f, 0.0f, 1.0f)  // Orange for suspended
+            };
+            
+            ImGui::LeftLabel("Status");
+            int statusIndex = (int)_this->recordingControlState;
+            if (statusIndex >= 0 && statusIndex < 4) {
+                ImGui::TextColored(statusColors[statusIndex], "%s", statusLabels[statusIndex]);
+                if (_this->recordingControlState == RECORDING_ACTIVE) {
+                    ImGui::SameLine();
+                    ImGui::Text("(%.1f MHz)", _this->recordingFrequency / 1e6);
+                    if (ImGui::IsItemHovered()) {
+                        ImGui::SetTooltip("Recording with %.0fs minimum duration\n(Captured when recording started)", _this->recordingMinDurationCapture);
+                    }
+                }
+            }
+            
+            ImGui::LeftLabel("Files Today");
+            ImGui::Text("%d", _this->recordingFilesCount);
+            ImGui::SameLine();
+            if (ImGui::Button("Reset##files_today_reset")) {
+                _this->resetFilesTodayCounter();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Reset the daily file counter to 0\n(Counter also resets automatically at midnight)");
+            }
+        }
+        
         // Draw signal analysis tooltip near VFO if enabled and signal detected
         _this->drawSignalTooltip();
     }
@@ -1427,7 +1485,7 @@ private:
         // MUTE WHILE SCANNING: Apply mute when scanner starts
         applyMuteWhileScanning();
         
-        flog::info("Scanner: Starting scanner from {:.3f} MHz", current / 1e6);
+        flog::info("Scanner: Starting scanner from {:.3f} MHz", (double)(current / 1e6));
         
         running = true;
         
@@ -1456,6 +1514,11 @@ private:
         if (!running) { return; }
         running = false;
         
+        // AUTO-RECORDING: Stop any active recording when scanner stops
+        if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+            stopAutoRecording();
+        }
+        
         // Restore squelch level if modified
         if (squelchDeltaActive) {
             restoreSquelchLevel();
@@ -1481,6 +1544,11 @@ private:
         std::lock_guard<std::mutex> lck(scanMtx);
             current = startFreq;
         receiving = false;
+        
+        // AUTO-RECORDING: Stop any active recording when scanner resets
+        if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+            stopAutoRecording();
+        }
         tuning = false;
         reverseLock = false;
         
@@ -1500,7 +1568,7 @@ private:
         // MUTE WHILE SCANNING: Restore squelch when scanner is reset
         restoreMuteWhileScanning();
         
-        flog::warn("Scanner: Reset to start frequency {:.0f} Hz", startFreq);
+        flog::warn("Scanner: Reset to start frequency {:.0f} Hz", (double)startFreq);
     }
 
     void saveConfig() {
@@ -1548,6 +1616,15 @@ private:
         // Save frequency manager integration settings
         // NOTE: useFrequencyManager and applyProfiles are now always enabled (no longer configurable)
         config.conf["scanRateHz"] = scanRateHz;
+        
+        // Save auto-recording settings
+        config.conf["autoRecord"] = autoRecord;
+        config.conf["autoRecordMinDuration"] = autoRecordMinDuration;
+        config.conf["recordingFilesCount"] = recordingFilesCount;
+        config.conf["recordingSequenceNum"] = recordingSequenceNum;
+        config.conf["lastResetDate"] = lastResetDate;
+        config.conf["autoRecordPath"] = autoRecordFolderSelect.path;
+        config.conf["autoRecordNameTemplate"] = std::string(autoRecordNameTemplate);
         
         config.release(true);
     }
@@ -1613,6 +1690,25 @@ private:
         // NOTE: useFrequencyManager and applyProfiles are now always true (simplified UI)
         scanRateHz = config.conf.value("scanRateHz", 25);
         
+        // Load auto-recording settings
+        autoRecord = config.conf.value("autoRecord", false);
+        autoRecordMinDuration = config.conf.value("autoRecordMinDuration", 5.0f);
+        flog::info("Scanner: Loaded autoRecordMinDuration = {}s", autoRecordMinDuration);
+        recordingFilesCount = config.conf.value("recordingFilesCount", 0);
+        recordingSequenceNum = config.conf.value("recordingSequenceNum", 1);
+        lastResetDate = config.conf.value("lastResetDate", "");
+        
+        if (config.conf.contains("autoRecordPath")) {
+            autoRecordFolderSelect.setPath(config.conf["autoRecordPath"]);
+        }
+        
+        if (config.conf.contains("autoRecordNameTemplate")) {
+            std::string nameTemplate = config.conf["autoRecordNameTemplate"];
+            if (nameTemplate.length() < sizeof(autoRecordNameTemplate)) {
+                strcpy(autoRecordNameTemplate, nameTemplate.c_str());
+            }
+        }
+        
         config.release();
         
         // Ensure current frequency is within bounds
@@ -1638,8 +1734,21 @@ private:
             // Initialize timer for sleep_until to reduce drift
             auto nextWakeTime = std::chrono::steady_clock::now();
             
+            // Check for midnight reset on startup
+            checkMidnightReset();
+            
+            // Track midnight reset checks (check every ~10 minutes during scanning)
+            auto lastMidnightCheck = std::chrono::steady_clock::now();
+            const auto midnightCheckInterval = std::chrono::minutes(10);
+            
             // PERFORMANCE-CRITICAL: Configurable scan rate (consistent across all modes)
             while (running) {
+                // Periodic midnight reset check (every 10 minutes)
+                auto now = std::chrono::steady_clock::now();
+                if (now - lastMidnightCheck >= midnightCheckInterval) {
+                    checkMidnightReset();
+                    lastMidnightCheck = now;
+                }
                     // Implement actual scan rate control with different max based on unlock status
                     // Safety guard against division by zero and enforce limits
                     const int maxHz = unlockHighSpeed ? MAX_SCAN_RATE : NORMAL_MAX_SCAN_RATE;
@@ -1681,9 +1790,9 @@ private:
                     
                     // Sleep until next scheduled time to reduce drift
                     // Reset nextWakeTime if we've fallen too far behind to prevent catch-up bursts
-                    auto now = std::chrono::steady_clock::now();
-                    if (nextWakeTime + std::chrono::milliseconds(2*intervalMs) < now) {
-                        nextWakeTime = now;
+                    auto sleepNow = std::chrono::steady_clock::now();
+                    if (nextWakeTime + std::chrono::milliseconds(2*intervalMs) < sleepNow) {
+                        nextWakeTime = sleepNow;
                     }
                     nextWakeTime += std::chrono::milliseconds(intervalMs);
                     std::this_thread::sleep_until(nextWakeTime);
@@ -1716,7 +1825,7 @@ private:
                 // Ensure current frequency is within bounds
                 // PERFORMANCE-CRITICAL: Ensure current frequency is within bounds (legacy mode only)
                 if (!useFrequencyManager && (current < currentStart || current > currentStop)) {
-                    flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", current);
+                    flog::warn("Scanner: Current frequency {:.0f} Hz out of bounds, resetting to start", (double)current);
                     current = currentStart;
                 }
                 // Record tuning time for debounce
@@ -1827,7 +1936,7 @@ private:
                     effectiveVfoWidth = baseVfoWidth;
                     static bool loggedBandMode = false;
                     if (!loggedBandMode && useFrequencyManager) {
-                        flog::info("Scanner: Band scanning mode - using full VFO bandwidth ({:.1f} kHz) for signal detection", baseVfoWidth / 1000.0);
+                        flog::info("Scanner: Band scanning mode - using full VFO bandwidth ({:.1f} kHz) for signal detection", (double)(baseVfoWidth / 1000.0));
                         loggedBandMode = true;
                     }
                 }
@@ -1852,7 +1961,7 @@ private:
                         auto timeSinceLastCentering = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCenteringTime);
                         
                         if (timeSinceLastCentering.count() >= 100) { // Every 100ms
-                            printf("timeSinceLastCentering (%d ms)", timeSinceLastCentering.count());
+                            printf("timeSinceLastCentering (%lld ms)", (long long)timeSinceLastCentering.count());
                             
                             // Calculate dynamic centering threshold based on current tuning profile bandwidth
                             double centeringThreshold = 25000.0; // Default fallback
@@ -1892,6 +2001,11 @@ private:
                             
                             receiving = false;
                             SCAN_DEBUG("Scanner: Signal lost, resuming scanning");
+                            
+                            // AUTO-RECORDING: Stop recording when signal lost (linger time expired)
+                            if (autoRecord && recordingControlState == RECORDING_ACTIVE) {
+                                stopAutoRecording();
+                            }
                             
                             // SIGNAL ANALYSIS: Clear signal info when signal is lost
                             if (showSignalInfo) {
@@ -1940,6 +2054,22 @@ private:
                             SCAN_DEBUG("Scanner: Setting receiving=true for single frequency signal at %.6f MHz (level: %.1f)\n", current / 1e6, maxLevel);
                             lastSignalTime = now;
                             flog::info("Scanner: Found signal at single frequency {:.6f} MHz (level: {:.1f})", current / 1e6, maxLevel);
+                            
+                            // AUTO-RECORDING: Start recording when signal detected
+                            if (autoRecord) {
+                                flog::info("Scanner: Signal detected at {:.3f} MHz, recording state: {}", 
+                                          current / 1e6, (int)recordingControlState);
+                                if (recordingControlState == RECORDING_IDLE) {
+                                    startAutoRecording(current, getCurrentMode());
+                                } else if (recordingControlState == RECORDING_ACTIVE) {
+                                    // Extend current recording - update frequency if changed significantly
+                                    if (std::abs(current - recordingFrequency) > 10000.0) { // 10kHz threshold
+                                        flog::info("Scanner: Signal moved from {:.3f} to {:.3f} MHz during recording", 
+                                                  recordingFrequency / 1e6, current / 1e6);
+                                        recordingFrequency = current; // Update tracked frequency
+                                    }
+                                }
+                            }
                             
                             // SIGNAL ANALYSIS: Calculate and store signal info for display
                             if (showSignalInfo) {
@@ -2000,8 +2130,9 @@ private:
                     if (useFrequencyManager) {
                         // Use frequency manager for frequency stepping
                                         if (!performFrequencyManagerScanning()) {
-                    // Fall back to legacy scanning if frequency manager unavailable
+                            // Fall back to legacy scanning if frequency manager unavailable or has no valid data
                     flog::warn("Scanner: FrequencyManager integration failed, falling back to legacy mode");
+                            useFrequencyManager = false; // Switch to legacy mode permanently until restart
                     performLegacyScanning();
                 }
                     } else {
@@ -2151,6 +2282,22 @@ private:
                 found = true;
                 receiving = true;
                 current = peakFreq;
+                
+                // AUTO-RECORDING: Start recording when signal detected
+                if (autoRecord) {
+                    flog::info("Scanner: Signal detected at {:.3f} MHz, recording state: {}", 
+                              current / 1e6, (int)recordingControlState);
+                    if (recordingControlState == RECORDING_IDLE) {
+                        startAutoRecording(current, getCurrentMode());
+                    } else if (recordingControlState == RECORDING_ACTIVE) {
+                        // Extend current recording - update frequency if changed significantly
+                        if (std::abs(current - recordingFrequency) > 10000.0) { // 10kHz threshold
+                            flog::info("Scanner: Signal moved from {:.3f} to {:.3f} MHz during recording", 
+                                      recordingFrequency / 1e6, current / 1e6);
+                            recordingFrequency = current; // Update tracked frequency
+                        }
+                    }
+                }
                 
                 // SIGNAL ANALYSIS: Calculate and store signal info for display
                 if (showSignalInfo) {
@@ -2401,8 +2548,7 @@ private:
         if (!interfaceChecked) {
             interfaceAvailable = core::modComManager.interfaceExists("frequency_manager");
             if (!interfaceAvailable) {
-                flog::warn("Scanner: Frequency manager module NOT AVAILABLE - check if module is enabled/loaded");
-                flog::warn("Scanner: Falling back to legacy scanning (interval setting will be used)");
+                flog::info("Scanner: Frequency manager module not available, using legacy mode");
             }
             interfaceChecked = true;
         }
@@ -2455,8 +2601,7 @@ private:
                     }
                     
                     if (!scanList || scanList->empty()) {
-                        flog::warn("Scanner: No scannable entries found in frequency manager");
-                        flog::warn("Scanner: Please add some frequencies to your frequency manager and mark them as scannable (S checkbox)");
+                        flog::info("Scanner: No scannable entries found in frequency manager, will use legacy mode");
                         return false;
                     }
                     
@@ -2678,8 +2823,8 @@ private:
             
             // Check if we found any non-blacklisted frequency
             if (attempts >= maxAttempts || isFrequencyBlacklisted(current)) {
-                flog::warn("Scanner: All frequencies in scan list are blacklisted!");
-                return false; // No valid frequencies to scan
+                flog::info("Scanner: All frequencies in frequency manager scan list are blacklisted, will use legacy mode");
+                return false; // No valid frequencies to scan, fallback to legacy mode
             }
             
             // CRITICAL: Store entry type for adaptive signal detection
@@ -3678,8 +3823,8 @@ private:
     double newRangeStop = 108000000.0;
     float newRangeGain = 20.0f;
     
-    // PERFORMANCE: Frequency manager integration (always enabled for simplified operation)
-    bool useFrequencyManager = true;     // Always enabled - scanner uses frequency manager exclusively  
+    // PERFORMANCE: Frequency manager integration (auto-detect based on availability and configuration)
+    bool useFrequencyManager = true;     // Auto-detect: use frequency manager if available and has data
     bool applyProfiles = true;           // Always enabled - automatically apply tuning profiles
     size_t currentScanIndex = 0;         // Current position in frequency manager scan list
     bool currentEntryIsSingleFreq = false; // Track if current entry is single frequency vs band
@@ -3703,6 +3848,224 @@ private:
     static constexpr int PASSBAND_VALUES_COUNT = 7;
     int passbandIndex = 6; // Default to 100% (index 6, recommended starting point)
     
+    // Auto-recording functionality
+    bool autoRecord = false;
+    FolderSelect autoRecordFolderSelect;
+    float autoRecordMinDuration = 5.0f;  // Minimum recording duration in seconds
+    char autoRecordNameTemplate[256] = "$y-$M-$d_$h-$m-$s_$f_$r_$n";
+    
+    // Recording control state
+    enum RecordingControlState {
+        RECORDING_DISABLED = 0,
+        RECORDING_IDLE = 1,
+        RECORDING_ACTIVE = 2,
+        RECORDING_SUSPENDED = 3
+    };
+    RecordingControlState recordingControlState = RECORDING_IDLE;
+    std::chrono::high_resolution_clock::time_point recordingStartTime;
+    double recordingFrequency = 0.0;
+    std::string recordingMode = "Unknown";
+    std::string recordingFilename = "";  // Captured filename when recording started
+    float recordingMinDurationCapture = 5.0f;  // Captured min duration when recording started
+    int recordingSequenceNum = 1;
+    int recordingFilesCount = 0;
+    std::string lastResetDate = "";
+    
+    // Auto-recording helper methods
+    void checkMidnightReset() {
+        auto now = std::time(nullptr);
+        auto tm = *std::localtime(&now);
+        
+        // Get current date as YYYY-MM-DD string
+        char dateBuffer[11];
+        snprintf(dateBuffer, sizeof(dateBuffer), "%04d-%02d-%02d", 
+                tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+        std::string currentDate(dateBuffer);
+        
+        // Check if we've crossed midnight (date changed)
+        if (lastResetDate != currentDate) {
+            if (!lastResetDate.empty()) {
+                flog::info("Scanner: Midnight reset - Files Today counter reset from {} to 0", recordingFilesCount);
+            }
+            recordingFilesCount = 0;
+            lastResetDate = currentDate;
+            saveConfig(); // Persist the reset
+        }
+    }
+    
+    void resetFilesTodayCounter() {
+        int oldCount = recordingFilesCount;
+        recordingFilesCount = 0;
+        saveConfig();
+        flog::info("Scanner: Manual reset - Files Today counter reset from {} to 0", oldCount);
+    }
+    
+    std::string generateRecordingFilename(double frequency, const std::string& mode) {
+        auto now = std::time(nullptr);
+        auto tm = *std::localtime(&now);
+        
+        // No nested directories - put date in filename instead
+        
+        // Generate filename with template replacement
+        std::string filename = autoRecordNameTemplate;
+        
+        // Replace template variables
+        std::regex regexPatterns[] = {
+            std::regex("\\$y"), std::regex("\\$M"), std::regex("\\$d"),
+            std::regex("\\$h"), std::regex("\\$m"), std::regex("\\$s"),
+            std::regex("\\$f"), std::regex("\\$r"), std::regex("\\$n")
+        };
+        
+        char replacements[9][32];
+        snprintf(replacements[0], sizeof(replacements[0]), "%04d", tm.tm_year + 1900);
+        snprintf(replacements[1], sizeof(replacements[1]), "%02d", tm.tm_mon + 1);
+        snprintf(replacements[2], sizeof(replacements[2]), "%02d", tm.tm_mday);
+        snprintf(replacements[3], sizeof(replacements[3]), "%02d", tm.tm_hour);
+        snprintf(replacements[4], sizeof(replacements[4]), "%02d", tm.tm_min);
+        snprintf(replacements[5], sizeof(replacements[5]), "%02d", tm.tm_sec);
+        snprintf(replacements[6], sizeof(replacements[6]), "%.0f", frequency);
+        snprintf(replacements[7], sizeof(replacements[7]), "%s", mode.c_str());
+        snprintf(replacements[8], sizeof(replacements[8]), "%03d", recordingSequenceNum);
+        
+        for (int i = 0; i < 9; i++) {
+            filename = std::regex_replace(filename, regexPatterns[i], replacements[i]);
+        }
+        
+        // Construct full path (single directory, date in filename)
+        std::string basePath = autoRecordFolderSelect.expandString(autoRecordFolderSelect.path);
+        std::string fullPath = basePath + "/" + filename + ".wav";
+        return fullPath;
+    }
+    
+    void startAutoRecording(double frequency, const std::string& mode) {
+        if (recordingControlState != RECORDING_IDLE || !autoRecordFolderSelect.pathIsValid()) {
+            flog::warn("Scanner: Cannot start recording - state: {}, path valid: {}", 
+                      (int)recordingControlState, autoRecordFolderSelect.pathIsValid());
+            return;
+        }
+        
+        // Check if Recorder module interface exists
+        if (!core::modComManager.interfaceExists("Recorder")) {
+            flog::error("Scanner: Recorder module interface not found - is Recorder module loaded?");
+            return;
+        }
+        flog::info("Scanner: Recorder module interface found");
+        
+        // Generate unique filename
+        std::string filepath = generateRecordingFilename(frequency, mode);
+        flog::info("Scanner: Generated recording filename: {}", filepath);
+        
+        // Create base recording directory if it doesn't exist
+        std::filesystem::path dir = std::filesystem::path(filepath).parent_path();
+        try {
+            if (!std::filesystem::exists(dir)) {
+                std::filesystem::create_directories(dir);
+                flog::info("Scanner: Created recording directory: {}", dir.string());
+            }
+        } catch (const std::exception& e) {
+            flog::error("Scanner: Failed to create recording directory: {}", e.what());
+            return;
+        }
+        
+        // Set recorder to audio mode first
+        int audioMode = RECORDER_MODE_AUDIO;
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_SET_MODE, &audioMode, nullptr)) {
+            flog::error("Scanner: Failed to set recorder to audio mode");
+            return;
+        }
+        flog::info("Scanner: Set recorder to audio mode");
+        
+        // Set external control
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_SET_EXTERNAL_CONTROL, (void*)"Scanner", nullptr)) {
+            flog::error("Scanner: Failed to set external control on Recorder module");
+            return;
+        }
+        flog::info("Scanner: Set external control to Scanner");
+        
+        // Start recording with custom filename
+        const char* filenamePtr = filepath.c_str();
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_START_WITH_FILENAME, (void*)filenamePtr, nullptr)) {
+            flog::error("Scanner: Failed to start recording with filename: {}", filepath);
+            return;
+        }
+        
+        recordingControlState = RECORDING_ACTIVE;
+        recordingStartTime = std::chrono::high_resolution_clock::now();
+        recordingFrequency = frequency;
+        recordingMode = mode;
+        recordingFilename = filepath;  // Capture the actual filename being recorded
+        recordingMinDurationCapture = autoRecordMinDuration;  // Capture current setting
+        
+        flog::info("Scanner: Started auto-recording: {} (min duration captured: {}s)", filepath, recordingMinDurationCapture);
+    }
+    
+    void stopAutoRecording() {
+        if (recordingControlState != RECORDING_ACTIVE) {
+            return;
+        }
+        
+        // Calculate recording duration
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - recordingStartTime);
+        
+        // Stop recorder interface
+        if (!core::modComManager.callInterface("Recorder", RECORDER_IFACE_CMD_STOP, nullptr, nullptr)) {
+            flog::error("Scanner: Failed to stop recording");
+        } else {
+            flog::info("Scanner: Successfully stopped recording");
+        }
+        
+        // Check minimum duration and delete file if too short (use captured value from when recording started)
+        flog::info("Scanner: Recording duration check: {}s vs captured minimum {}s (current slider: {}s)", 
+                   (double)duration.count(), (double)recordingMinDurationCapture, (double)autoRecordMinDuration);
+        if (duration.count() < recordingMinDurationCapture) {
+            flog::info("Scanner: Recording too short ({}s < {}s), deleting file", (double)duration.count(), (double)recordingMinDurationCapture);
+            // Delete the short file using captured filename
+            try {
+                std::filesystem::remove(recordingFilename);
+                flog::info("Scanner: Deleted short recording file: {}", recordingFilename);
+            } catch (const std::exception& e) {
+                flog::warn("Scanner: Failed to delete short recording file: {}", e.what());
+            }
+        } else {
+            recordingFilesCount++;
+            recordingSequenceNum++;
+            flog::info("Scanner: Completed auto-recording ({}s), saved as file #{}", (double)duration.count(), recordingFilesCount);
+        }
+        
+        recordingControlState = RECORDING_IDLE;
+        saveConfig(); // Save updated counters
+    }
+    
+    std::string getCurrentMode() {
+        if (gui::waterfall.selectedVFO.empty()) {
+            return "Unknown";
+        }
+        
+        std::string vfoName = gui::waterfall.selectedVFO;
+        if (core::modComManager.getModuleName(vfoName) == "radio") {
+            int mode = -1;
+            core::modComManager.callInterface(vfoName, RADIO_IFACE_CMD_GET_MODE, NULL, &mode);
+            if (mode >= 0) {
+                // Map radio modes to strings (from recorder module)
+                const char* radioModeStrings[] = {"NFM", "WFM", "AM", "DSB", "USB", "CW", "LSB", "RAW"};
+                if (mode < 8) return radioModeStrings[mode];
+            }
+        }
+        return "Unknown";
+    }
+    
+    // Module interface handler for external communication
+    static void scannerInterfaceHandler(int code, void* in, void* out, void* ctx) {
+        ScannerModule* _this = (ScannerModule*)ctx;
+        switch (code) {
+            case SCANNER_IFACE_CMD_GET_RUNNING:
+                if (out != NULL) {
+                    *(bool*)out = _this->running;
+                }
+                break;
+        }
+    }
 
 };
 
@@ -3742,6 +4105,15 @@ MOD_EXPORT void _INIT_() {
     
     // Frequency manager integration (now always enabled for simplified operation)
     def["scanRateHz"] = 25;                 // 25 scans per second (recommended starting point)
+    
+    // Auto-recording defaults
+    def["autoRecord"] = false;
+    def["autoRecordMinDuration"] = 5.0f;
+    def["autoRecordPath"] = "%ROOT%/scanner_recordings";
+    def["autoRecordNameTemplate"] = "$y-$M-$d_$h-$m-$s_$f_$r_$n";
+    def["recordingFilesCount"] = 0;
+    def["recordingSequenceNum"] = 1;
+    def["lastResetDate"] = "";
 
     config.setPath(core::args["root"].s() + "/scanner_config.json");
     config.load(def);

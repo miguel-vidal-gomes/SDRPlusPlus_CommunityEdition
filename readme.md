@@ -2,8 +2,8 @@
 ## Advanced Software-Defined Radio (SDR) application with MPX broadcasting analysis
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Cross-Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android-lightgrey)](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases)
-[![Hardware Support](https://img.shields.io/badge/hardware-RTL--SDR%20%7C%20HackRF%20%7C%20LimeSDR%20%7C%20AirSpy%20%7C%20PlutoSDR-green)](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition)
+[![Cross-Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Android-lightgrey)](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases)
+[![Hardware Support](https://img.shields.io/badge/hardware-RTL--SDR%20%7C%20HackRF%20%7C%20LimeSDR%20%7C%20AirSpy%20%7C%20PlutoSDR-green)](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition)
 
 **The community-driven SDR software** for RTL-SDR, HackRF, LimeSDR, AirSpy, PlutoSDR, USRP and more. Features advanced **FM broadcasting analysis**, **MPX spectrum visualization**, **frequency scanning**, and comprehensive **signal processing** capabilities.
 
@@ -34,16 +34,25 @@
 - **Amateur radio** and **ham radio** applications
 - **Satellite tracking** and **radio astronomy** support
 
-## 🎉 **Latest Release: v1.2.4-CE** - The Ultimate Scanner Experience
+## 🎉 **Latest Release: v1.2.5-CE** - Advanced Recording & Enhanced Reliability
 
-**The Fastest, Most Hardware-Efficient, and Highly Customizable Frequency Scanner on Any Platform**
+**Revolutionary Discrete Recording System + The Ultimate Scanner Experience**
 
 [![SDR++ CE Scanner Demo](https://img.youtube.com/vi/jU1z-VlKJ4Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=jU1z-VlKJ4Q)
 *🎥 Watch the revolutionary scanner in action - [YouTube Demo](https://www.youtube.com/watch?v=jU1z-VlKJ4Q)*
 
-This groundbreaking release delivers the **most advanced frequency scanning experience** available in any SDR software, combining cutting-edge signal processing with professional-grade real-time analysis:
+This groundbreaking release introduces **automated frequency discovery and recording** alongside the most advanced scanning capabilities available:
 
-**🚀 Revolutionary Signal Detection (NEW in v1.2.4-CE)**
+**🎙️ NEW: Discrete Audio Recording System (v1.2.5-CE)**  
+*Feature requested by @Axpelle - transforming frequency scanning into automated discovery*
+- **Automated File Splitting**: Recordings automatically break into discrete files based on scanner linger time
+- **Intelligent Filename Generation**: Files include frequency, timestamp, mode, and sequence numbers  
+- **Smart Organization**: Single-folder structure with dates embedded in filenames (e.g., `2025-09-03_14-30-15_162550000_WFM_001.wav`)
+- **Minimum Duration Filtering**: Configurable threshold eliminates short noise recordings
+- **Real-Time Status Display**: Live recording indicator with frequency and duration tracking
+- **Files Today Counter**: Track daily recording activity with automatic midnight reset
+
+**🚀Signal Detection (Enhanced in v1.2.5-CE)**
 - **Zoom-Independent Detection**: 43x better frequency resolution (43.9Hz vs 1.5kHz bins) using raw FFT data
 - **Advanced Signal Centering**: Intelligent plateau detection for wide signals with center-of-mass calculation
 - **Real-Time Signal Analysis**: Live VFO tooltips showing signal strength (dBFS) and SNR with 50ms refresh
@@ -54,10 +63,13 @@ This groundbreaking release delivers the **most advanced frequency scanning expe
 - **Configurable Aggressive Mute**: User-controllable enhanced mute system (-10.0 to 0.0 dB threshold)
 - **Operation-Level Protection**: 5ms pre-emptive mute before frequency changes and demodulator switching
 
-**🎯 Enhanced Hardware Integration**
+**🎯 Enhanced Hardware Integration (v1.2.5-CE)**
+- **SDRPlay Default Support**: Now enabled by default across all platforms (Windows, macOS, Linux, Android)
+- **PlutoSDR Manual IP Configuration**: Connect to devices with custom IP addresses on local networks
+- **SoapySDR macOS Support**: Native integration for expanded hardware compatibility on macOS
 - **RTL-SDR AGC Auto-Management**: Automatic AGC disable for external gain control compatibility
 - **RF Gain Profile Migration**: Auto-converts legacy profiles with intelligent defaults
-- **Source Module Diagnostics**: Enhanced error handling and compatibility across all supported hardware
+- **Cross-Platform Build Stability**: Resolved Android compilation issues and improved reliability
 
 **🌊 FFT/Waterfall Enhancements (NEW)**
 - **Auto-Range Feature**: Smart auto-ranging for optimal FFT/waterfall display levels
@@ -87,7 +99,13 @@ This groundbreaking release delivers the **most advanced frequency scanning expe
 - Linux GCC and Debian compatibility improvements
 - Enhanced macOS support with proper app bundle creation
 
-**📦 Download**: [Release v1.2.4-CE](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases/tag/v1.2.4-CE)
+**📦 Download**: [Release v1.2.5-CE](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases/tag/v1.2.5-CE)
+
+**🎯 Perfect for:**
+- **Automated Spectrum Monitoring**: Unattended frequency discovery and logging
+- **Professional Signal Analysis**: Discrete recordings with metadata for analysis
+- **Amateur Radio Exploration**: Discover active frequencies across bands
+- **Research Applications**: Long-term spectrum surveillance and documentation
 ### 🎯 **Mission: Community-First Development**
 
 This Community Edition exists to address the gap in community contributions and feature development. While the original SDR++ project has established a solid foundation, many valuable user-requested features and improvements have remained unaddressed due to restrictive contribution policies.
@@ -122,8 +140,8 @@ We actively encourage contributions! Whether you're fixing bugs, adding features
 ---
 
 ### 🚀 **Get Started**
-- 🏠 **Project Home**: [SDRPlusPlus_CommunityEdition](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition)
-- 📞 **Community Support**: [Issues & Discussions](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/issues)
+- 🏠 **Project Home**: [SDRPlusPlus_CommunityEdition](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition)
+- 📞 **Community Support**: [Issues & Discussions](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/issues)
 - 📖 **Contributing Guide**: [contributing.md](contributing.md)
 
 ## 📚 **Developer Documentation**
@@ -164,14 +182,14 @@ SDR++CE provides comprehensive documentation for developers, from newcomers to e
 
 ## Community Edition Releases
 
-**SDR++ Community Edition** releases include the latest community-contributed features and improvements. Download the latest release from the [Community Edition Releases page](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases).
+**SDR++ Community Edition** releases include the latest community-contributed features and improvements. Download the latest release from the [Community Edition Releases page](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases).
 
 ### 🔄 **Seamless Migration**
 SDR++ Community Edition maintains full compatibility with existing configurations and plugins, making migration effortless.
 
 ## Windows
 
-Download the latest release from [the Community Edition Releases page](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases) and extract to the directory of your choice.
+Download the latest release from [the Community Edition Releases page](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases) and extract to the directory of your choice.
 
 To create a desktop shortcut, rightclick the exe and select `Send to -> Desktop (create shortcut)`, then, rename the shortcut on the desktop to whatever you want.
 
@@ -179,7 +197,7 @@ To create a desktop shortcut, rightclick the exe and select `Send to -> Desktop 
 
 ### Debian-based (Ubuntu, Mint, etc)
 
-Download the latest release from [the Community Edition Releases page](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases) and extract to the directory of your choice.
+Download the latest release from [the Community Edition Releases page](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases) and extract to the directory of your choice.
 
 Then, use apt to install it:
 
@@ -194,15 +212,15 @@ sudo apt install path/to/the/sdrpp_debian_amd64.deb
 yay -S sdrpp-git
 ```
 
-**Note:** For the most up-to-date features, we recommend downloading from our [Community Edition Releases](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases).
+**Note:** For the most up-to-date features, we recommend downloading from our [Community Edition Releases](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases).
 
 ### Other
 
-There are currently no existing packages for other distributions, for these systems you'll have to [build from source](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition#building-on-linux--bsd).
+There are currently no existing packages for other distributions, for these systems you'll have to [build from source](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition#building-on-linux--bsd).
 
 ## MacOS
 
-Download the latest macOS app bundle from [Community Edition Releases](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/releases).
+Download the latest macOS app bundle from [Community Edition Releases](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/releases).
 
 ### 🔒 **macOS Security Notice**
 macOS may show a "corrupted" or "damaged" warning for unsigned apps. This is normal! The app is safe.
@@ -219,7 +237,7 @@ sudo xattr -rd com.apple.quarantine /path/to/SDR++.app
 
 ## BSD
 
-There are currently no BSD packages, refer to [Building on Linux / BSD](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition#building-on-linux--bsd) for instructions on building from source.
+There are currently no BSD packages, refer to [Building on Linux / BSD](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition#building-on-linux--bsd) for instructions on building from source.
 
 # Building on Windows
 
@@ -511,8 +529,8 @@ The HackRF has the annoying tendency to have a DC offset spike. You can avoid th
 ### 🚀 **How to Contribute**
 
 **Report issues or suggest features:**
-- Use our [GitHub Issues](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/issues) to report bugs or request features
-- Join discussions in our [Community Forum](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/discussions)
+- Use our [GitHub Issues](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/issues) to report bugs or request features
+- Join discussions in our [Community Forum](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/discussions)
 
 **Code contributions:**
 - **New SDR devices**: Create source plugins - our modular design makes this straightforward
@@ -594,7 +612,7 @@ For guidance, check the existing modules and our comprehensive wiki documentatio
 Beyond code, there are many valuable ways to support SDR++ Community Edition:
 
 ### 📢 **Community Support**
-- **Help fellow users** in our [GitHub Discussions](https://github.com/miguel-vidal-gomes/SDRPlusPlus_CommunityEdition/discussions)
+- **Help fellow users** in our [GitHub Discussions](https://github.com/LunaeMons/SDRPlusPlus_CommunityEdition/discussions)
 - **Share your projects** and inspire others with your SDR applications
 - **Write tutorials** and documentation to help newcomers get started
 - **Test new features** and provide feedback on releases

@@ -168,9 +168,16 @@ public:
         writer.setSamplerate(samplerate);
 
         // Open file
-        std::string vfoName = (recMode == RECORDER_MODE_AUDIO) ? selectedStreamName : "";
-        std::string extension = ".wav";
-        std::string expandedPath = expandString(folderSelect.path + "/" + genFileName(nameTemplate, recMode, vfoName) + extension);
+        std::string expandedPath;
+        if (externalControl && !externalFilename.empty()) {
+            // Use external filename when under external control
+            expandedPath = expandString(externalFilename);
+        } else {
+            // Use normal filename generation
+            std::string vfoName = (recMode == RECORDER_MODE_AUDIO) ? selectedStreamName : "";
+            std::string extension = ".wav";
+            expandedPath = expandString(folderSelect.path + "/" + genFileName(nameTemplate, recMode, vfoName) + extension);
+        }
         if (!writer.open(expandedPath)) {
             flog::error("Failed to open file for recording: {0}", expandedPath);
             return;
@@ -220,6 +227,13 @@ public:
 
         // Close file
         writer.close();
+        
+        // Reset external control state
+        if (externalControl) {
+            externalControl = false;
+            externalFilename = "";
+            externalController = "";
+        }
         
         recording = false;
     }
@@ -326,9 +340,20 @@ private:
             }
         }
 
+        // External control status indicator
+        if (_this->externalControl) {
+            ImGui::TextColored(ImVec4(0.0f, 0.8f, 1.0f, 1.0f), "Controlled by: %s", _this->externalController.c_str());
+        }
+
         // Record button
         bool canRecord = _this->folderSelect.pathIsValid();
         if (_this->recMode == RECORDER_MODE_AUDIO) { canRecord &= !_this->selectedStreamName.empty(); }
+        
+        // Disable manual control if under external control
+        if (_this->externalControl) {
+            ImGui::BeginDisabled();
+        }
+        
         if (!_this->recording) {
             if (ImGui::Button(CONCAT("Record##_recorder_rec_", _this->name), ImVec2(menuWidth, 0))) {
                 _this->start();
@@ -347,8 +372,17 @@ private:
                 ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Paused %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
             }
             else {
-                ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Recording %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
+                if (_this->externalControl) {
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Recording %02d:%02d:%02d (%s)", dtm->tm_hour, dtm->tm_min, dtm->tm_sec, _this->externalController.c_str());
+                } else {
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Recording %02d:%02d:%02d", dtm->tm_hour, dtm->tm_min, dtm->tm_sec);
+                }
             }
+        }
+        
+        // End disabled section for external control
+        if (_this->externalControl) {
+            ImGui::EndDisabled();
         }
     }
 
@@ -557,6 +591,33 @@ private:
         else if (code == RECORDER_IFACE_CMD_STOP) {
             if (_this->recording) { _this->stop(); }
         }
+        else if (code == RECORDER_IFACE_CMD_START_WITH_FILENAME) {
+            if (!_this->recording && in != nullptr) {
+                const char* filename = (const char*)in;
+                _this->externalFilename = std::string(filename);
+                _this->externalControl = true;
+                _this->start();
+            }
+        }
+        else if (code == RECORDER_IFACE_CMD_GET_RECORDING_STATE) {
+            if (out != nullptr) {
+                bool* _out = (bool*)out;
+                *_out = _this->recording;
+            }
+        }
+        else if (code == RECORDER_IFACE_CMD_SET_EXTERNAL_CONTROL) {
+            if (in != nullptr) {
+                const char* controller = (const char*)in;
+                _this->externalControl = true;
+                _this->externalController = std::string(controller);
+            }
+        }
+        else if (code == RECORDER_IFACE_CMD_GET_EXTERNAL_CONTROL) {
+            if (out != nullptr) {
+                bool* _out = (bool*)out;
+                *_out = _this->externalControl;
+            }
+        }
     }
 
     std::string name;
@@ -597,6 +658,11 @@ private:
     dsp::convert::StereoToMono s2m;
 
     uint64_t samplerate = 48000;
+
+    // External control state for scanner integration
+    bool externalControl = false;           // Is recorder being controlled externally?
+    std::string externalFilename = "";      // Custom filename from external controller
+    std::string externalController = "";    // Name of external controller module
 
     EventHandler<std::string> onStreamRegisteredHandler;
     EventHandler<std::string> onStreamUnregisterHandler;

@@ -4,7 +4,11 @@ enum {
     RECORDER_IFACE_CMD_GET_MODE,
     RECORDER_IFACE_CMD_SET_MODE,
     RECORDER_IFACE_CMD_START,
-    RECORDER_IFACE_CMD_STOP
+    RECORDER_IFACE_CMD_STOP,
+    RECORDER_IFACE_CMD_START_WITH_FILENAME,  // Start recording with custom filename
+    RECORDER_IFACE_CMD_GET_RECORDING_STATE,  // Check if currently recording
+    RECORDER_IFACE_CMD_SET_EXTERNAL_CONTROL, // Set external control mode
+    RECORDER_IFACE_CMD_GET_EXTERNAL_CONTROL  // Get external control state
 };
 
 enum {
