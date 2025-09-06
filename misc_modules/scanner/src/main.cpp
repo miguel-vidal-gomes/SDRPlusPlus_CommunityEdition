@@ -372,7 +372,7 @@ private:
                            currentTransmissionFreq / 1e6, durationSeconds);
             } else {
                 flog::debug("Scanner: Skipped short transmission {:.6f} MHz, duration: {}ms (< {}ms threshold)", 
-                           currentTransmissionFreq / 1e6, duration.count(), scanLogMinDurationMs);
+                           currentTransmissionFreq / 1e6, (int)duration.count(), (int)scanLogMinDurationMs);
             }
             isTrackingTransmission = false;
         }
