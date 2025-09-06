@@ -5,6 +5,7 @@
 #include <signal_path/signal_path.h>
 #include <chrono>
 #include <thread>
+#include <future>
 #include <algorithm>
 #include <fstream> // Added for file operations
 #include <core.h>
@@ -106,6 +107,13 @@ struct TuningProfile {
 
 // Scanner module interface commands
 #define SCANNER_IFACE_CMD_GET_RUNNING   0
+#define SCANNER_IFACE_CMD_START         1
+#define SCANNER_IFACE_CMD_STOP          2
+#define SCANNER_IFACE_CMD_RESET         3
+#define SCANNER_IFACE_CMD_GET_STATUS    4
+#define SCANNER_IFACE_CMD_PREV_FREQ     5
+#define SCANNER_IFACE_CMD_NEXT_FREQ     6
+#define SCANNER_IFACE_CMD_BLACKLIST     7
 
 class ScannerModule : public ModuleManager::Instance {
 public:
@@ -137,6 +145,29 @@ public:
     }
 
     ~ScannerModule() {
+        flog::info("Scanner: Destructor called, cleaning up");
+        
+        // Stop scanner and set running to false
+        running = false;
+        
+        // Clean up worker thread with timeout
+        if (workerThread.joinable()) {
+            flog::info("Scanner: Cleaning up worker thread in destructor");
+            try {
+                auto future = std::async(std::launch::async, [this]() {
+                    workerThread.join();
+                });
+                if (future.wait_for(std::chrono::seconds(1)) == std::future_status::timeout) {
+                    flog::warn("Scanner: Worker thread cleanup timed out in destructor, detaching");
+                    workerThread.detach();
+                }
+            } catch (const std::exception& e) {
+                flog::error("Scanner: Exception during thread cleanup in destructor: {}", e.what());
+                workerThread.detach();
+            }
+        }
+        
+        // Clean up other resources
         saveConfig();
         gui::menu.removeEntry(name);
         core::modComManager.unregisterInterface(name);
@@ -147,6 +178,8 @@ public:
             delete logFileDialog;
             logFileDialog = nullptr;
         }
+        
+        flog::info("Scanner: Destructor completed");
     }
 
     void postInit() {}
@@ -1603,6 +1636,24 @@ private:
             flog::info("Scanner: Logging enabled to {}", path);
         }
         
+        // THREAD SAFETY: Clean up any existing thread before starting new one
+        if (workerThread.joinable()) {
+            flog::info("Scanner: Cleaning up previous worker thread");
+            try {
+                // Try to join with a short timeout
+                auto future = std::async(std::launch::async, [this]() {
+                    workerThread.join();
+                });
+                if (future.wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout) {
+                    flog::warn("Scanner: Previous thread cleanup timed out, detaching");
+                    workerThread.detach();
+                }
+            } catch (const std::exception& e) {
+                flog::error("Scanner: Exception during thread cleanup: {}", e.what());
+                workerThread.detach();
+            }
+        }
+        
         // SAFETY CHECK: Ensure radio source is running before starting scanner
         if (!gui::mainWindow.sdrIsRunning()) {
             flog::error("Scanner: Cannot start scanning - radio source is not running");
@@ -1659,6 +1710,8 @@ private:
             flog::info("Scanner: Logging stopped");
         }
         if (!running) { return; }
+        
+        flog::info("Scanner: Stop requested, setting running=false");
         running = false;
         
         // AUTO-RECORDING: Stop any active recording when scanner stops
@@ -1682,9 +1735,10 @@ private:
         // MUTE WHILE SCANNING: Restore squelch when scanner stops
         restoreMuteWhileScanning();
         
-        if (workerThread.joinable()) {
-            workerThread.join();
-        }
+        // THREAD SAFETY: Don't join thread from UI thread to prevent deadlock
+        // The worker thread will exit on its own when it sees running=false
+        // We'll clean up the thread in the destructor or when starting a new scan
+        flog::info("Scanner: Stop completed (thread will exit asynchronously)");
     }
 
     void reset() {
@@ -4251,6 +4305,85 @@ private:
             case SCANNER_IFACE_CMD_GET_RUNNING:
                 if (out != NULL) {
                     *(bool*)out = _this->running;
+                }
+                break;
+            case SCANNER_IFACE_CMD_START:
+                if (_this->enabled) {
+                    _this->start();
+                }
+                break;
+            case SCANNER_IFACE_CMD_STOP:
+                if (_this->enabled) {
+                    _this->stop();
+                }
+                break;
+            case SCANNER_IFACE_CMD_RESET:
+                if (_this->enabled) {
+                    _this->reset();
+                }
+                break;
+            case SCANNER_IFACE_CMD_GET_STATUS:
+                if (out != NULL) {
+                    // Return status as integer: 0=idle, 1=scanning, 2=tuning, 3=receiving
+                    int status = 0;
+                    if (_this->running) {
+                        if (_this->receiving) status = 3;
+                        else if (_this->tuning) status = 2;
+                        else status = 1;
+                    }
+                    *(int*)out = status;
+                }
+                break;
+            case SCANNER_IFACE_CMD_PREV_FREQ:
+                if (_this->enabled && _this->running) {
+                    // Same logic as << button
+                    _this->reverseLock = true;
+                    _this->receiving = false;
+                    _this->scanUp = false;
+                    _this->configNeedsSave = true;
+                    _this->applyMuteWhileScanning();
+                }
+                break;
+            case SCANNER_IFACE_CMD_NEXT_FREQ:
+                if (_this->enabled && _this->running) {
+                    // Same logic as >> button
+                    _this->reverseLock = true;
+                    _this->receiving = false;
+                    _this->scanUp = true;
+                    _this->configNeedsSave = true;
+                    _this->applyMuteWhileScanning();
+                }
+                break;
+            case SCANNER_IFACE_CMD_BLACKLIST:
+                if (_this->enabled && !gui::waterfall.selectedVFO.empty()) {
+                    // Same logic as "Blacklist Current Frequency" button
+                    double currentFreq = gui::waterfall.getCenterFrequency();
+                    if (gui::waterfall.vfos.find(gui::waterfall.selectedVFO) != gui::waterfall.vfos.end()) {
+                        currentFreq += gui::waterfall.vfos[gui::waterfall.selectedVFO]->centerOffset;
+                    }
+                    
+                    // Check if frequency is already blacklisted (avoid duplicates)
+                    bool alreadyBlacklisted = false;
+                    for (const double& blacklisted : _this->blacklistedFreqs) {
+                        if (std::abs(currentFreq - blacklisted) < _this->blacklistTolerance) {
+                            alreadyBlacklisted = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!alreadyBlacklisted) {
+                        _this->blacklistedFreqs.push_back(currentFreq);
+                        _this->frequencyNameCache.clear();
+                        _this->frequencyNameCacheDirty = true;
+                        _this->saveConfig();
+                        
+                        // Auto-resume scanning after blacklisting
+                        {
+                            std::lock_guard<std::mutex> lck(_this->scanMtx);
+                            _this->receiving = false;
+                        }
+                        _this->applyMuteWhileScanning();
+                    }
                 }
                 break;
         }
